@@ -6,7 +6,7 @@ CC = gcc
 
 #COMPILER_FLAGS specifies the additional compilation options we're using
 
-INCLUDE         = -I./include
+INCLUDE         = -I./include -I./include/configs
 COMPILER_FLAGS = -march=native -Ofast -fopenmp -std=gnu11
 
 DEBUG_FLAG   = -g
@@ -20,12 +20,12 @@ CONFIG_IO_OUT  = ./bin/config_io_test
 
 #This is the target that compiles our executable
 all : $(CONFIG_IO)
-	$(CC) $(CONFIG_IO) $(INCLUDE) $(WARNING_FLAG) $(LINKER_FLAGS) -o $(CONFIG_IO_OUT) 2> ./warnings/config.warn
+	$(CC) $(CONFIG_IO) $(INCLUDE) $(COMPILER_FLAGS) $(WARNING_FLAG) $(LINKER_FLAGS) -o $(CONFIG_IO_OUT) 2> ./warnings/config.warn
 	./bin/config_io_test
 
 test : $(CONFIG_IO)
-	$(CC) $(CONFIG_IO) $(INCLUDE) $(WARNING_FLAG) $(LINKER_FLAGS) -o $(CONFIG_IO_OUT) 2> ./warnings/config.warn
+	$(CC) $(CONFIG_IO) $(INCLUDE) $(COMPILER_FLAGS) $(WARNING_FLAG) $(LINKER_FLAGS) -o $(CONFIG_IO_OUT) 2> ./warnings/config.warn
 	./bin/config_io_test
 
 debug : $(CONFIG_IO)
-	$(CC) $(CONFIG_IO) $(INCLUDE) $(WARNING_FLAG) $(LINKER_FLAGS) $(DEBUG_FLAG) -o $(CONFIG_IO_OUT) 2> ./warnings/config.warn
+	$(CC) $(CONFIG_IO) $(INCLUDE) $(COMPILER_FLAGS) $(WARNING_FLAG) $(LINKER_FLAGS) $(DEBUG_FLAG) -o $(CONFIG_IO_OUT) 2> ./warnings/config.warn

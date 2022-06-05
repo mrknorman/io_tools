@@ -1,8 +1,11 @@
+#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+
 #include <inttypes.h>
 
+#include "config.h"
 #include "structures.h"
 
 void printTestResult(
@@ -24,12 +27,16 @@ void printTestResult(
 }
 
 int main() {
+
+	//Variables:
+	const char* config_directory_name       = "./configs";
+	const char* basic_test_config_file_name = "basic_test_config.cfg"
 	
 	bool pass = 0;
 	
-	printTestResult(pass, "all tests.");
+	#include "basic_test_config.h"	
 	
-	#include "./configs/basic_test_config.h"
+	printTestResult(pass, "all tests.");
 	
 	return 0;
 }

@@ -1,34 +1,24 @@
 #ifndef IO_CONFIG_H
 #define IO_CONFIG_H
 
-#include <sys/types.h>
 #include <stdio.h>
-#include <inttypes.h>
 #include <stdbool.h>
-#include <math.h>
-#include <omp.h>
-#include <string.h>
-#include <unistd.h>
-#include <ctype.h>
-#include <limits.h>
-#include <immintrin.h>
-#include <complex.h> 
 #include <stdlib.h>
 
-#include "dataset/structures.h"
+#include <inttypes.h>
+#include <string.h>
 
-#include "io/strings.h"
+#include "strings.h"
 
 typedef struct construct_s {
 	
-	int32_t   structure_size;
-	int32_t * structure_map;
-	char    * variable_types_string;
-	char    * variable_names_string;
-
+	size_t  structure_size;
+	size_t *structure_map;
+	char   *variable_types_string;
+	char   *variable_names_string;
 } construct_s;
 
-int getSizeOfType(
+size_t getSizeOfType(
     const char* string
     ) {	
 
@@ -72,30 +62,37 @@ int getSizeOfType(
 		
 		return sizeof(construct_s*);
 	} else {
-		fprintf(stderr, "Warning! Unrecognised variable type: %s in function getSizeOfType. \n", string);
+		fprintf(
+			stderr, 
+			"Warning! Unrecognised variable type: %s in function getSizeOfType. \n", 
+			string
+		);
 		
 		return 0;
 	}
 }
 
 bool isInt(
-    const char* string
+    const char *string
     ) {
 
-	if (((!strcmp(string, "size_t")) || (!strcmp(string, "int"))) || ((!strcmp(string, "uint16_t")) || (!strcmp(string, "uint32_t")))){
+	if (
+		((!strcmp(string, "size_t")) || (!strcmp(string, "int"))) || ((!strcmp(string, "uint16_t")) || (!strcmp(string, "uint32_t")))){
+		
 		return 1;
 	}
 	else{
+	
 		return 0;
 	}
 }
 
-int getTotalTypeArraySize(
-          char    ** type_array, 
-    const int32_t    length
+size_t getTotalTypeArraySize(
+          char    **type_array, 
+    const int32_t   length
     ) {
 
-	int32_t total_size = 0;
+	size_t total_size = 0;
 
 	for (int32_t index = 0; index < length; index++) {
 		
@@ -110,8 +107,8 @@ bool checkTypeOrder(
     const int32_t    length
    ) {
 
-	int32_t last_value = getSizeOfType(type_array[0]);;
-    int32_t value;
+	size_t last_value = getSizeOfType(type_array[0]);;
+    size_t value;
 
 	for (int32_t index = 1; index < length - 1; index++ ){
     
@@ -119,7 +116,14 @@ bool checkTypeOrder(
 		
 		if(getSizeOfType(type_array[index]) > last_value){
 			
-			fprintf(stderr, "Error! Struture elements must be aranged in decreasing size to ensure no padding is added! Exiting. Types: %s: %zu > %s: %zu. \n", type_array[index], getSizeOfType(type_array[index]), type_array[index - 1], last_value, length);
+			fprintf(stderr, 
+				"Error! Struture elements must be aranged in decreasing size to ensure no padding is added! Exiting. Types: %s: %zu > %s: %zu. \n", 
+				type_array[index], 
+				getSizeOfType(type_array[index]), 
+				type_array[index - 1], 
+				last_value
+			);
+			
 			exit(1);
 		}
         
@@ -137,48 +141,48 @@ void castToVoid(
           void     * config_struct
     ){
 
-	int32_t   cum_size    = getTotalTypeArraySize(type_array, index);
-	char    * type_string = type_array[index];
+	size_t  cum_size    = getTotalTypeArraySize(type_array, index);
+	char   *type_string = type_array[index];
 
 	if ( !strcmp("double", type_string)) {
 	
 		double value = (double) atof(value_string);
-		memcpy(&config_struct[cum_size], &value, sizeof(double));
+		memcpy((uint8_t*) &((char*) config_struct)[cum_size], &value, sizeof(double));
   	} else if ( !strcmp("float", type_string)) {
 	
 		float value = (float) atof(value_string);
-		memcpy(&config_struct[cum_size], &value, sizeof(float));
+		memcpy((uint8_t*) &((char*) config_struct)[cum_size], &value, sizeof(float));
 	} else if ( !strcmp("int", type_string)) {
 	
 		int value = (int) atoi(value_string);
-		memcpy(&config_struct[cum_size], &value, sizeof(int));
+		memcpy((uint8_t*) &((char*) config_struct)[cum_size], &value, sizeof(int));
 	} else if ( !strcmp("size_t", type_string)) {
 	
 		size_t value = (size_t) atoi(value_string);		
-		memcpy(&config_struct[cum_size], &value, sizeof(size_t));
+		memcpy((uint8_t*) &((char*) config_struct)[cum_size], &value, sizeof(size_t));
 	} else if ( !strcmp("uint16_t", type_string)) {
 	
 		uint16_t value = (uint16_t) atoi(value_string);
-		memcpy(&config_struct[cum_size], &value, sizeof(uint16_t));
+		memcpy((uint8_t*) &((char*) config_struct)[cum_size], &value, sizeof(uint16_t));
 	} else if ( !strcmp("uint32_t", type_string)) {
 	
 		uint32_t value = (uint32_t) atoi(value_string);
-		memcpy(&config_struct[cum_size], &value, sizeof(uint32_t));
+		memcpy((uint8_t*) &((char*) config_struct)[cum_size], &value, sizeof(uint32_t));
     } else if ( !strcmp("int32_t", type_string)) {
 	
 		int32_t value = (int32_t) atoi(value_string);
-		memcpy(&config_struct[cum_size], &value, sizeof(int32_t));
+		memcpy((uint8_t*) &((char*) config_struct)[cum_size], &value, sizeof(int32_t));
 	} else if ( !strcmp("bool", type_string)) {
 	
 		bool value = (bool) atoi(value_string);
-		memcpy(&config_struct[cum_size], &value, sizeof(bool));
+		memcpy((uint8_t*) &((char*) config_struct)[cum_size], &value, sizeof(bool));
 	} else if ( !strcmp("char*", type_string)) {
 	
 		//char* value = malloc(sizeof(&value_string));
-		memcpy(&config_struct[cum_size], &value_string, sizeof(char*));
+		memcpy( &((uint8_t*) config_struct)[cum_size], &value_string, sizeof(char*));
 	} else if (!strcmp("uint32_t*", type_string)) {
 	
-		memcpy(&config_struct[cum_size], &value_string, sizeof(uint32_t*));
+		memcpy( &((uint8_t*) config_struct)[cum_size], &value_string, sizeof(uint32_t*));
 	} else {
 	
 		fprintf(stderr, "Warning! Unrecognised variable type: %s given for variable: %s. Ignoring.\n", type_string, name);
@@ -186,9 +190,9 @@ void castToVoid(
 }
 
 int getVariableindex(
-    const char     * variable_name, 
-    const int32_t    num_variables, 
-          char    ** variable_array
+    const char     *variable_name, 
+    const int32_t   num_variables, 
+          char    **variable_array
     ) {	
 
 	//Find variable number:	
@@ -207,13 +211,13 @@ int getVariableindex(
 }
 
 void* readConfig(
-     const char    * filename         ,  
-     const char    * variable_names_o, 
-     const char    * variable_types_o, 
-     const int32_t   num_variables    , 
-     const int32_t   num_configs      , 
-     const int32_t   mem_aligment     , 
-     const int32_t   com_struct_size
+     const char    *filename         ,  
+     const char    *variable_names_o, 
+     const char    *variable_types_o, 
+     const int32_t  num_variables    , 
+     const int32_t  num_configs      , 
+     const size_t   mem_aligment     , 
+     const size_t   com_struct_size
     ){
 
 	//Paser settings:
@@ -239,7 +243,7 @@ void* readConfig(
 
 	if ( checkTypeOrder(type_array, num_variables) ) {
 
-	 	int32_t struct_size = getTotalTypeArraySize(type_array, num_variables); //<-- Calculate total structure size
+	 	size_t struct_size = getTotalTypeArraySize(type_array, num_variables); //<-- Calculate total structure size
 
 		//Opening file:
 		FILE* file;
@@ -255,16 +259,30 @@ void* readConfig(
 			}
 		}
 
-		void** config_structs = malloc(sizeof(void*)*num_configs);
-		for (int32_t config_index = 0; config_index < num_configs; config_index++){
+		void** config_structs = malloc(sizeof(void*) * (size_t) num_configs);
+		
+		for (int32_t config_index = 0; config_index < num_configs; config_index++) {
+		
 			config_structs[config_index] = calloc(com_struct_size, 1);
 		}
 
 		if (struct_size > com_struct_size){
-			fprintf(stderr, "Error! Inputted struct size: (%i) is larger than compiled structure: (%i), exiting.\n", struct_size, com_struct_size);
+			
+			fprintf(
+				stderr, 
+				"Error! Inputted struct size: (%zu) is larger than compiled structure: (%zu), exiting.\n", 
+				struct_size, 
+				com_struct_size
+			);
 			exit(1);
 		} else if ((com_struct_size >= 8) && (struct_size < com_struct_size - mem_aligment)){
-			fprintf(stderr, "Warning! Inputted struct size: (%i) is smaller than compiled structure, even acounting for padding: (%i), exiting.\n", struct_size, com_struct_size - mem_aligment);
+			
+			fprintf(
+				stderr, 
+				"Warning! Inputted struct size: (%zu) is smaller than compiled structure, even acounting for padding: (%zu), exiting.\n", 
+				struct_size, 
+				com_struct_size - mem_aligment
+			);
 			exit(1);
 		}
 
@@ -383,10 +401,9 @@ void* readConfig(
 					castToVoid(value_string, type_array, variable_index, variable_name, config_structs[config_index]);
 
 					//Resets variable name:
-					memset(variable_name, 0, sizeof(variable_name));
+					memset(variable_name, 0, strlen(variable_name));
 
 					value_check = 0;
-
 				}
 
 				char_index++; 
@@ -416,25 +433,25 @@ void* readConfig(
 	}
 }
 
-uint32_t* createStructureVariableMap(
-     const char    * type_string, 
-     const int32_t   length
+size_t *createStructureVariableMap(
+     const char    *type_string, 
+     const int32_t  length
     ) {
 	
-    char* filtered_string;
+    char *filtered_string;
 	removeStringChars(type_string, " ", &filtered_string);
     
-    char** type_array = NULL;
+    char **type_array = NULL;
 	splitString(filtered_string, length, ",", &type_array);
     free(filtered_string);
 		
 	checkTypeOrder(type_array, length);
 	
-	uint32_t* structure_map = malloc(sizeof(uint32_t)*length);
+	size_t *structure_map = malloc(sizeof(size_t) * (size_t) length);
 	
 	for (int32_t index = 0; index < length; index++) {
 		
-		structure_map[index]  =  getTotalTypeArraySize(type_array, index);
+		structure_map[index] = getTotalTypeArraySize(type_array, index);
 	}
 	
 	free(type_array); type_array = NULL;
@@ -443,13 +460,14 @@ uint32_t* createStructureVariableMap(
 }
 
 void* pullValueFromStruct(
-    const void    * structure     , 
-    const int32_t   variable_index, 
-    const int32_t   size
+    const void    * structure        , 
+    const size_t    variable_position, 
+    const size_t    size
     ) {
-	//Warning check your compiler padding before using this function...
+	
+	//Warning check your compiler padding before using this function:
 	void* value = malloc(size);
-	memcpy(value, &(structure)[variable_index], size);
+	memcpy(value, &((uint8_t*) structure)[variable_position], size);
 	
 	return value;
 }
@@ -464,7 +482,7 @@ void pullUInt16ArrayFromStruct(
 	
 	uint16_t* pointer = NULL;
 	
-	for (uint32_t index = start; index < stop; index++) {
+	for (int32_t index = start; index < stop; index++) {
 	
 		pointer = (uint16_t*) pullValueFromStruct(structure, construct->structure_map[index], sizeof(uint16_t));
 		array[index - start] = *pointer;

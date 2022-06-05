@@ -20,7 +20,7 @@ config_s test_config = {
 
 	.num_defined_parameters = num_defined_parameters,
 	.min_inputed_parameters = 0,
-	.min_inputed_parameters = num_defined_parameters,
+	.max_inputed_parameters = num_defined_parameters,
 	.defined_parameters     = defined_parameters,
 	.default_parameter      = default_parameter
 };

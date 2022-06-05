@@ -2,6 +2,12 @@
 #define IO_STRUCTURES_H
 
 typedef enum Type{
+	
+	/**
+     * Enum to hold type information. Used in universal and multi unions,
+	 * and in config loader.
+     */
+	
 	bool_e        ,
 	int_e         , 
 	int_array_e   ,
@@ -15,12 +21,21 @@ typedef enum Type{
 } type_e;
 
 typedef enum Necessity{ 
+	
+	/**
+     * Enum to hold neccesity information.
+     */
+	
 	required_e, 
 	optional_e, 
 	excluded_e
 } necessity_e;
 
 typedef struct Parameter{
+	
+	/**
+     * Structure to hold infomation about variable to be loaded from config.
+     */
 	
 	char*         name;
 	type_e        type;
@@ -29,6 +44,10 @@ typedef struct Parameter{
 } parameter_s;
 
 typedef struct Config{
+	
+	/**
+     * Structure to hold config variable grouping.
+     */
 	
 	char*          name;
 	necessity_e    name_necessity;
