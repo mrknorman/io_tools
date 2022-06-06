@@ -9,6 +9,7 @@
 #include <string.h>
 
 #include "strings.h"
+#include "custom_types.h"
 
 typedef struct construct_s {
 	
@@ -112,7 +113,7 @@ bool checkTypeOrder(
 
 	for (int32_t index = 1; index < length - 1; index++ ){
     
-        value = getSizeOfType(type_array[0]);
+        value = getSizeOfType(type_array[index]);
 		
 		if(getSizeOfType(type_array[index]) > last_value){
 			

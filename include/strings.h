@@ -1,6 +1,7 @@
 #ifndef IO_STRINGS_H
 #define IO_STRINGS_H
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <stdio.h>
 

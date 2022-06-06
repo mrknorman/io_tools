@@ -1,11 +1,20 @@
 //Basic test config:
+typedef struct BasicConfigTest{
 
-int32_t num_defined_parameters = 4;
+	char   *parameter_1; 
+
+	float   parameter_2;
+	float   parameter_3;
+
+	int32_t parameter_4;
+} basic_test_config_s;
+
+const int32_t num_defined_parameters = 4;
 parameter_s defined_parameters[] = {
-	{"parameter_1", int_e   , required_e},
+	{"parameter_1", string_e, required_e},
 	{"parameter_2", float_e , optional_e},
 	{"parameter_3", float_e , excluded_e},
-	{"parameter_4", string_e, required_e},	
+	{"parameter_4", int_e   , required_e},	
 };
 
 parameter_s default_parameter = 
