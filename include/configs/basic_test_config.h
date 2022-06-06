@@ -20,7 +20,7 @@ parameter_s defined_parameters[] = {
 parameter_s default_parameter = 
 	{"default_paramter", int_e, excluded_e};
 
-config_s test_config = {
+loader_config_s test_config = {
 	.name                   = "simple_config_example",
 	.name_necessity         = required_e,
 
@@ -31,5 +31,7 @@ config_s test_config = {
 	.min_inputed_parameters = 0,
 	.max_inputed_parameters = num_defined_parameters,
 	.defined_parameters     = defined_parameters,
-	.default_parameter      = default_parameter
+	.default_parameter      = default_parameter,
+		
+	.struct_size            = sizeof(basic_test_config_s)
 };

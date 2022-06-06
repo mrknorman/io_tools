@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
+#include "text.h"
+
 #include <inttypes.h>
 
 #include "config.h"
@@ -27,7 +29,9 @@ void printTestResult(
 }
 
 int main() {
-
+	
+	const int32_t verbosity = 3;
+	
 	//Variables:
 	const char* config_directory_name       = "configs";
 	const char* basic_test_config_file_name = "basic_test_config.cfg";
@@ -36,17 +40,13 @@ int main() {
 
 	char* config_file_path;
 	asprintf(&config_file_path, "./%s/%s", config_directory_name, basic_test_config_file_name);
-	
+		
 	basic_test_config_s* basic_test_config = 
 		((basic_test_config_s**) 
 			 readConfig(
+			     verbosity,
 				 config_file_path, 
-				 "parameter_1, parameter_2, parameter_3, parameter_4", 
-				 "char* , float, float, int", 
-				 4, 
-				 1, 
-				 8, 
-				 sizeof(basic_test_config_s)
+				 test_config
 			 )
 		)[0];
 	

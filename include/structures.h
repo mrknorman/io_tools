@@ -24,30 +24,32 @@ typedef struct Parameter{
 	
 } parameter_s;
 
-typedef struct Config{
+typedef struct LoaderConfig{
 	
 	/**
      * Structure to hold config variable grouping.
      */
 	
-	char*          name;
-	necessity_e    name_necessity;
+	char                *name;
+	necessity_e          name_necessity;
 	
-	bool           is_superconfig;          
+	bool                 is_superconfig;          
 
-	necessity_e    necessity;
-	int32_t        num_defined_parameters;
+	necessity_e          necessity;
+	int32_t              num_defined_parameters;
 	
-	int32_t        min_inputed_parameters;
-	int32_t        max_inputed_parameters;
-	parameter_s*   defined_parameters;
-	parameter_s    default_parameter;
+	int32_t              min_inputed_parameters;
+	int32_t              max_inputed_parameters;
+	parameter_s         *defined_parameters;
+	parameter_s          default_parameter;
 	
-	int32_t        min_num_subconfigs;
-	int32_t        max_num_subconfigs;
-	struct Config* subconfigs;
-	struct Config* default_subconfig;
+	int32_t              min_num_subconfigs;
+	int32_t              max_num_subconfigs;
+	struct LoaderConfig *subconfigs;
+	struct LoaderConfig *default_subconfig;
+	
+	size_t               struct_size;
 
-} config_s;
+} loader_config_s;
 
 #endif
