@@ -5,6 +5,8 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include <ctype.h>
+
 #include <stdbool.h>
 #include <inttypes.h>
 
@@ -199,7 +201,7 @@ char *typetoString(
 	return string;
 }
 
-void *StringToVoid(
+multi_s StringToMultiS(
 	const char*  string,
 	const type_e type
 	) {
@@ -211,50 +213,66 @@ void *StringToVoid(
      * @see
      * @return char *string: inputted multi_s value in string format.
      */
-	
-	void* value = NULL;
-	
-	bool    value_b = false;
-	int32_t value_i = 0;
-	float   value_f = 0.0f;
-	char*   value_s = NULL;
+	multi_s value;
+	value.type = type;
 	
 	switch(type) {
 		
-		case(bool_e): 
-			value_b = (bool) atoi(string); 
-			value = (void*) &value_b; 
-		break;
-		
-		case(int_e): 
-			value_i = (int32_t) atoi(string); 
-			value = (void*) &value_i; 
-		break;
-		
-		case(float_e):
-			value_f = (float) atof(string); 
-			value = (void*) &value_f; 
-		break;
-		
-		case(char_e): 
-			asprintf(&value_s, "%s", string); 
-			value = (void*) &value_s[0]; 
-		break;
-		
-		case(string_e): 
-			asprintf(&value_s, "%s", string); 
-			value = (void*) &value_s; 	
-		break;		
+		case(bool_e  ): 
+			if isdigit(string[0]) {
+				int32_t bool_value = atoi(string);
+				
+				if ((bool_value > 1) || (bool_value < 0)) {
+				
+					fprintf(stderr, "Warning! Bool value %s not recognised! \n", string);
+					value.value.b = false;
+				} else {
+				
+					value.value.b = (bool) atoi(string); 
+				}
+				
+			} else if (!strcmp(string, "true")) {
 			
+				value.value.b = true;
+			} else if (!strcmp(string, "false")) {
+			
+				value.value.b = false;
+			} else {
+				fprintf(stderr, "Warning! Bool value %s not recognised! \n", string);
+				value.value.b = false;
+			}
+		break;
+		case(int_e   ): 
+			if isdigit(string[0]) {
+			
+				value.value.i = (int32_t) atoi(string); 
+			} else {
+			
+				fprintf(stderr, "Warning! Int value %s not recognised! \n", string);
+				value.value.i = 0;
+			}
+			break;
+		case(float_e ):
+			if isdigit(string[0]) {
+			
+				value.value.f = (float) atof(string); 
+			} else {
+			
+				fprintf(stderr, "Warning! Float value %s not recognised! \n", string);
+				value.value.f = 0.0f;
+			}
+			break;
+		case(char_e  ): value.value.c = (char   ) string[0]   ; break;
+		case(string_e): asprintf(&value.value.s, "%s", string); break;		
+	
 		default:
-			
 			fprintf(stderr, "Warning! Type \"%i\" not recognised! \n", type);
+			value.value.f = 0.0f;
 		break;
 	}
 	
 	return value;
 }
-
 
 char *MultiStoString(
 	const multi_s data

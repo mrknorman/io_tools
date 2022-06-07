@@ -1,20 +1,21 @@
 //Basic test config:
-typedef struct BasicConfigTest{
+typedef struct SingleConfigTest{
+	
+	char    *parameter_string;
+	float    parameter_float;
+	int32_t  parameter_int;
+	bool     parameter_bool;
+	char     parameter_char;
 
-	char   *parameter_1; 
+} single_config_test_s;
 
-	float   parameter_2;
-	float   parameter_3;
-
-	int32_t parameter_4;
-} basic_test_config_s;
-
-const int32_t num_defined_parameters = 4;
+const int32_t num_defined_parameters = 5;
 parameter_s defined_parameters[] = {
-	{"parameter_1", string_e, required_e},
-	{"parameter_2", float_e , optional_e},
-	{"parameter_3", float_e , excluded_e},
-	{"parameter_4", int_e   , required_e},	
+	{"parameter_string", string_e, required_e},
+	{"parameter_float" , float_e , required_e},
+	{"parameter_int"   , int_e   , required_e},
+	{"parameter_bool"  , bool_e  , required_e},	
+	{"parameter_char"  , char_e  , required_e}	
 };
 
 parameter_s default_parameter = 
@@ -33,5 +34,5 @@ loader_config_s test_config = {
 	.defined_parameters     = defined_parameters,
 	.default_parameter      = default_parameter,
 		
-	.struct_size            = sizeof(basic_test_config_s)
+	.struct_size            = sizeof(single_config_test_s)
 };
