@@ -201,6 +201,10 @@ char *typetoString(
 	return string;
 }
 
+
+
+
+
 multi_s StringToMultiS(
 	const char*  string,
 	const type_e type
@@ -243,6 +247,16 @@ multi_s StringToMultiS(
 			}
 		break;
 		case(int_e   ): 
+			
+			if ( strchr(string, '.') ) {
+				fprintf(stderr, "Warning! Decimal detected in: %s, ignoring post decimal values. \n", string);
+				
+				char* string_copy = strdup(string);
+				strtok(string_copy, ".");
+				
+				string = string_copy;
+			}
+			
 			if isdigit(string[0]) {
 			
 				value.value.i = (int32_t) atoi(string); 
@@ -790,8 +804,17 @@ int32_t getMapIndex(
      * @see findDictEntry(), createMap().
      * @return int32_t index: Index corresponding to inputted key.
      */
+	
+	int32_t index = -1;
+	
+	dict_entry_s *entry = findDictEntry(map.dict, key);
+	if ( entry!= NULL ) {
+		index = entry->data.value.i;
+	} else {
+		index = -1;
+	}
     
-    return findDictEntry(map.dict, key)->data.value.i;
+    return index;
 }
 
 char *getMapKey(
@@ -807,8 +830,16 @@ char *getMapKey(
      * @see findDictEntry(), createMap().
      * @return char *key: String_key corresponding to inputted index.
      */
+	
+	char* key = NULL;
+	if ((index < map.length) && (map.length > 0)) {
+	
+		key = map.keys[index];
+	} else {
+		key = NULL;
+	}
     
-    return map.keys[index];
+    return key;
 }
     
 #endif
