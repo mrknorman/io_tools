@@ -123,16 +123,20 @@ bool checkNumConfigs(
 	
 	bool return_value = true;
 
-	if ((num_configs > config_setup.max_num_subconfigs) && (config_setup.max_num_subconfigs > 0)) {
-		
-		if (verbosity > 0) {
+	if     ((num_configs > config_setup.max_num_subconfigs) 
+		&&  (config_setup.max_num_subconfigs > 0)) 
+	{
+		if (verbosity > 0) 
+		{
 			fprintf(stderr, "Warning! Larger than expected number of configs! Returning Null! \n");
 		}
 		return_value = false;
 	
-	} else if (num_configs < config_setup.min_num_subconfigs) {
-		
-		if (verbosity > 0) {
+	} 
+	else if (num_configs < config_setup.min_num_subconfigs) 
+	{
+		if (verbosity > 0) 
+		{
 			fprintf(stderr, "Warning! Smaller than expected number of configs! Returning Null! \n");
 		}
 		return_value = false;
@@ -205,8 +209,8 @@ char* pullValueFromLine(
 	char * parameter_copy = strdup(parameter_start);
 	char * value_string   = strtok(parameter_copy, new_line);
 	
-	switch (type) {
-		
+	switch (type) 
+	{	
 		case (string_e):
 			value_string = 
 				separateString(value_string, string_separator, parameter_name);
@@ -279,7 +283,8 @@ void addExtraParameter(
 	) {
 	
 	char* extra_parameter_name = name;
-	if (num_read > start_index) {
+	if (num_read > start_index) 
+	{
 		asprintf(
 			&extra_parameter_name, 
 			"%s_%i", 
@@ -294,29 +299,32 @@ void addExtraParameter(
 }
 
 type_e guessDataTypeFromString(
-	const char* value_string
+	const char *string
 	) {
+
+	type_e guess = float_e;
 	
-	const int32_t num_type_tests = 4; 
-	const type_e  type_tests[]   = {float_e, bool_e, string_e};
-
-	multi_s data; int32_t test_index;
-	for (test_index = 0; test_index < num_type_tests; test_index++) {
-
-		const int32_t verbosity = 0;
-		data = 
-			StringToMultiS(
-				verbosity, 
-				value_string, 
-				type_tests[test_index]
-			);
-
-		if ((float) data.value.f != 0){
-			break;
+	if isdigit(string[0])
+	{
+		if ( strchr(string, '.') ) 
+		{
+			guess = float_e;
+		} 
+		else 
+		{
+			guess = int_e;
 		}
+	} 
+	else if ((!strcmp(string, "true")) || (!strcmp(string, "false"))) 
+	{
+		guess = bool_e;	
+	} 
+	else 
+	{
+		guess = string_e;
 	}
 	
-	return type_tests[test_index];
+	return guess;
 }
 
 void* readConfig(

@@ -10,7 +10,7 @@
 #include <stdbool.h>
 #include <inttypes.h>
 
-typedef enum Type{
+typedef enum Type {
 	
 	/**
      * Enum to represent type.
@@ -100,8 +100,8 @@ size_t getSizeOfType(
      */
 	
 	size_t size = 0;
-	switch(type) {
-		
+	switch(type) 
+	{	
 		case(bool_e        ): size = sizeof(bool      ); break;
 		
 		case(int_e         ): size = sizeof(int32_t   ); break;
@@ -143,8 +143,8 @@ bool isTypeInt(
 	
 	bool is_int = false;
 	
-	switch(type) {
-		
+	switch(type) 
+	{	
 		case(bool_e        ): is_int = true ; break;
 		
 		case(int_e         ): is_int = true ; break;
@@ -176,8 +176,8 @@ char *typetoString(
      */
 	
 	char *string = NULL;
-	switch(type) {
-		
+	switch(type) 
+	{	
 		case(bool_e        ): string = "bool"              ; break;
 		
 		case(int_e         ): string = "int"               ; break;
@@ -217,32 +217,36 @@ multi_s StringToMultiS(
 	multi_s value;
 	value.type = type;
 	
-	switch(type) {
-		
+	switch(type)
+	{	
 		case(bool_e  ): 
-			if isdigit(string[0]) {
+			if isdigit(string[0]) 
+			{
 				int32_t bool_value = atoi(string);
 				
-				if ((bool_value > 1) || (bool_value < 0)) {
-					
+				if ((bool_value > 1) || (bool_value < 0)) 
+				{
 					if (verbosity > 1) 
 					{
 						fprintf(stderr, "Warning! Bool value %s not recognised! \n", string);
 					}
 					value.value.b = false;
-				} else {
-				
+				} 
+				else 
+				{
 					value.value.b = (bool) atoi(string); 
 				}
-				
-			} else if (!strcmp(string, "true")) {
-			
+			} 
+			else if (!strcmp(string, "true")) 
+			{
 				value.value.b = true;
-			} else if (!strcmp(string, "false")) {
-			
+			} 
+			else if (!strcmp(string, "false")) 
+			{
 				value.value.b = false;
-			} else {
-				
+			} 
+			else 
+			{
 				if (verbosity > 1) 
 				{
 					fprintf(stderr, "Warning! Bool value %s not recognised! \n", string);
@@ -250,9 +254,11 @@ multi_s StringToMultiS(
 				value.value.b = false;
 			}
 		break;
+		
 		case(int_e   ): 
 			
-			if ( strchr(string, '.') ) {
+			if ( strchr(string, '.') ) 
+			{
 				fprintf(stderr, "Warning! Decimal detected in: %s, ignoring post decimal values. \n", string);
 				
 				char* string_copy = strdup(string);
@@ -261,36 +267,43 @@ multi_s StringToMultiS(
 				string = string_copy;
 			}
 			
-			if isdigit(string[0]) {
-			
+			if isdigit(string[0]) 
+			{
 				value.value.i = (int32_t) atoi(string); 
-			} else {
-				
+			} 
+			else 
+			{	
 				if (verbosity > 1) 
 				{
 					fprintf(stderr, "Warning! Int value %s not recognised! \n", string);
 				}
 				value.value.i = 0;
 			}
-			break;
+		break;
+		
 		case(float_e ):
-			if isdigit(string[0]) {
-			
+			if isdigit(string[0]) 
+			{
 				value.value.f = (float) atof(string); 
-			} else {
-			
+			} else 
+			{
 				if (verbosity > 1) 
 				{
 					fprintf(stderr, "Warning! Float value %s not recognised! \n", string);
 				}
 				value.value.f = 0.0f;
 			}
-			break;
-		case(char_e  ): value.value.c = (char   ) string[0]   ; break;
-		case(string_e): asprintf(&value.value.s, "%s", string); break;		
+		break;
+		
+		case(char_e  ): 
+			value.value.c = (char) string[0]; 
+		break;
+		
+		case(string_e): 
+			asprintf(&value.value.s, "%s", string); 
+		break;		
 	
 		default:
-			
 			if (verbosity > 1) 
 			{
 				fprintf(stderr, "Warning! Type \"%i\" not recognised! \n", type);
@@ -315,8 +328,8 @@ char *MultiStoString(
      */
 	
 	char* string;
-	switch(data.type) {
-		
+	switch(data.type) 
+	{	
 		case(bool_e        ): asprintf(&string, "%i", (int)    data.value.b  ); break;
 		
 		case(int_e         ): asprintf(&string, "%i",          data.value.i  ); break;
@@ -371,44 +384,67 @@ void freeMultiS(
 	
 	switch(data.type) {
 		
-		case(int_array_e   ): if (data.value.ii  != NULL) {free(data.value.ii); } break;
-		case(float_array_e ): if (data.value.ff  != NULL) {free(data.value.ff); } break;
-		case(string_array_e): if (data.value.ss  != NULL) {free(data.value.ss); } break;
+		case(int_array_e   ): 
+			
+			if (data.value.ii  != NULL) 
+			{
+				free(data.value.ii); 
+			} 
+		break;
+		
+		case(float_array_e ): 
+			
+			if (data.value.ff  != NULL) 
+			{
+				free(data.value.ff);
+			} 
+		break;
+		
+		case(string_array_e): 
+			
+			if (data.value.ss  != NULL) 
+			{
+				free(data.value.ss); 
+			}
+		break;
+		
 		case(int_jagged_e  ): 
-		if (data.value.iii != NULL) {
-				
-			for (int32_t index = 0; index < data.length; index++) {
-					
-					if (data.value.iii[index] != NULL) {
-						
+			
+			if (data.value.iii != NULL) 
+			{		
+				for (int32_t index = 0; index < data.length; index++) 
+				{
+					if (data.value.iii[index] != NULL) 
+					{
+
 						free(data.value.iii[index]);
 					}
-					
+
 					if (data.lengths != NULL) {
-						
+
 						free(data.lengths);
 					}
-                    
+
 				}
-                free(data.value.iii);
+
+				free(data.value.iii);
 			} 
 		break;
 			
 		case(float_jagged_e):
 			
-			if (data.value.fff != NULL) {
-				
-				for (int32_t index = 0; index < data.length; index++) {
-					
-					if (data.value.fff[index] != NULL) {
-						
+			if (data.value.fff != NULL) 
+			{
+				for (int32_t index = 0; index < data.length; index++) 
+				{	
+					if (data.value.fff[index] != NULL) 
+					{	
 						free(data.value.fff[index]);
 					}
-					
 				}
                 
-                if (data.lengths != NULL) {
-						
+                if (data.lengths != NULL) 
+				{		
 					free(data.lengths);
 				}
                 
@@ -417,7 +453,7 @@ void freeMultiS(
 		break;
 		
 		default:
-			
+
 			fprintf(stderr, "Warning! Type \"%i\" not recognised! \n", data.type);
 		break;
 	}
@@ -592,18 +628,16 @@ int32_t findHashIndex(
 			return index;
 		} else if (index == stop_index) {
 			
-			fprintf(stderr, "Warning! Cannot find entry! %s. \n", string_key);
 			return -1;		
 		}
 			
 		index++; index %= dict->length; //Wrap around. 
 	}
 	
-	fprintf(stderr, "Warning! Cannot find entry! %s. \n", string_key);
 	return -1;
 }
 
-dict_entry_s *findDictEntry(
+dict_entry_s *findDictEntry_(
 	const dict_s *dict    , 
 	const char   *string_key
 	) {
@@ -619,13 +653,38 @@ dict_entry_s *findDictEntry(
 	
 	const int32_t index = findHashIndex(dict, string_key);
 	
+	dict_entry_s *entry = NULL;
 	if (index >= 0) {
 		
-		return dict->entries[index];
-	} else {
+		entry = dict->entries[index];
+	} 
+
+	return entry;
+}
+
+dict_entry_s *findDictEntry(
+	const dict_s *dict    , 
+	const char   *string_key
+	) {
+	
+	/**
+     * Find dictionary entry from entered string key, with error wrapper.
+     * @param 
+	 *     const dict_s  *dict      : Dictionary to find entry for specified string key.
+     *     const char    *string_key: String key to find dictionary entry of.
+     * @see findHashIndex().
+     * @return dict_entry_s entry: Returns dict entry if successful, else return NULL.
+     */
 		
+	dict_entry_s *entry = findDictEntry_(dict, string_key);
+	
+	if (entry == NULL)
+	{
+		fprintf(stderr, "Warning! Cannot find entry! %s. \n", string_key);
 		return NULL;
 	}
+	
+	return entry;
 }
 
 void deleteDictEntry(
@@ -820,10 +879,14 @@ int32_t getMapIndex(
 	
 	int32_t index = -1;
 	
-	dict_entry_s *entry = findDictEntry(map.dict, key);
-	if ( entry!= NULL ) {
+	dict_entry_s *entry = 
+		findDictEntry_(map.dict, key);
+	
+	if ( entry!= NULL ) 
+	{
 		index = entry->data.value.i;
-	} else {
+	} else 
+	{
 		index = -1;
 	}
     

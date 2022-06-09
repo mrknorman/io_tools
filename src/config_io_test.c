@@ -209,7 +209,8 @@ bool testVariableConfig(
 			 )
 		);
 		
-	if (!num_configs == expected_num_configs) {
+	if (!num_configs == expected_num_configs) 
+	{
 		pass = false; 
 		fprintf(
 			stderr, 
@@ -225,7 +226,7 @@ bool testVariableConfig(
 	} 
 	else
 	{
-		      char *  strings[] = 
+		char *  strings[] = 
 			{"", "Config Test 1", "Config Test 2", "Config Test 3", "Config Test 4", "Config Test 5"};
 		const float   floats[] = 
 			{1.0f, 0.0f, 1.2f, 1.3f, 1.4f};
@@ -377,19 +378,19 @@ bool testReqirmentConfig(
 	const char    *config_directory_name
 	) {
 	
-	const char* file_name = "multi_config_test.cfg";
-
 	bool pass = true;
 	
+	char* file_name = NULL;
+	int32_t num_configs = 0; 
+	test_config_s** test_results = NULL;
+
 	char* config_file_path;
+	
+	#include "requirement_config_test.h"	
+	
+	file_name = "requirement_config_test_0.cfg";
 	asprintf(&config_file_path, "./%s/%s", config_directory_name, file_name);
-	
-	#include "multi_config_test.h"	
-	
-	const int32_t expected_num_parameters = 5;
-	const int32_t expected_num_configs = 3;
-		  int32_t num_configs = 0; 
-	test_config_s** test_results = 
+	test_results = 
 		((test_config_s**) 
 			 readConfig(
 			     verbosity,
@@ -398,71 +399,117 @@ bool testReqirmentConfig(
 				 &num_configs
 			 )
 		);
-		
-	if (!num_configs == expected_num_configs) {
-		pass = false; 
-		fprintf(
-			stderr, 
-			"Number of configs found (%i) does not match expected (%i). \n",
-			num_configs, expected_num_configs
-		);
-	}
+	free(config_file_path);
 	
-	if (test_results == NULL) 
+	if (test_results != NULL) 
 	{
-		printf("Load Config returned NULL! \n");
-		pass = false;
+		printf("Load Config %s did not return NULL! As expected.\n", file_name);
+		pass *= true;
 	} 
 	else
 	{
-		const char *  initial_string = "Config Test";
-		const float   initial_float  = 1.0f;
-		const int32_t initial_int    = 0;
-		const bool    bool_array[]   = {false, true, false};
-		const char    char_array[]   = {'a', 'b', 'c'};
-
-		uni_s *cells = malloc(sizeof(uni_s)* (size_t) ( expected_num_configs * expected_num_parameters * 2 ));
-		for (int32_t index = 0; index < expected_num_configs; index++) {
-
-			char *parameter_string;
-			asprintf(&parameter_string, "%s %i", initial_string, index);
-
-			test_config_s known_results = {
-				.parameter_string = parameter_string,
-				.parameter_float  = initial_float + ((float)index * 0.1f),
-				.parameter_int    = initial_int + index,
-				.parameter_bool   = bool_array[index],
-				.parameter_char   = char_array[index]
-			};
-
-			int32_t cell_index = index*expected_num_parameters*2;
-			
-			const test_config_s *test_result = test_results[index];
-			
-			setTableCells(
-				known_results, 
-				test_result, 
-				expected_num_parameters, 
-				cell_index, 
-				cells
-			);
-
-			pass *= 
-				configTestCompare(known_results, test_result);
-		}
-
-		plotConfigTestTable(
-			expected_num_configs, 
-			expected_num_parameters,
-			"Multi Config Test",
-			cells
-		);
+		printf("Load Config %s returned NULL! Unexpected behaviour.\n", file_name);
+		pass = false;
 	}
 	
-	printTestResult(pass, "multi config test.");
-	
+	file_name = "requirement_config_test_1.cfg";
+	asprintf(&config_file_path, "./%s/%s", config_directory_name, file_name);
+	test_results = 
+		((test_config_s**) 
+			 readConfig(
+			     verbosity,
+				 config_file_path, 
+				 loader_config,
+				 &num_configs
+			 )
+		);
 	free(config_file_path);
-
+	
+	if (test_results == NULL) 
+	{
+		printf("Load Config %s returned NULL! As expected.\n", file_name);
+		pass *= true;
+	} 
+	else
+	{
+		printf("Load Config %s did not return NULL! Unexpected behaviour.\n", file_name);
+		pass = false;
+	}
+	
+	file_name = "requirement_config_test_2.cfg";
+	asprintf(&config_file_path, "./%s/%s", config_directory_name, file_name);
+	test_results = 
+		((test_config_s**) 
+			 readConfig(
+			     verbosity,
+				 config_file_path, 
+				 loader_config,
+				 &num_configs
+			 )
+		);
+	free(config_file_path);
+	
+	if (test_results == NULL) 
+	{
+		printf("Load Config %s returned NULL! As expected.\n", file_name);
+		pass *= true;
+	} 
+	else
+	{
+		printf("Load Config %s did not return NULL! Unexpected behaviour.\n", file_name);
+		pass = false;
+	}
+	
+	file_name = "requirement_config_test_3.cfg";
+	asprintf(&config_file_path, "./%s/%s", config_directory_name, file_name);
+	test_results = 
+		((test_config_s**) 
+			 readConfig(
+			     verbosity,
+				 config_file_path, 
+				 loader_config,
+				 &num_configs
+			 )
+		);
+	free(config_file_path);
+	
+	if (test_results != NULL) 
+	{
+		printf("Load Config %s did not return NULL! As expected.\n", file_name);
+		pass *= true;
+	} 
+	else
+	{
+		printf("Load Config %s returned NULL! Unexpected behaviour.\n", file_name);
+		pass = false;
+	}
+	
+	file_name = "requirement_config_test_4.cfg";
+	asprintf(&config_file_path, "./%s/%s", config_directory_name, file_name);
+	test_results = 
+		((test_config_s**) 
+			 readConfig(
+			     verbosity,
+				 config_file_path, 
+				 loader_config,
+				 &num_configs
+			 )
+		);
+	free(config_file_path);
+	
+	if (test_results == NULL) 
+	{
+		printf("Load Config %s returned NULL! As expected.\n", file_name);
+		pass *= true;
+	} 
+	else
+	{
+		printf("Load Config %s did not return NULL! Unexpected behaviour.\n", file_name);
+		pass = false;
+	}
+	
+	printTestResult(pass, "Requirement config test.");
+	
 	return pass;
 }
 
@@ -493,13 +540,21 @@ int main() {
 		config_directory_name
 	);
 	
-
+	pass *= 
+	testReqirmentConfig(
+		verbosity,
+		config_directory_name
+	);
 	
-	// Comment Test
+
 	// Requirment Test
-	// Exclusion Test
 	// Default Variable Test
+
+	// Comment Test
+	// Exclusion Test
 	// Min Max Variable Test
+	
+	
 	// Default Config Test
 	// Min Max Config Test
 	// Config Name Requirement Test
