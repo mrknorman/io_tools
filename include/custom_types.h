@@ -201,13 +201,10 @@ char *typetoString(
 	return string;
 }
 
-
-
-
-
 multi_s StringToMultiS(
-	const char*  string,
-	const type_e type
+	const int32_t  verbosity,
+	const char    *string,
+	const type_e   type
 	) {
 	
 	/**
@@ -227,8 +224,11 @@ multi_s StringToMultiS(
 				int32_t bool_value = atoi(string);
 				
 				if ((bool_value > 1) || (bool_value < 0)) {
-				
-					fprintf(stderr, "Warning! Bool value %s not recognised! \n", string);
+					
+					if (verbosity > 1) 
+					{
+						fprintf(stderr, "Warning! Bool value %s not recognised! \n", string);
+					}
 					value.value.b = false;
 				} else {
 				
@@ -242,7 +242,11 @@ multi_s StringToMultiS(
 			
 				value.value.b = false;
 			} else {
-				fprintf(stderr, "Warning! Bool value %s not recognised! \n", string);
+				
+				if (verbosity > 1) 
+				{
+					fprintf(stderr, "Warning! Bool value %s not recognised! \n", string);
+				}
 				value.value.b = false;
 			}
 		break;
@@ -261,8 +265,11 @@ multi_s StringToMultiS(
 			
 				value.value.i = (int32_t) atoi(string); 
 			} else {
-			
-				fprintf(stderr, "Warning! Int value %s not recognised! \n", string);
+				
+				if (verbosity > 1) 
+				{
+					fprintf(stderr, "Warning! Int value %s not recognised! \n", string);
+				}
 				value.value.i = 0;
 			}
 			break;
@@ -272,7 +279,10 @@ multi_s StringToMultiS(
 				value.value.f = (float) atof(string); 
 			} else {
 			
-				fprintf(stderr, "Warning! Float value %s not recognised! \n", string);
+				if (verbosity > 1) 
+				{
+					fprintf(stderr, "Warning! Float value %s not recognised! \n", string);
+				}
 				value.value.f = 0.0f;
 			}
 			break;
@@ -280,7 +290,11 @@ multi_s StringToMultiS(
 		case(string_e): asprintf(&value.value.s, "%s", string); break;		
 	
 		default:
-			fprintf(stderr, "Warning! Type \"%i\" not recognised! \n", type);
+			
+			if (verbosity > 1) 
+			{
+				fprintf(stderr, "Warning! Type \"%i\" not recognised! \n", type);
+			}
 			value.value.f = 0.0f;
 		break;
 	}
@@ -774,8 +788,7 @@ map_s createMap(
      * @see makeDictionary(), insertDictEntry().
      * @return map_s map: map between keys and index.
      */
-	
-    
+	    
     map_s map;
     map.dict = makeDictionary(10*num_keys);
     

@@ -20,7 +20,8 @@ typedef struct Parameter{
 	
 	char*         name;
 	type_e        type;
-	necessity_e   necessity;
+	int32_t       min;
+	int32_t       max;
 	
 } parameter_s;
 
