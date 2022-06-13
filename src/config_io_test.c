@@ -118,13 +118,16 @@ bool testSingleConfig(
 	const int32_t expected_num_parameters = 5;
 	const int32_t expected_num_configs = 1;
 	      int32_t num_configs = 0; 
+		  
+	dict_s **extra_parameters = NULL;
 	test_config_s* test_results = 
 		((test_config_s**) 
 			 readConfig(
 			     verbosity,
 				 config_file_path, 
 				 loader_config,
-				 &num_configs
+				 &num_configs,
+				 &extra_parameters
 			 )
 		)[0];
 	
@@ -172,7 +175,6 @@ bool testSingleConfig(
 			"Single Config Test",
 			cells
 		);
-	
 	}
 	
 	printTestResult(pass, "single config test.");
@@ -199,13 +201,16 @@ bool testVariableConfig(
 	const int32_t expected_num_parameters = 5;
 	const int32_t expected_num_configs = 5;
 		  int32_t num_configs = 0; 
+		  
+	dict_s **extra_parameters = NULL;
 	test_config_s** test_results = 
 		((test_config_s**) 
 			 readConfig(
 			     verbosity,
 				 config_file_path, 
 				 loader_config,
-				 &num_configs
+				 &num_configs,
+				 &extra_parameters
 			 )
 		);
 		
@@ -296,13 +301,16 @@ bool testMultiConfig(
 	const int32_t expected_num_parameters = 5;
 	const int32_t expected_num_configs = 3;
 		  int32_t num_configs = 0; 
+		  
+	dict_s **extra_parameters = NULL;
 	test_config_s** test_results = 
 		((test_config_s**) 
 			 readConfig(
 			     verbosity,
 				 config_file_path, 
 				 loader_config,
-				 &num_configs
+				 &num_configs,
+				 &extra_parameters
 			 )
 		);
 		
@@ -383,6 +391,7 @@ bool testReqirmentConfig(
 	char* file_name = NULL;
 	int32_t num_configs = 0; 
 	test_config_s** test_results = NULL;
+	dict_s** extra_parameters = NULL;
 
 	char* config_file_path;
 	
@@ -396,7 +405,8 @@ bool testReqirmentConfig(
 			     verbosity,
 				 config_file_path, 
 				 loader_config,
-				 &num_configs
+				 &num_configs,
+				 &extra_parameters
 			 )
 		);
 	free(config_file_path);
@@ -420,7 +430,8 @@ bool testReqirmentConfig(
 			     verbosity,
 				 config_file_path, 
 				 loader_config,
-				 &num_configs
+				 &num_configs,
+				 &extra_parameters
 			 )
 		);
 	free(config_file_path);
@@ -444,7 +455,8 @@ bool testReqirmentConfig(
 			     verbosity,
 				 config_file_path, 
 				 loader_config,
-				 &num_configs
+				 &num_configs,
+				 &extra_parameters
 			 )
 		);
 	free(config_file_path);
@@ -468,7 +480,8 @@ bool testReqirmentConfig(
 			     verbosity,
 				 config_file_path, 
 				 loader_config,
-				 &num_configs
+				 &num_configs,
+				 &extra_parameters
 			 )
 		);
 	free(config_file_path);
@@ -492,7 +505,8 @@ bool testReqirmentConfig(
 			     verbosity,
 				 config_file_path, 
 				 loader_config,
-				 &num_configs
+				 &num_configs,
+				 &extra_parameters
 			 )
 		);
 	free(config_file_path);
@@ -508,7 +522,188 @@ bool testReqirmentConfig(
 		pass = false;
 	}
 	
+	printf("\n");
 	printTestResult(pass, "Requirement config test.");
+	
+	return pass;
+}
+
+bool testExtraParameterConfig(
+	const int32_t  verbosity,
+	const char    *config_directory_name
+	) {
+	
+	bool pass = true;
+	
+	char* file_name = NULL;
+	int32_t num_configs = 0; 
+	test_config_s **test_results = NULL;
+	dict_s        **extra_parameters = NULL;
+
+	char* config_file_path;
+	
+	#include "extra_parameter_config_test.h"	
+	
+	file_name = "extra_parameter_config_test_0.cfg";
+	asprintf(&config_file_path, "./%s/%s", config_directory_name, file_name);
+	test_results = 
+		((test_config_s**) 
+			 readConfig(
+			     verbosity,
+				 config_file_path, 
+				 loader_config,
+				 &num_configs,
+				 &extra_parameters
+			 )
+		);
+	free(config_file_path);
+	
+	
+	const int32_t num_extra_parameters = 5;
+	dict_s *known_results = makeDictionary(100);
+	
+	char   *known_string = "Extra Parameter Test";
+	float   known_float  = 1.1f;
+	int32_t known_int    = 0;
+	bool    known_bool   = true;
+	char    known_char   = 'a';
+			
+	multi_s known_extra_parameters[] = 
+	{
+		MultiS(known_string, string_e, 1, NULL),
+		MultiS(&known_float , float_e , 1, NULL),
+		MultiS(&known_int   , int_e   , 1, NULL),
+		MultiS(&known_bool  , bool_e  , 1, NULL),
+		MultiS(&known_char  , char_e  , 1, NULL)
+	};
+
+	const char *extra_parameter_names[] = 
+	{
+		"extra_parameter_string",
+		"extra_parameter_float",
+		"extra_parameter_int",
+		"extra_parameter_bool",
+		"extra_parameter_char"
+	};
+	
+	for (int32_t index = 0; index < num_extra_parameters; index++) 
+	{	
+		insertDictEntry(
+			known_results, 
+			known_extra_parameters[index], 
+			extra_parameter_names[index]
+		);
+	}
+	
+	if (test_results != NULL) 
+	{
+		printf("Load Config %s did not return NULL! As expected.\n", file_name);
+		pass *= true;
+	} 
+	else
+	{
+		printf("Load Config %s returned NULL! Unexpected behaviour.\n", file_name);
+		pass = false;
+	}
+	
+	file_name = "extra_parameter_config_test_1.cfg";
+	asprintf(&config_file_path, "./%s/%s", config_directory_name, file_name);
+	test_results = 
+		((test_config_s**) 
+			 readConfig(
+			     verbosity,
+				 config_file_path, 
+				 loader_config,
+				 &num_configs,
+				 &extra_parameters
+			 )
+		);
+	
+	for (int32_t index = 0; index < num_extra_parameters; index++) 
+	{	
+		dict_entry_s *known_result = findDictEntry(
+			known_results, 
+			extra_parameter_names[index]
+		);
+		dict_entry_s *read_result = findDictEntry(
+			extra_parameters[3], 
+			extra_parameter_names[index]
+		);
+		
+		if (known_result->data.type == read_result->data.type) 
+		{
+			pass *= comapareMultiS(known_result->data, read_result->data);
+			printf("%s, %s, %s \n", MultiStoString(read_result->data), MultiStoString(known_result->data), extra_parameter_names[index]);
+		} else {
+			pass *= false;
+		}
+	}
+	
+	free(config_file_path);
+	
+	if (test_results == NULL) 
+	{
+		printf("Load Config %s returned NULL! As expected.\n", file_name);
+		pass *= true;
+	} 
+	else
+	{
+		printf("Load Config %s did not return NULL! Unexpected behaviour.\n", file_name);
+		pass = false;
+	}
+	
+	file_name = "extra_parameter_config_test_2.cfg";
+	asprintf(&config_file_path, "./%s/%s", config_directory_name, file_name);
+	test_results = 
+		((test_config_s**) 
+			 readConfig(
+			     verbosity,
+				 config_file_path, 
+				 loader_config,
+				 &num_configs,
+				 &extra_parameters
+			 )
+		);
+	free(config_file_path);
+	
+	if (test_results == NULL) 
+	{
+		printf("Load Config %s returned NULL! As expected.\n", file_name);
+		pass *= true;
+	} 
+	else
+	{
+		printf("Load Config %s did not return NULL! Unexpected behaviour.\n", file_name);
+		pass = false;
+	}
+	
+	file_name = "extra_parameter_config_test_3.cfg";
+	asprintf(&config_file_path, "./%s/%s", config_directory_name, file_name);
+	test_results = 
+		((test_config_s**) 
+			 readConfig(
+			     verbosity,
+				 config_file_path, 
+				 loader_config,
+				 &num_configs,
+				 &extra_parameters
+			 )
+		);
+	free(config_file_path);
+	
+	if (test_results == NULL) 
+	{
+		printf("Load Config %s returned NULL! As expected.\n", file_name);
+		pass *= true;
+	} 
+	else
+	{
+		printf("Load Config %s did not return NULL! Unexpected behaviour.\n", file_name);
+		pass = false;
+	}
+	
+	printf("\n");
+	printTestResult(pass, "Extra parameter config test.");
 	
 	return pass;
 }
@@ -523,35 +718,38 @@ int main() {
 	bool pass = true;
 	
 	pass *= 
-	testSingleConfig(
-		verbosity,
-		config_directory_name
-	);
+		testSingleConfig(
+			verbosity,
+			config_directory_name
+		);
 	
 	pass *= 
-	testMultiConfig(
-		verbosity,
-		config_directory_name
-	);
+		testMultiConfig(
+			verbosity,
+			config_directory_name
+		);
 	
 	pass *= 
-	testVariableConfig(
-		verbosity,
-		config_directory_name
-	);
+		testVariableConfig(
+			verbosity,
+			config_directory_name
+		);
 	
 	pass *= 
-	testReqirmentConfig(
-		verbosity,
-		config_directory_name
-	);
+		testReqirmentConfig(
+			verbosity,
+			config_directory_name
+		);
 	
+	pass *=
+		testExtraParameterConfig(
+			verbosity,
+			config_directory_name
+		);
 
-	// Requirment Test
 	// Default Variable Test
 
 	// Comment Test
-	// Exclusion Test
 	// Min Max Variable Test
 	
 	

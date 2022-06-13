@@ -16,6 +16,7 @@ typedef enum Type {
      * Enum to represent type.
      */
 	
+	none_e        ,
 	bool_e        ,
 	int_e         , 
 	int_array_e   ,
@@ -52,25 +53,43 @@ typedef struct Universal_S {
 	
 } uni_s;
 
+uni_s UniS(
+	void    *value  ,
+	type_e   type   
+) {
+
+	uni_s return_union;
+	if (type == string_e) 
+	{
+		return_union = (uni_s) {*((uni_u*)(&value)), type};
+	}
+	else 
+	{
+		return_union = (uni_s) {*((uni_u*)(value)), type};
+	}
+	 
+	return return_union;
+}
+
 typedef union Universal_Multi_U {
 	
 	/**
      * Union to store commonly used types and array pointers.
      */
 	
-	bool       b;
+	bool      b;
 	
-	int32_t    i; 
-	int32_t *  ii;
-	int32_t ** iii;
+	int32_t   i; 
+	int32_t  *ii;
+	int32_t **iii;
 	
-	float      f;
-	float   *  ff;
-	float   ** fff;
+	float     f;
+	float    *ff;
+	float   **fff;
 	
-	char       c;
-	char    *  s;
-	char    ** ss;
+	char      c;
+	char     *s;
+	char    **ss;
 	
 } multi_u;
 
@@ -84,8 +103,28 @@ typedef struct Universal_Multi_S {
 	multi_u  value  ;
 	type_e   type   ;
 	int32_t  length ;
-	int32_t* lengths;	
+	int32_t *lengths;	
 } multi_s;
+
+multi_s MultiS(
+	void    *value  ,
+	type_e   type   ,
+	int32_t  length ,
+	int32_t *lengths	
+) {
+	
+	multi_s data;
+	if (type == string_e) 
+	{
+		data = (multi_s) {*((multi_u*)(&value)), type, length, lengths};
+	}
+	else 
+	{
+		data = (multi_s) {*((multi_u*)(value)), type, length, lengths};
+	}
+	
+	return data;
+}
 
 size_t getSizeOfType(
 	const type_e type
@@ -102,6 +141,7 @@ size_t getSizeOfType(
 	size_t size = 0;
 	switch(type) 
 	{	
+		case(none_e        ): size = 0                 ; break;
 		case(bool_e        ): size = sizeof(bool      ); break;
 		
 		case(int_e         ): size = sizeof(int32_t   ); break;
@@ -129,40 +169,6 @@ size_t getSizeOfType(
 	return size;
 }
 
-bool isTypeInt(
-    const type_e type
-    ) {
-	
-	/**
-     * Checks if type is an integer.
-     * @param 
-     *     const type_e type: enum holding type infomation.
-     * @see
-     * @return bool is_int: 1 if type is int, else 0.
-     */
-	
-	bool is_int = false;
-	
-	switch(type) 
-	{	
-		case(bool_e        ): is_int = true ; break;
-		
-		case(int_e         ): is_int = true ; break;
-		case(int_array_e   ): is_int = true ; break;
-		case(int_jagged_e  ): is_int = true ; break;			
-			
-		case(float_e       ): is_int = false; break;
-		case(float_array_e ): is_int = false; break;
-		case(float_jagged_e): is_int = false; break;		
-
-		case(char_e        ): is_int = false; break;
-		case(string_e      ): is_int = false; break;		
-		case(string_array_e): is_int = false; break;
-	}
-	
-	return is_int;
-}
-
 char *typetoString(
 	const type_e type
 	) {
@@ -178,6 +184,7 @@ char *typetoString(
 	char *string = NULL;
 	switch(type) 
 	{	
+		case(none_e        ): string = "none"              ; break;
 		case(bool_e        ): string = "bool"              ; break;
 		
 		case(int_e         ): string = "int"               ; break;
@@ -201,6 +208,48 @@ char *typetoString(
 	return string;
 }
 
+bool comapareMultiS(
+	const multi_s data_a,
+	const multi_s data_b
+	) {
+	
+	/**
+     * Convert type value to string.
+     * @param 
+     *     const type type: type_e enum to return string name.
+     * @see
+     * @return char *string: name of type as string.
+	 */
+	
+	type_e type = data_a.type;
+	
+	bool pass = false;
+	switch(type) 
+	{	
+		case(none_e        ): pass = false; break;
+		case(bool_e        ): pass = (data_a.value.b == data_b.value.b); break;
+		
+		case(int_e         ): pass = (data_a.value.b == data_b.value.b); break;
+		case(int_array_e   ): pass = false; break;
+		case(int_jagged_e  ): pass = false; break;			
+			
+		case(float_e       ): pass = (data_a.value.b == data_b.value.b); break;
+		case(float_array_e ): pass = false; break;
+		case(float_jagged_e): pass = false; break;		
+
+		case(char_e        ): pass = (data_a.value.b == data_b.value.b); break;
+		case(string_e      ): pass = (bool) !strcmp(data_a.value.s, data_b.value.s); break;		
+		case(string_array_e): pass = false; break;
+			
+		default:
+			
+			fprintf(stderr, "Warning! Type \"%i\" not recognised! \n", type);
+		break;
+	}
+	
+	return pass;
+}
+
 multi_s StringToMultiS(
 	const int32_t  verbosity,
 	const char    *string,
@@ -219,6 +268,9 @@ multi_s StringToMultiS(
 	
 	switch(type)
 	{	
+		case(none_e):
+		break;
+		
 		case(bool_e  ): 
 			if isdigit(string[0]) 
 			{
@@ -330,15 +382,16 @@ char *MultiStoString(
 	char* string;
 	switch(data.type) 
 	{	
-		case(bool_e        ): asprintf(&string, "%i", (int)    data.value.b  ); break;
+		case(none_e        ): printf("Warning! Cannot convert None to string!"); break;
+		case(bool_e        ): asprintf(&string, "%i", (int)    data.value.b  );  break;
 		
-		case(int_e         ): asprintf(&string, "%i",          data.value.i  ); break;
-		case(int_array_e   ): asprintf(&string, "%p", (void *) data.value.ii ); break;
-		case(int_jagged_e  ): asprintf(&string, "%p", (void *) data.value.iii); break;			
+		case(int_e         ): asprintf(&string, "%i",          data.value.i  );  break;
+		case(int_array_e   ): asprintf(&string, "%p", (void *) data.value.ii );  break;
+		case(int_jagged_e  ): asprintf(&string, "%p", (void *) data.value.iii);  break;			
 			
-		case(float_e       ): asprintf(&string, "%f",          data.value.f  ); break;
-		case(float_array_e ): asprintf(&string, "%p", (void *) data.value.ff ); break;
-		case(float_jagged_e): asprintf(&string, "%p", (void *) data.value.fff); break;		
+		case(float_e       ): asprintf(&string, "%f",          data.value.f  );  break;
+		case(float_array_e ): asprintf(&string, "%p", (void *) data.value.ff );  break;
+		case(float_jagged_e): asprintf(&string, "%p", (void *) data.value.fff);  break;		
 
 		case(char_e        ): asprintf(&string, "%c", data.value.c  ); break;
 		case(string_e      ): string = data.value.s; break;		
@@ -383,6 +436,10 @@ void freeMultiS(
      */
 	
 	switch(data.type) {
+		
+		case(none_e   ): 
+		
+		break;
 		
 		case(int_array_e   ): 
 			
@@ -551,9 +608,9 @@ int getDictHashCode(
 }
 
 int32_t insertDictEntry(
-	      dict_s  *dict      , 
-	const multi_s  data      , 
-    const char    *string_key
+	      dict_s  *dict        , 
+	const multi_s  data        , 
+    const char    *string_key_o
 	) {
 	
 	/**
@@ -565,7 +622,9 @@ int32_t insertDictEntry(
      * @see getDictHashCode(), multi_s.
      * @return int32_t return_value: Returns 0 if successful, else return 1.
      */
-
+	
+	const char *string_key = strdup(string_key_o);
+	
 	dict->num_entries++;
 	if (dict->num_entries > dict->length) {
 		
@@ -851,14 +910,15 @@ map_s createMap(
     map_s map;
     map.dict = makeDictionary(10*num_keys);
     
+	map.keys = malloc(sizeof(char*) * (size_t) num_keys);
     for (int32_t index = 0; index < num_keys; index++) {
         
         const multi_s data = (multi_s) {*((multi_u*)(&index)), int_e, 1, NULL};
         insertDictEntry(map.dict, data, keys[index]);
+		map.keys[index] = strdup(keys[index]);
 	}   
     
-    map.keys   = keys;
-    map.length = num_keys;
+	map.length = num_keys;
     
     return map;
 }

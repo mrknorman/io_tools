@@ -13,7 +13,6 @@ typedef struct ConfigTest{
 
 #else
 
-//Multi Config Test:
 const int32_t num_defined_parameters = 5;
 parameter_s defined_parameters[] = 
 {
@@ -25,7 +24,7 @@ parameter_s defined_parameters[] =
 };
 
 parameter_s default_parameter = 
-	{"default_paramter", int_e, 0, 0};
+	{"default_parameter", none_e, 0, 0};
 
 loader_config_s loader_config = 
 {
@@ -39,6 +38,9 @@ loader_config_s loader_config =
 	.min_inputed_parameters = 0,
 	.max_inputed_parameters = num_defined_parameters,
 	.defined_parameters     = defined_parameters,
+	
+	.min_extra_parameters   = 0,
+	.max_extra_parameters   = 0,
 	.default_parameter      = default_parameter,
 
 	.max_num_subconfigs     = 3,

@@ -37,11 +37,14 @@ typedef struct LoaderConfig{
 	bool                 is_superconfig;          
 
 	necessity_e          necessity;
-	int32_t              num_defined_parameters;
 	
+	int32_t              num_defined_parameters;
 	int32_t              min_inputed_parameters;
 	int32_t              max_inputed_parameters;
 	parameter_s         *defined_parameters;
+	
+	int32_t              min_extra_parameters;
+	int32_t              max_extra_parameters;
 	parameter_s          default_parameter;
 	
 	int32_t              min_num_subconfigs;
