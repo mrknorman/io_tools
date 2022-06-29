@@ -114,35 +114,6 @@ bool checkStructSize(
 	return return_value;
 }
 
-bool checkNumConfigs(
-	const int32_t         verbosity,
-	const int32_t         num_configs,
-	const loader_config_s config_setup
-	) {
-	
-	bool return_value = true;
-
-	if     ((num_configs > config_setup.max_num_subconfigs) 
-		&&  (config_setup.max_num_subconfigs > 0)) 
-	{
-		if (verbosity > 0) 
-		{
-			fprintf(stderr, "Warning! Larger than expected number of configs! Returning Null! \n");
-		}
-		return_value = false;
-	} 
-	else if (num_configs < config_setup.min_num_subconfigs) 
-	{
-		if (verbosity > 0) 
-		{
-			fprintf(stderr, "Warning! Smaller than expected number of configs! Returning Null! \n");
-		}
-		return_value = false;
-	}
-	
-	return return_value;
-}
-
 void castToVoid(
 	const int32_t verbosity,
 	const char   *string,
@@ -187,7 +158,12 @@ char* separateString(
 
 	if (string == NULL) {
 
-		fprintf(stderr, "Error! Could not find closing %s, for parameter %s. \n", separator, name);
+		fprintf(
+            stderr, 
+            "Error! Could not find closing %s, for parameter %s. \n", 
+            separator, 
+            name
+        );
 		
 		string = "";
 	}
@@ -213,31 +189,55 @@ char* pullValueFromLine(
 		
 			strtok(value_string, string_separator);
 			char* string_c = strtok(NULL, string_separator);
-			if (string_c == NULL) {
-				strtok(value_string, char_separator);
+			
+            if (string_c == NULL) 
+            {	
+                strtok(value_string, char_separator);
 				string_c = strtok(NULL, string_separator);
-				if (string_c == NULL) {
-					removeStringChars(value_string, " =", &value_string);
-				} else {
+				
+                if (string_c == NULL) 
+                {
+					removeStringChars(
+                        value_string, 
+                        " =", 
+                        &value_string
+                    );
+				} 
+                else 
+                {
 					value_string = string_c;
 				}
-			} else {
+			} 
+            else 
+            {
 				value_string = string_c;
 			} 
 		break;
 	
 		case (string_e):
 			value_string = 
-				separateString(value_string, string_separator, parameter_name);
+				separateString(
+                    value_string, 
+                    string_separator, 
+                    parameter_name
+                );
 		break;
 		
 		case (char_e):
 			value_string =
-				separateString(value_string, char_separator, parameter_name);	
+				separateString(
+                    value_string, 
+                    char_separator, 
+                    parameter_name
+                );	
 		break; 
 		
 		default:
-			removeStringChars(value_string, " =", &value_string);
+			removeStringChars(
+                value_string, 
+                " =", 
+                &value_string
+            );
 		break;
 	}
 	
@@ -268,7 +268,7 @@ bool checkNumParameters(
 		{
 			fprintf(
 				stderr, 
-				"Error! Total num  variables (%i) greater than max allowed (%i)! \n",
+				"Error! Total num variables (%i) greater than max allowed (%i)! \n",
 				sum, max
 			); 
 		}
@@ -281,7 +281,53 @@ bool checkNumParameters(
 		{
 			fprintf(
 				stderr, 
-				"Error! Total num extra variables (%i) smaller than minimum required (%i)! \n",
+				"Error! Total num variables (%i) smaller than minimum required (%i)! \n",
+				sum, min
+			); 
+		}
+	} 
+	
+	return pass;
+}
+
+bool checkNumConfigs(
+	const int32_t  verbosity,
+	const int32_t *num_read,
+	const int32_t  num_configs,
+	const int32_t  min,
+	const int32_t  max
+	) {
+	
+	bool pass = true;
+	
+	int32_t sum = 0;
+	for (int32_t index = 0; index < num_configs; index++) 
+	{
+		sum += num_read[index];
+	}
+	
+	if (sum > max) 
+	{
+		pass *= false;
+		
+		if (verbosity > 0)
+		{
+			fprintf(
+				stderr, 
+				"Error! Total num configs (%i) greater than max allowed (%i)! \n",
+				sum, max
+			); 
+		}
+	}
+	else if (sum < min) 
+	{
+		pass *= false;
+		
+		if (verbosity > 0)
+		{
+			fprintf(
+				stderr, 
+				"Error! Total num configs (%i) smaller than minimum required (%i)! \n",
 				sum, min
 			); 
 		}
@@ -340,15 +386,17 @@ bool checkNumExtraParameters(
 	return pass;
 }
 
-bool checkNeccesityRequirements(
-	const int32_t      verbosity,
-	const int32_t     *num_read,
-	const parameter_s *parameters,
-	const int32_t      num_parameters,
-	const int32_t      total_min,
-	const int32_t      total_max
+bool checkParameterRequirements(
+	const int32_t          verbosity,
+	const int32_t         *num_read,
+	const parameter_s     *parameters,
+	const int32_t          num_parameters,
+    const loader_config_s  config
 	) {
 	
+    const int32_t total_min = config.min_inputed_parameters;
+    const int32_t total_max = config.max_inputed_parameters;
+    
 	bool pass = true;
 	
 	for (int32_t index = 0; index < num_parameters; index++) 
@@ -395,12 +443,14 @@ bool checkNeccesityRequirements(
 }
 
 bool checkExtraParameterRequirments(
-	const int32_t      verbosity,
-	const parameter_s  parameter,
-	const dict_s      *num_extra_parameters,
-	const int32_t      total_min,
-	const int32_t      total_max
+	const int32_t          verbosity,
+	const parameter_s      parameter,
+	const dict_s          *num_extra_parameters,
+    const loader_config_s  config
 	) {
+    
+    const int32_t total_min = config.min_extra_parameters;
+    const int32_t total_max = config.max_extra_parameters;
 	
 	bool pass = true;
 	
@@ -452,11 +502,13 @@ bool checkExtraParameterRequirments(
 }
 
 bool checkNameRequirments(
-    const bool         verbosity,
-    const bool         name_read,
-    const necessity_e  necessity
+    const bool            verbosity,
+    const bool            name_read,
+    const loader_config_s config
     ) {
     
+    const necessity_e  necessity = config.name_necessity;
+
     bool pass = false;
     
     switch (necessity) 
@@ -488,6 +540,63 @@ bool checkNameRequirments(
         break;
     }
 
+    return pass;
+}
+
+bool checkConfigRequirements(
+    const int32_t          verbosity,
+    const bool             is_superconfig, 
+	const int32_t         *num_read,
+	const loader_config_s *subconfigs,
+	const int32_t          num_subconfigs,
+	const loader_config_s  config
+    ) {
+    
+    const int32_t total_min = config.min_num_subconfigs;
+    const int32_t total_max = config.max_num_subconfigs;
+    
+	bool pass = true;
+	
+	for (int32_t index = 0; index < num_subconfigs*is_superconfig; index++) 
+	{
+	
+		const loader_config_s  config = subconfigs[index];
+		const int32_t          min    = config.min;
+		const int32_t          max    = config.max;
+		const char            *name   = config.name;
+		const int32_t          read   = num_read[index];
+		
+		if (read < min) 
+		{
+			fprintf(
+				stderr, 
+				"Warning! Num instances (%i) of variable \"%s\" lower than required (%i)! \n", 
+				read, name, min
+			);
+			
+			pass *= false;
+		}
+		else if (read > max)
+		{
+			fprintf(
+				stderr, 
+				"Warning! Num instances (%i) of variable \"%s\" higher than allowed (%i) \n", 
+				read, name, max
+			);
+			
+			pass *= false;
+		}
+	}
+	
+	pass *= 
+		checkNumConfigs(
+			verbosity,
+			num_read,
+			num_subconfigs,
+			total_min,
+			total_max
+		);
+	    
     return pass;
 }
 
@@ -648,10 +757,82 @@ bool checkParameters(
 	return pass;
 }
 
+bool checkDefaultConfig(
+	const int32_t         verbosity,
+    const bool            is_superconfig,
+	const loader_config_s config
+	) {
+	
+	bool pass = true;
+	
+    if (is_superconfig)
+    {
+    
+        const int32_t min  = config.min;
+        const int32_t max  = config.max;
+        const char   *name = config.name;
+
+        if (min > max) {
+
+            if (verbosity > 0) 
+            {
+                fprintf(
+                    stderr, 
+                    "Error! Min num config instances greater than max for config: \"%s\"! Returning Null!", 
+                    name
+                );
+            }
+
+            pass *= false;
+        }
+    }
+    
+	return pass;
+}
+
+bool checkConfigs(
+	const int32_t          verbosity,
+    const bool             is_superconfig,
+	const loader_config_s *configs,
+	const int32_t          num_configs
+	) {
+	
+	bool pass = true;
+	
+    if (is_superconfig)
+    {
+        for (int32_t index = 0; index < num_configs; index++) {
+
+            const loader_config_s config = configs[index];
+
+            const int32_t min  = config.min;
+            const int32_t max  = config.max;
+            const char   *name = config.name;
+
+            if (min > max) {
+
+                if (verbosity > 0) 
+                {
+                    fprintf(
+                        stderr, 
+                        "Error! Min num config instances greater than max for config: \"%s\"! Returning Null!", 
+                        name
+                    );
+                }
+
+                pass *= false;
+            }
+        }
+    }
+	
+	return pass;
+}
+
+
 void* readConfig(
 	 const int32_t            verbosity,
      const char              *file_name,  
-	 const loader_config_s    config_setup,
+	 const loader_config_s    config,
 	       int32_t*           ret_num_configs,
 		   dict_s          ***ret_extra_parameters
     ){
@@ -673,28 +854,65 @@ void* readConfig(
 		  int32_t num_configs         = initial_num_configs;
 		   
 	//Derived Parameters:
-	const size_t       largest_memory_alignment = sizeof(double);
-	const int32_t      num_defined_parameters   = config_setup.num_defined_parameters;
-	const size_t       compiled_struct_size     = config_setup.struct_size;
-	const parameter_s *defined_parameters       = config_setup.defined_parameters;
-	const parameter_s  default_parameter        = config_setup.default_parameter;
-	
+	const size_t           largest_memory_alignment = sizeof(double);
+	const size_t           compiled_struct_size     = config.struct_size;
+    
+    const bool             is_superconfig           = config.is_superconfig;
+    
+    const int32_t          num_defined_parameters   = config.num_defined_parameters;
+	const parameter_s     *defined_parameters       = config.defined_parameters;
+	const parameter_s      default_parameter        = config.default_parameter;
+    
+          int32_t          num_defined_subconfigs   = config.num_defined_subconfigs;
+    const loader_config_s *defined_subconfigs       = config.defined_subconfigs;
+    
+    loader_config_s  default_subconfig;
+    if (is_superconfig)
+    {
+        default_subconfig = *config.default_subconfig;
+    }
+    
 	void **config_structures = NULL;
 	
-	// Create lists:
+	// Create parameter lists:
 	type_e  types[num_defined_parameters];
-	char   *names[num_defined_parameters];
+	char   *parameter_names[num_defined_parameters];
 	for (int32_t index = 0; index < num_defined_parameters; index++) 
 	{	
-		names[index] = defined_parameters[index].name;
-		types[index] = defined_parameters[index].type;
+		parameter_names[index] = defined_parameters[index].name;
+		types[index]           = defined_parameters[index].type;
 	}
-	
+    
+    // Create parameter name maping:
+	map_s parameter_name_map = 
+        createMap(parameter_names, num_defined_parameters);
+    
+    // Create config lists:
+    char   **config_names;
+    
+    if (is_superconfig == true) {
+        
+        config_names = malloc(sizeof(char*) * (size_t) num_defined_subconfigs);
+        
+        for (int32_t index = 0; index < num_defined_subconfigs; index++) 
+        {	
+            config_names[index] = defined_subconfigs[index].name;
+        } 
+    }
+    else
+    {
+        config_names = malloc(sizeof(char*));
+        num_defined_subconfigs = 1;
+        
+        *config_names = config.name;
+    }
+    
+    // Create config name maping:
+    map_s config_name_map = 
+        createMap(config_names, num_defined_subconfigs);
+    
 	// Create dictionary array to hold extra parameters:
 	dict_s **all_extra_parameters = malloc(sizeof(dict_s*)* (size_t) num_configs);
-	
-	// Create parameter name maping:
-	map_s name_map = createMap(names, num_defined_parameters);
 	
 	// Calculate struct size from types list:
 	const size_t struct_size = 
@@ -729,7 +947,20 @@ void* readConfig(
 			verbosity,
 			defined_parameters, 
 			num_defined_parameters
-		)) 
+		) 
+        ||
+        !checkDefaultConfig(
+            verbosity,
+            is_superconfig,
+            default_subconfig
+        )
+        ||
+        !checkConfigs(
+            verbosity,
+            is_superconfig,
+            defined_subconfigs, 
+            num_defined_subconfigs
+        ))
 	{	
 		num_configs = 0;
 		if (verbosity > 0) 
@@ -743,18 +974,21 @@ void* readConfig(
 			calloc((size_t) num_configs, sizeof(void*));
 
 		// Setup and reset config wide parameters:
-		bool     in_config    = false;
-        bool     name_read    = false;
-		size_t   line_length  = 1; 
-		char    *line_string  = NULL; //<-- String which will contain the read in line.
-		int32_t  line_index   = 0;
-        char    *config_name  = NULL;
+		bool     in_config   = false;
+        bool     name_read   = false;
+		size_t   line_length = 1; 
+		char    *line_string = NULL; //<-- String which will contain the read in line.
+		int32_t  line_index  = 0;
+        char    *config_name = NULL;
 		
 		dict_s  *extra_parameters     = NULL;
 		dict_s  *num_extra_parameters = NULL;
 		
 		//Create bins to hold number of each parameter name read:
-		int32_t *num_read = NULL; 
+		int32_t *num_parameters_read = NULL; 
+        
+        //Create bins to hold number of each parameter name read:
+        int32_t *num_subconfigs_read = calloc((size_t) num_defined_parameters, sizeof(int32_t));
 
 		// Reading file, loop over lines:
 		while (getline(&line_string, &line_length, file) != EOF) 
@@ -784,36 +1018,34 @@ void* readConfig(
 					config_index++; 
 					
 					// Check neccesity requirements:
-					if (!checkNeccesityRequirements(
+					if (!checkParameterRequirements(
 							verbosity,
-							num_read,
+							num_parameters_read,
 							defined_parameters,
 							num_defined_parameters,
-							config_setup.min_inputed_parameters,
-							config_setup.max_inputed_parameters
+							config
 						) 
 						||
 						!checkExtraParameterRequirments(
 							verbosity,
 							default_parameter,
 							num_extra_parameters,
-							config_setup.min_extra_parameters,
-							config_setup.max_extra_parameters
+							config
 						)
                         ||
                         !checkNameRequirments(
                             verbosity,
                             name_read,
-                            config_setup.name_necessity
+                            config
                         ))
 					{
 						return NULL;
 					}
 					
 					// Zeroes variables read histogram:
-					if (num_read != NULL) 
+					if (num_parameters_read != NULL) 
 					{
-						free(num_read);
+						free(num_parameters_read);
 					}
 						
 					break;
@@ -827,10 +1059,12 @@ void* readConfig(
 				// Checks for new config opening anywhere in line:
 				if (!in_config && strchr(new_config, line_string[char_index]))
 				{
-					in_config = true; 
+					in_config   = true; 
+                    name_read   = false;
+                    config_name = NULL;
 					
 					// Zeroes variables read histogram:
-					num_read = 
+					num_parameters_read = 
 						calloc((size_t) num_defined_parameters, sizeof(int32_t));
 
 					// If number of configs greater than allocated in memory,
@@ -869,8 +1103,30 @@ void* readConfig(
                 // Checks for config name character and reads name if found:
                 if (strchr(open_name, line_string[char_index])) 
 				{ 	
-                    config_name = strtok(&line_string[char_index + 1], close_name);
-                    name_read = true;
+                    if (name_read == false) 
+                    {
+                        config_name = strtok(&line_string[char_index + 1], close_name);
+                        name_read = true;
+                        
+                        if (is_superconfig)
+                        {
+                            const int32_t config_index = 
+                            getMapIndex(config_name_map, config_name);
+										
+                            if (config_index > -1) 
+                            {
+                                num_subconfigs_read[config_index]++;
+                            }        
+                        }            
+                    }
+                    else if (verbosity > 1)
+                    {
+                        fprintf(
+                            stderr, 
+                            "Warning! More than one name detected inside config %s, ignoring all but first. \n", 
+                            config_name
+                        );
+                    }
 					break; 
 				}
     
@@ -899,12 +1155,12 @@ void* readConfig(
 				{
 					
 					parameter_index = 
-						getMapIndex(name_map, parameter_name);
+						getMapIndex(parameter_name_map, parameter_name);
 										
 					if (parameter_index > -1) 
 					{
 						parameter_type = types[parameter_index];
-						num_read[parameter_index]++;
+						num_parameters_read[parameter_index]++;
 						parameter_recognised = true;
 					} 
 					else 
@@ -938,7 +1194,7 @@ void* readConfig(
 						parameter_recognised = false;
 						parameter_index = 0;
 						
-						if ((config_setup.max_extra_parameters == 0) 
+						if ((config.max_extra_parameters == 0) 
 							&&
 							(verbosity > 1))
 						{
@@ -980,7 +1236,7 @@ void* readConfig(
 						int32_t extra_parameter_start_index = 0;
 						
 						if     ((parameter_recognised) 
-							&& (num_read[parameter_index] > 1))
+							&& (num_parameters_read[parameter_index] > 1))
 						{
 							extra_parameter_start_index = 2;
 						} 
@@ -990,7 +1246,7 @@ void* readConfig(
 						}
 						
 						if (   (parameter_recognised) 
-							&& (num_read[parameter_index] < 2)) 
+							&& (num_parameters_read[parameter_index] < 2)) 
 						{
 							castToVoidArray(
 								verbosity,
@@ -1009,13 +1265,22 @@ void* readConfig(
 								parameter_type,
 								parameter_index, 
 								extra_parameter_start_index, 
-								num_read[parameter_index],
+								num_parameters_read[parameter_index],
 								value_string
 							);
 						}
 						 
 				
-					} else {
+					} 
+                    else 
+                    {
+                        if (verbosity > 0)
+                        {
+                            fprintf(
+                                stderr, 
+                                "Warning! No value string read! \n"
+                            );
+                        }
 
 					}
 
@@ -1034,13 +1299,21 @@ void* readConfig(
 		{
 			fclose(file);
 		}
-	}
-	
-	if (!checkNumConfigs(verbosity, config_index, config_setup)) 
-	{
-		free(config_structures);
-		config_structures = NULL; config_index = 0;
-	}
+    
+        if (
+            !checkConfigRequirements(
+                verbosity,
+                is_superconfig,
+                num_subconfigs_read,
+                defined_subconfigs,
+                num_defined_subconfigs,
+                config
+            )) 
+        {
+            free(config_structures);
+            config_structures = NULL; config_index = 0;
+        }
+    }
 	
 	*ret_num_configs = config_index;
 	*ret_extra_parameters = all_extra_parameters;

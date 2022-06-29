@@ -13,6 +13,7 @@ typedef struct ConfigTest{
 
 #else
 
+// Parameters:
 const int32_t num_defined_parameters = 5;
 parameter_s defined_parameters[] = 
 {
@@ -32,7 +33,8 @@ loader_config_s loader_config =
 	.name_necessity         = required_e,
 
 	.is_superconfig         = false,
-	.necessity              = required_e,
+	.min                    = 1,
+    .max                    = 1,
 
 	.num_defined_parameters = num_defined_parameters,
 	.min_inputed_parameters = 0,

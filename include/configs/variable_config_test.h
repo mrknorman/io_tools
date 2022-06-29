@@ -13,6 +13,7 @@ typedef struct ConfigTest{
 
 #else
 
+// Parameters:
 const int32_t num_defined_parameters = 5;
 parameter_s defined_parameters[] = 
 {
@@ -26,14 +27,16 @@ parameter_s defined_parameters[] =
 parameter_s default_parameter = 
 	{"default_parameter", none_e, 0, 0};
 
-loader_config_s loader_config = 
+// Subconfigs:
+loader_config_s subconfig = 
 {
-	.name                   = "simple_config_example",
+	.name                   = "variable_config_test",
 	.name_necessity         = required_e,
 
 	.is_superconfig         = false,
-	.necessity              = required_e,
-
+    .min                    = 1,
+    .max                    = 1,
+    
 	.num_defined_parameters = num_defined_parameters,
 	.min_inputed_parameters = 0,
 	.max_inputed_parameters = num_defined_parameters,
@@ -42,6 +45,50 @@ loader_config_s loader_config =
 	.min_extra_parameters   = 0,
 	.max_extra_parameters   = 0,
 	.default_parameter      = default_parameter,
+
+	.struct_size            = sizeof(test_config_s)
+};
+
+const int32_t num_defined_subconfigs = 5;
+loader_config_s defined_subconfigs[5];
+
+for (int32_t index = 0; index < num_defined_subconfigs; index++)
+{
+    defined_subconfigs[index] = subconfig;
+    
+    char *name; asprintf(&name, "variable_config_test_%i", index);
+    defined_subconfigs[index].name = name;
+}
+
+loader_config_s default_subconfig[] = {subconfig}; 
+
+loader_config_s loader_config = 
+{
+	.name                   = "simple_config_example",
+	.name_necessity         = required_e,
+
+	.is_superconfig         = true,
+    
+    .min                    = 1,
+    .max                    = 1,
+    
+	.num_defined_parameters = num_defined_parameters,
+	.min_inputed_parameters = 0,
+	.max_inputed_parameters = num_defined_parameters,
+	.defined_parameters     = defined_parameters,
+	
+	.min_extra_parameters   = 0,
+	.max_extra_parameters   = 0,
+	.default_parameter      = default_parameter,
+    
+    .num_defined_subconfigs = num_defined_subconfigs,
+	.min_num_subconfigs     = 5,
+	.max_num_subconfigs     = 5,
+	.defined_subconfigs     = defined_subconfigs,
+    
+    .min_extra_subconfigs   = 0,
+	.max_extra_subconfigs   = 0,
+	.default_subconfig      = default_subconfig,
 
 	.struct_size            = sizeof(test_config_s)
 };
