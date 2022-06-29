@@ -619,26 +619,34 @@ bool testExtraParameterConfig(
 			 )
 		);
 	
-	for (int32_t index = 0; index < num_extra_parameters; index++) 
-	{	
-		dict_entry_s *known_result = findDictEntry(
-			known_results, 
-			extra_parameter_names[index]
-		);
-		dict_entry_s *read_result = findDictEntry(
-			extra_parameters[3], 
-			extra_parameter_names[index]
-		);
-		
-		if (known_result->data.type == read_result->data.type) 
-		{
-			pass *= comapareMultiS(known_result->data, read_result->data);
-			printf("%s, %s, %s \n", MultiStoString(read_result->data), MultiStoString(known_result->data), extra_parameter_names[index]);
-		} else {
-			pass *= false;
-		}
-	}
-	
+    if (extra_parameters != NULL)
+    {
+        for (int32_t index = 0; index < num_extra_parameters; index++) 
+        {	
+            dict_entry_s *known_result = findDictEntry(
+                known_results, 
+                extra_parameter_names[index]
+            );
+            dict_entry_s *read_result = findDictEntry(
+                extra_parameters[3], 
+                extra_parameter_names[index]
+            );
+
+            if (known_result->data.type == read_result->data.type) 
+            {
+                pass *= comapareMultiS(known_result->data, read_result->data);
+                printf("%s, %s, %s \n", MultiStoString(read_result->data), MultiStoString(known_result->data), extra_parameter_names[index]);
+            } else {
+                pass *= false;
+            }
+        }
+    }
+    else 
+    {
+        printf("Extra parameters %s returned NULL! Unexpected behaviour.\n", file_name);
+		pass *= false;
+    }
+    
 	free(config_file_path);
 	
 	if (test_results == NULL) 

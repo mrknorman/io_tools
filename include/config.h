@@ -21,7 +21,6 @@ typedef struct construct_s {
 	
 } construct_s;
 
-
 size_t getTotalTypeArraySize(
     const type_e   *types, 
     const int32_t   length
@@ -416,9 +415,8 @@ bool checkExtraParameterRequirments(
 	for (int32_t index = 0; index < num_entries; index++) {
 		
 		const dict_entry_s *entry = entries[index];
-		
-		const char         *name = entry->string_key;
-		const int32_t       read = entry->data.value.i;
+		const char         *name  = entry->string_key;
+		const int32_t       read  = entry->data.value.i;
 				
 		if (read < min) 
 		{
@@ -451,6 +449,46 @@ bool checkExtraParameterRequirments(
 		);
 	
 	return pass;
+}
+
+bool checkNameRequirments(
+    const bool         verbosity,
+    const bool         name_read,
+    const necessity_e  necessity
+    ) {
+    
+    bool pass = false;
+    
+    switch (necessity) 
+    {
+        case(required_e):
+            pass = name_read;
+            
+            if ((verbosity > 0) && !pass) 
+            {
+                fprintf(stderr, "Error! Config Name required. \n");
+            }
+        break;
+        
+        case(optional_e):
+            pass = true;
+        break;
+        
+        case(excluded_e):
+            pass = !name_read;
+            
+            if ((verbosity > 0) && !pass) 
+            {
+                fprintf(stderr, "Error! Config name excluded. \n");
+            }
+        break;
+        
+        default:
+            pass = true;
+        break;
+    }
+
+    return pass;
 }
 
 type_e guessDataTypeFromString(
@@ -627,6 +665,8 @@ void* readConfig(
 	const char *end_config          = "}";
 	const char *string_separator    = "\"";
 	const char *char_separator      = "\'";
+    const char *open_name           = "[";
+    const char *close_name          = "]";
 	
 	const int32_t initial_num_configs = 1;
 		  int32_t config_index        = 0;
@@ -704,9 +744,11 @@ void* readConfig(
 
 		// Setup and reset config wide parameters:
 		bool     in_config    = false;
+        bool     name_read    = false;
 		size_t   line_length  = 1; 
 		char    *line_string  = NULL; //<-- String which will contain the read in line.
 		int32_t  line_index   = 0;
+        char    *config_name  = NULL;
 		
 		dict_s  *extra_parameters     = NULL;
 		dict_s  *num_extra_parameters = NULL;
@@ -734,7 +776,7 @@ void* readConfig(
 			// Reading Line, loop over characters:
 			while(line_string[char_index] != 0) 
 			{
-			
+                
 				// Checks for config closing anywhere in line:
 				if (in_config && strchr(end_config, line_string[char_index])) 
 				{
@@ -757,7 +799,13 @@ void* readConfig(
 							num_extra_parameters,
 							config_setup.min_extra_parameters,
 							config_setup.max_extra_parameters
-						))
+						)
+                        ||
+                        !checkNameRequirments(
+                            verbosity,
+                            name_read,
+                            config_setup.name_necessity
+                        ))
 					{
 						return NULL;
 					}
@@ -817,7 +865,15 @@ void* readConfig(
 					fprintf(stderr, "Warning! Unexpected config opening '{'"); 
 					break;
 				}
-
+                
+                // Checks for config name character and reads name if found:
+                if (strchr(open_name, line_string[char_index])) 
+				{ 	
+                    config_name = strtok(&line_string[char_index + 1], close_name);
+                    name_read = true;
+					break; 
+				}
+    
 				// Checks for comment character and starts a new line if found:
 				if (strchr(comment, line_string[char_index])) 
 				{ 	
