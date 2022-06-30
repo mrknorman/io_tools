@@ -292,21 +292,14 @@ bool checkNumParameters(
 
 bool checkNumConfigs(
 	const int32_t  verbosity,
-	const int32_t *num_read,
-	const int32_t  num_configs,
+	const int32_t  total_num_read,
 	const int32_t  min,
 	const int32_t  max
 	) {
 	
 	bool pass = true;
 	
-	int32_t sum = 0;
-	for (int32_t index = 0; index < num_configs; index++) 
-	{
-		sum += num_read[index];
-	}
-	
-	if (sum > max) 
+	if (total_num_read > max) 
 	{
 		pass *= false;
 		
@@ -315,11 +308,11 @@ bool checkNumConfigs(
 			fprintf(
 				stderr, 
 				"Error! Total num configs (%i) greater than max allowed (%i)! \n",
-				sum, max
+				total_num_read, max
 			); 
 		}
 	}
-	else if (sum < min) 
+	else if (total_num_read < min) 
 	{
 		pass *= false;
 		
@@ -328,7 +321,7 @@ bool checkNumConfigs(
 			fprintf(
 				stderr, 
 				"Error! Total num configs (%i) smaller than minimum required (%i)! \n",
-				sum, min
+				total_num_read, min
 			); 
 		}
 	} 
@@ -531,7 +524,7 @@ bool checkNameRequirments(
             
             if ((verbosity > 0) && !pass) 
             {
-                fprintf(stderr, "Error! Config name excluded. \n");
+                fprintf(stderr, "Error! Unnamed configs are set to be excluded. \n");
             }
         break;
         
@@ -547,13 +540,20 @@ bool checkConfigRequirements(
     const int32_t          verbosity,
     const bool             is_superconfig, 
 	const int32_t         *num_read,
+    const int32_t          total_num_read,
 	const loader_config_s *subconfigs,
 	const int32_t          num_subconfigs,
 	const loader_config_s  config
     ) {
     
-    const int32_t total_min = config.min_num_subconfigs;
-    const int32_t total_max = config.max_num_subconfigs;
+    int32_t total_min = config.min_num_subconfigs;
+    int32_t total_max = config.max_num_subconfigs;
+    
+    if (!is_superconfig)
+    {
+        total_min = 0;
+        total_max = 1;
+    }
     
 	bool pass = true;
 	
@@ -570,7 +570,7 @@ bool checkConfigRequirements(
 		{
 			fprintf(
 				stderr, 
-				"Warning! Num instances (%i) of variable \"%s\" lower than required (%i)! \n", 
+				"Warning! Num instances (%i) of config \"%s\" lower than required (%i)! \n", 
 				read, name, min
 			);
 			
@@ -580,7 +580,7 @@ bool checkConfigRequirements(
 		{
 			fprintf(
 				stderr, 
-				"Warning! Num instances (%i) of variable \"%s\" higher than allowed (%i) \n", 
+				"Warning! Num instances (%i) of config \"%s\" higher than allowed (%i) \n", 
 				read, name, max
 			);
 			
@@ -591,8 +591,7 @@ bool checkConfigRequirements(
 	pass *= 
 		checkNumConfigs(
 			verbosity,
-			num_read,
-			num_subconfigs,
+			total_num_read,
 			total_min,
 			total_max
 		);
@@ -828,7 +827,6 @@ bool checkConfigs(
 	return pass;
 }
 
-
 void* readConfig(
 	 const int32_t            verbosity,
      const char              *file_name,  
@@ -974,15 +972,19 @@ void* readConfig(
 			calloc((size_t) num_configs, sizeof(void*));
 
 		// Setup and reset config wide parameters:
-		bool     in_config   = false;
-        bool     name_read   = false;
-		size_t   line_length = 1; 
-		char    *line_string = NULL; //<-- String which will contain the read in line.
-		int32_t  line_index  = 0;
-        char    *config_name = NULL;
+		bool             in_config   = false;
+        bool             name_read   = false;
+		size_t           line_length = 1; 
+		char            *line_string = NULL; //<-- String which will contain the read in line.
+		int32_t          line_index  = 0;
+        char            *config_name = NULL;
+        loader_config_s  subconfig   = default_subconfig;
 		
 		dict_s  *extra_parameters     = NULL;
 		dict_s  *num_extra_parameters = NULL;
+        
+        dict_s  *num_extra_configs    = 
+            makeDictionary(num_defined_subconfigs*100);
 		
 		//Create bins to hold number of each parameter name read:
 		int32_t *num_parameters_read = NULL; 
@@ -1005,7 +1007,7 @@ void* readConfig(
 			char    *parameter_name       = calloc(line_length, sizeof(char));
 			bool     parameter_recognised = false;
 
-			int32_t char_index = 0;
+			int32_t  char_index = 0;
 			
 			// Reading Line, loop over characters:
 			while(line_string[char_index] != 0) 
@@ -1036,7 +1038,7 @@ void* readConfig(
                         !checkNameRequirments(
                             verbosity,
                             name_read,
-                            config
+                            subconfig
                         ))
 					{
 						return NULL;
@@ -1091,6 +1093,10 @@ void* readConfig(
 					// Create dictionary to count instances of extra parameters:
 					num_extra_parameters = 
 						makeDictionary(num_defined_parameters*100);
+                    
+                    // Intilise subconfig to default:
+                    subconfig = 
+                        default_subconfig;
 					
 					break;	
 				} 
@@ -1110,13 +1116,41 @@ void* readConfig(
                         
                         if (is_superconfig)
                         {
-                            const int32_t config_index = 
-                            getMapIndex(config_name_map, config_name);
+                            const int32_t config_name_index = 
+                                getMapIndex(config_name_map, config_name);
 										
-                            if (config_index > -1) 
+                            if (config_name_index > -1) 
                             {
-                                num_subconfigs_read[config_index]++;
-                            }        
+                                num_subconfigs_read[config_name_index]++;
+                                subconfig = defined_subconfigs[config_name_index];
+                            }
+                            else
+                            {
+                                dict_entry_s* entry = 
+                                    findDictEntry_(
+                                        num_extra_configs, 
+                                        config_name
+                                    );
+
+                                if (entry == NULL) 
+                                {								
+                                    multi_s data;
+                                    data.value.i = 1;
+                                    data.type = int_e;
+
+                                    insertDictEntry(
+                                        num_extra_configs, 
+                                        data, 
+                                        config_name
+                                    );		
+
+                                    data.value.i++;	
+                                }
+                                else
+                                {
+                                    entry->data.value.i++;
+                                }
+                            }
                         }            
                     }
                     else if (verbosity > 1)
@@ -1269,8 +1303,6 @@ void* readConfig(
 								value_string
 							);
 						}
-						 
-				
 					} 
                     else 
                     {
@@ -1305,6 +1337,7 @@ void* readConfig(
                 verbosity,
                 is_superconfig,
                 num_subconfigs_read,
+                config_index,
                 defined_subconfigs,
                 num_defined_subconfigs,
                 config

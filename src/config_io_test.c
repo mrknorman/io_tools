@@ -11,6 +11,18 @@
 
 #include "single_config_test.h"	
 
+typedef struct TestLoaderNull{
+	
+	/**
+     * Structure to hold infomation about variable to be loaded from config.
+     */
+	
+	char* file_name;
+	bool  null_expected;
+	
+} loader_null_test_s;
+
+
 void printTestResult(
     const int32_t  pass,
     const char    *test_name
@@ -27,6 +39,94 @@ void printTestResult(
     
     const char *result = pass ? "PASSED" : "FAILED";
     printf("%s: %s.\n\n", test_name, result); 
+}
+
+bool checkNotNULL(
+    const void *pointer,
+    const char *test,
+    const char *name
+    ) {
+    
+    bool pass = false;
+    
+    if (pointer != NULL) 
+	{
+		printf("%s %s did not return NULL! As expected.\n", test, name);
+		pass = true;
+	} 
+	else
+	{
+		printf("%s %s returned NULL! Unexpected behaviour.\n", test, name);
+		pass = false;
+	}
+    
+    return pass;
+}
+
+bool checkNULL(
+    const void *pointer,
+    const char *test,
+    const char *name
+    ) {
+    
+    bool pass = false;
+    
+	if (pointer == NULL) 
+	{
+		printf("%s %s returned NULL! As expected.\n", test, name);
+		pass = true;
+	} 
+	else
+	{
+		printf("%s %s did not return NULL! Unexpected behaviour.\n", test, name);
+		pass = false;
+	}
+    
+    return pass;
+}
+
+bool checkLoaderReturnNull(
+        const int32_t            verbosity,
+        const char              *config_directory_name,
+        const loader_config_s    loader_config,
+        const loader_null_test_s test_config
+    ) {
+    
+    bool pass = true;
+    
+    const char *file_name     = test_config.file_name;
+    const bool  null_expected = test_config.null_expected;
+    
+    int32_t         num_configs = 0; 
+	test_config_s **test_results = NULL;
+	dict_s        **extra_parameters = NULL;
+    
+    char *config_file_path;
+	asprintf(&config_file_path, "./%s/%s", config_directory_name, file_name);
+	test_results = 
+		((test_config_s**) 
+			 readConfig(
+			     verbosity,
+				 config_file_path, 
+				 loader_config,
+				 &num_configs,
+				 &extra_parameters
+			 )
+		);
+	free(config_file_path);
+    
+    if (null_expected)
+    {
+        pass *=
+            checkNULL(test_results, "Load Config", file_name);
+    }
+    else
+    {
+        pass *=
+            checkNotNULL(test_results, "Load Config", file_name);
+    }
+    
+    return pass;
 }
 
 void setTableCells(
@@ -387,140 +487,28 @@ bool testReqirmentConfig(
 	) {
 	
 	bool pass = true;
-	
-	char* file_name = NULL;
-	int32_t num_configs = 0; 
-	test_config_s** test_results = NULL;
-	dict_s** extra_parameters = NULL;
-
-	char* config_file_path;
-	
-	#include "requirement_config_test.h"	
-	
-	file_name = "requirement_config_test_0.cfg";
-	asprintf(&config_file_path, "./%s/%s", config_directory_name, file_name);
-	test_results = 
-		((test_config_s**) 
-			 readConfig(
-			     verbosity,
-				 config_file_path, 
-				 loader_config,
-				 &num_configs,
-				 &extra_parameters
-			 )
-		);
-	free(config_file_path);
-	
-	if (test_results != NULL) 
-	{
-		printf("Load Config %s did not return NULL! As expected.\n", file_name);
-		pass *= true;
-	} 
-	else
-	{
-		printf("Load Config %s returned NULL! Unexpected behaviour.\n", file_name);
-		pass = false;
-	}
-	
-	file_name = "requirement_config_test_1.cfg";
-	asprintf(&config_file_path, "./%s/%s", config_directory_name, file_name);
-	test_results = 
-		((test_config_s**) 
-			 readConfig(
-			     verbosity,
-				 config_file_path, 
-				 loader_config,
-				 &num_configs,
-				 &extra_parameters
-			 )
-		);
-	free(config_file_path);
-	
-	if (test_results == NULL) 
-	{
-		printf("Load Config %s returned NULL! As expected.\n", file_name);
-		pass *= true;
-	} 
-	else
-	{
-		printf("Load Config %s did not return NULL! Unexpected behaviour.\n", file_name);
-		pass = false;
-	}
-	
-	file_name = "requirement_config_test_2.cfg";
-	asprintf(&config_file_path, "./%s/%s", config_directory_name, file_name);
-	test_results = 
-		((test_config_s**) 
-			 readConfig(
-			     verbosity,
-				 config_file_path, 
-				 loader_config,
-				 &num_configs,
-				 &extra_parameters
-			 )
-		);
-	free(config_file_path);
-	
-	if (test_results == NULL) 
-	{
-		printf("Load Config %s returned NULL! As expected.\n", file_name);
-		pass *= true;
-	} 
-	else
-	{
-		printf("Load Config %s did not return NULL! Unexpected behaviour.\n", file_name);
-		pass = false;
-	}
-	
-	file_name = "requirement_config_test_3.cfg";
-	asprintf(&config_file_path, "./%s/%s", config_directory_name, file_name);
-	test_results = 
-		((test_config_s**) 
-			 readConfig(
-			     verbosity,
-				 config_file_path, 
-				 loader_config,
-				 &num_configs,
-				 &extra_parameters
-			 )
-		);
-	free(config_file_path);
-	
-	if (test_results != NULL) 
-	{
-		printf("Load Config %s did not return NULL! As expected.\n", file_name);
-		pass *= true;
-	} 
-	else
-	{
-		printf("Load Config %s returned NULL! Unexpected behaviour.\n", file_name);
-		pass = false;
-	}
-	
-	file_name = "requirement_config_test_4.cfg";
-	asprintf(&config_file_path, "./%s/%s", config_directory_name, file_name);
-	test_results = 
-		((test_config_s**) 
-			 readConfig(
-			     verbosity,
-				 config_file_path, 
-				 loader_config,
-				 &num_configs,
-				 &extra_parameters
-			 )
-		);
-	free(config_file_path);
-	
-	if (test_results == NULL) 
-	{
-		printf("Load Config %s returned NULL! As expected.\n", file_name);
-		pass *= true;
-	} 
-	else
-	{
-		printf("Load Config %s did not return NULL! Unexpected behaviour.\n", file_name);
-		pass = false;
-	}
+    
+	#include "requirement_test.h"	
+    
+    const int32_t num_tests = 5;
+    loader_null_test_s test_configs[] = 
+    {
+        {"requirement_test_0.cfg", false},
+        {"requirement_test_1.cfg", true},
+        {"requirement_test_2.cfg", true},
+        {"requirement_test_3.cfg", false},
+        {"requirement_test_4.cfg", true},
+    };
+    
+    for (int32_t index = 0; index < num_tests; index++) 
+    {
+        pass *= checkLoaderReturnNull(
+            verbosity,
+            config_directory_name,
+            loader_config,
+            test_configs[index]
+        );
+    }
 	
 	printf("\n");
 	printTestResult(pass, "Requirement config test.");
@@ -542,9 +530,9 @@ bool testExtraParameterConfig(
 
 	char* config_file_path;
 	
-	#include "extra_parameter_config_test.h"	
+	#include "extra_parameter_test.h"	
 	
-	file_name = "extra_parameter_config_test_0.cfg";
+	file_name = "extra_parameter_test_0.cfg";
 	asprintf(&config_file_path, "./%s/%s", config_directory_name, file_name);
 	test_results = 
 		((test_config_s**) 
@@ -557,7 +545,6 @@ bool testExtraParameterConfig(
 			 )
 		);
 	free(config_file_path);
-	
 	
 	const int32_t num_extra_parameters = 5;
 	dict_s *known_results = makeDictionary(100);
@@ -595,18 +582,10 @@ bool testExtraParameterConfig(
 		);
 	}
 	
-	if (test_results != NULL) 
-	{
-		printf("Load Config %s did not return NULL! As expected.\n", file_name);
-		pass *= true;
-	} 
-	else
-	{
-		printf("Load Config %s returned NULL! Unexpected behaviour.\n", file_name);
-		pass = false;
-	}
+	pass *=
+        checkNotNULL(test_results, "Load Config", file_name);
 	
-	file_name = "extra_parameter_config_test_1.cfg";
+	file_name = "extra_parameter_test_1.cfg";
 	asprintf(&config_file_path, "./%s/%s", config_directory_name, file_name);
 	test_results = 
 		((test_config_s**) 
@@ -649,71 +628,124 @@ bool testExtraParameterConfig(
     
 	free(config_file_path);
 	
-	if (test_results == NULL) 
-	{
-		printf("Load Config %s returned NULL! As expected.\n", file_name);
-		pass *= true;
-	} 
-	else
-	{
-		printf("Load Config %s did not return NULL! Unexpected behaviour.\n", file_name);
-		pass = false;
-	}
-	
-	file_name = "extra_parameter_config_test_2.cfg";
-	asprintf(&config_file_path, "./%s/%s", config_directory_name, file_name);
-	test_results = 
-		((test_config_s**) 
-			 readConfig(
-			     verbosity,
-				 config_file_path, 
-				 loader_config,
-				 &num_configs,
-				 &extra_parameters
-			 )
-		);
-	free(config_file_path);
-	
-	if (test_results == NULL) 
-	{
-		printf("Load Config %s returned NULL! As expected.\n", file_name);
-		pass *= true;
-	} 
-	else
-	{
-		printf("Load Config %s did not return NULL! Unexpected behaviour.\n", file_name);
-		pass = false;
-	}
-	
-	file_name = "extra_parameter_config_test_3.cfg";
-	asprintf(&config_file_path, "./%s/%s", config_directory_name, file_name);
-	test_results = 
-		((test_config_s**) 
-			 readConfig(
-			     verbosity,
-				 config_file_path, 
-				 loader_config,
-				 &num_configs,
-				 &extra_parameters
-			 )
-		);
-	free(config_file_path);
-	
-	if (test_results == NULL) 
-	{
-		printf("Load Config %s returned NULL! As expected.\n", file_name);
-		pass *= true;
-	} 
-	else
-	{
-		printf("Load Config %s did not return NULL! Unexpected behaviour.\n", file_name);
-		pass = false;
-	}
+	pass *=
+        checkNULL(test_results, "Load Config", file_name);
+        
+    const int32_t num_tests = 2;
+    loader_null_test_s test_configs[] = 
+    {
+        {"extra_parameter_test_2.cfg", true},
+        {"extra_parameter_test_3.cfg", true}
+    };
+    
+    for (int32_t index = 0; index < num_tests; index++) 
+    {
+        pass *= checkLoaderReturnNull(
+            verbosity,
+            config_directory_name,
+            loader_config,
+            test_configs[index]
+        );
+    }
 	
 	printf("\n");
 	printTestResult(pass, "Extra parameter config test.");
 	
 	return pass;
+}
+
+bool testNameRequrimentConfig(
+	const int32_t  verbosity,
+	const char    *config_directory_name
+	) {
+    
+    bool pass = true;
+	
+	char* file_name = NULL;
+	int32_t num_configs = 0; 
+	test_config_s **test_results = NULL;
+	dict_s        **extra_parameters = NULL;
+
+	char* config_file_path;
+	
+    {
+        #include "name_requirement_test_0.h"	
+        
+        const int32_t num_tests = 3;
+        loader_null_test_s test_configs[] = 
+        {
+            {"name_requirement_test_0.cfg", false},
+            {"name_requirement_test_1.cfg", false},
+            {"name_requirement_test_2.cfg", false}
+        };
+
+        for (int32_t index = 0; index < num_tests; index++) 
+        {
+            pass *= checkLoaderReturnNull(
+                verbosity,
+                config_directory_name,
+                loader_config,
+                test_configs[index]
+            );
+        }
+    }
+    {
+        #include "name_requirement_test_1.h"	
+
+        file_name = "name_requirement_test_3.cfg";
+        asprintf(&config_file_path, "./%s/%s", config_directory_name, file_name);
+        test_results = 
+            ((test_config_s**) 
+                 readConfig(
+                     verbosity,
+                     config_file_path, 
+                     loader_config,
+                     &num_configs,
+                     &extra_parameters
+                 )
+            );
+        free(config_file_path);
+
+        pass *= 
+            checkNULL(test_results, "Load config", file_name);
+    }
+    
+    return pass;
+}
+
+bool testConfigRequriment(
+	const int32_t  verbosity,
+	const char    *config_directory_name
+	) {
+    
+    bool pass = true;
+    
+    #include "config_requrirement_test.h"	
+    
+    const int32_t num_tests = 5;
+    loader_null_test_s test_configs[] = 
+    {
+        {"config_requirement_test_0.cfg", false},
+        {"config_requirement_test_1.cfg", false},
+        {"config_requirement_test_2.cfg", false},
+        {"config_requirement_test_3.cfg", true},
+        {"config_requirement_test_4.cfg", true},
+    };
+    
+    for (int32_t index = 0; index < num_tests; index++) 
+    {
+        pass *= checkLoaderReturnNull(
+            verbosity,
+            config_directory_name,
+            loader_config,
+            test_configs[index]
+        );
+    }
+	
+	printf("\n");
+	printTestResult(pass, "Requirement config test.");
+    
+    return pass;
 }
 
 int main() {
@@ -754,16 +786,25 @@ int main() {
 			verbosity,
 			config_directory_name
 		);
-
-	// Default Variable Test
-
+        
+    pass *= 
+        testNameRequrimentConfig(
+            verbosity,
+            config_directory_name
+        ); 
+        
+    pass *= testConfigRequriment(
+            verbosity,
+            config_directory_name
+        );
+    
+    // Default Variable Test
 	// Comment Test
 	// Min Max Variable Test
 	
-	
 	// Default Config Test
 	// Min Max Config Test
-	// Config Name Requirement Test
+	
 	// Nested Requirment Test
 	// Nested Config Test
 	
