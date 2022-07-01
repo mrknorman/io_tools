@@ -329,6 +329,45 @@ bool checkNumConfigs(
 	return pass;
 }
 
+bool checkNumExtraConfigs(
+	const int32_t  verbosity,
+	const int32_t  total_num_read,
+	const int32_t  min,
+	const int32_t  max
+	) {
+	
+	bool pass = true;
+	
+	if (total_num_read > max) 
+	{
+		pass *= false;
+		
+		if (verbosity > 0)
+		{
+			fprintf(
+				stderr, 
+				"Error! Total num extra configs (%i) greater than max allowed (%i)! \n",
+				total_num_read, max
+			); 
+		}
+	}
+	else if (total_num_read < min) 
+	{
+		pass *= false;
+		
+		if (verbosity > 0)
+		{
+			fprintf(
+				stderr, 
+				"Error! Total num extra configs (%i) smaller than minimum required (%i)! \n",
+				total_num_read, min
+			); 
+		}
+	} 
+	
+	return pass;
+}
+
 bool checkNumExtraParameters(
 	const int32_t  verbosity,
 	const dict_s  *num_extra_parameters,
@@ -549,10 +588,22 @@ bool checkConfigRequirements(
     int32_t total_min = config.min_num_subconfigs;
     int32_t total_max = config.max_num_subconfigs;
     
+    int32_t extra_min = config.min_extra_subconfigs;
+    int32_t extra_max = config.max_extra_subconfigs;
+    
+    int32_t sum = 0;
+	for (int32_t index = 0; index < num_subconfigs*is_superconfig; index++) 
+	{
+		sum += num_read[index];
+	}
+    
     if (!is_superconfig)
     {
         total_min = 0;
         total_max = 1;
+        
+        extra_min = 0;
+        extra_max = 1;
     }
     
 	bool pass = true;
@@ -595,7 +646,15 @@ bool checkConfigRequirements(
 			total_min,
 			total_max
 		);
-	    
+        
+    pass *=
+        checkNumExtraConfigs(
+			verbosity,
+			total_num_read - sum,
+			extra_min,
+			extra_max
+		);
+    	    
     return pass;
 }
 

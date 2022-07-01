@@ -97,7 +97,7 @@ loader_config_s loader_config =
 	.defined_subconfigs     = defined_subconfigs,
     
     .min_extra_subconfigs   = 0,
-	.max_extra_subconfigs   = 0,
+	.max_extra_subconfigs   = INT32_MAX,
 	.default_subconfig      = default_subconfig,
 
 	.struct_size            = sizeof(test_config_s)
