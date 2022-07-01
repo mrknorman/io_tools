@@ -13,6 +13,7 @@ typedef struct ConfigTest{
 
 #else
 
+// Parameters:
 const int32_t num_defined_parameters = 5;
 parameter_s defined_parameters[] = 
 {

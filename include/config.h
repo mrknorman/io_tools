@@ -827,6 +827,100 @@ bool checkConfigs(
 	return pass;
 }
 
+map_s createParameterMap(
+    const int32_t      num_parameters,
+    const parameter_s *parameters
+    ) {
+
+	char   *names[num_parameters];
+	for (int32_t index = 0; index < num_parameters; index++) 
+	{	
+		names[index] = parameters[index].name;
+	}
+    
+    // Create parameter name maping:
+	map_s map = 
+        createMap(names, num_parameters);
+    
+    return map;
+}
+
+map_s createConfigMap(
+    const loader_config_s *subconfigs,
+    const int32_t          num_subconfigs,
+    const loader_config_s  config
+    ) {
+    
+     char **names;
+     if (config.is_superconfig == true) 
+     {   
+        names = malloc(sizeof(char*) * (size_t) num_subconfigs);
+        
+        for (int32_t index = 0; index < num_subconfigs; index++) 
+        {	
+            names[index] = subconfigs[index].name;
+        } 
+    }
+    else
+    {
+        names = malloc(sizeof(char*));
+        *names = config.name;
+    }
+    
+    // Create config name maping:
+    map_s map = 
+        createMap(names, num_subconfigs);
+    
+    return map;
+}
+
+parameter_s *overwriteParameters(
+    const parameter_s*     default_parameters,
+    const map_s            default_parameter_map,
+    const loader_config_s  priority_config
+    ) {
+    
+    const int32_t      num_priority_parameters  = priority_config.num_defined_parameters;
+    const parameter_s *priority_parameters      = priority_config.defined_parameters;
+    
+    parameter_s *new_parameters = malloc(sizeof(parameter_s) * (size_t) default_parameter_map.length);
+    memcpy(new_parameters, default_parameters, sizeof(parameter_s) * (size_t) default_parameter_map.length);
+
+    // Create config lists:    
+    map_s priority_name_map = 
+        createParameterMap(
+            num_priority_parameters,
+            priority_parameters
+        );
+
+    for (int32_t index = 0; index < num_priority_parameters; index++) 
+    {
+        const char *parameter_name = getMapKey(priority_name_map, index);
+
+        if (parameter_name != NULL) 
+        {
+            int32_t default_index = getMapIndex(default_parameter_map, parameter_name);
+
+            if (default_index > -1) 
+            {
+                new_parameters[index] = priority_parameters[index];
+            } 
+            else
+            {
+                fprintf(stderr, "Warning! Subparameter %s name at not found in defined parameters! \n.", parameter_name);
+                break;
+            }
+        }
+        else
+        {
+            fprintf(stderr, "Warning! Subparameter name at index %i not found, check num defined parameters \n.", index);
+            break;
+        }
+    }
+    
+    return new_parameters;
+}
+
 void* readConfig(
 	 const int32_t            verbosity,
      const char              *file_name,  
@@ -858,8 +952,8 @@ void* readConfig(
     const bool             is_superconfig           = config.is_superconfig;
     
     const int32_t          num_defined_parameters   = config.num_defined_parameters;
-	const parameter_s     *defined_parameters       = config.defined_parameters;
-	const parameter_s      default_parameter        = config.default_parameter;
+          parameter_s     *defined_parameters       = config.defined_parameters;
+          parameter_s      default_parameter        = config.default_parameter;
     
           int32_t          num_defined_subconfigs   = config.num_defined_subconfigs;
     const loader_config_s *defined_subconfigs       = config.defined_subconfigs;
@@ -869,45 +963,38 @@ void* readConfig(
     {
         default_subconfig = *config.default_subconfig;
     }
+    else
+    {
+        default_subconfig = config;
+    }
     
 	void **config_structures = NULL;
 	
 	// Create parameter lists:
 	type_e  types[num_defined_parameters];
-	char   *parameter_names[num_defined_parameters];
 	for (int32_t index = 0; index < num_defined_parameters; index++) 
 	{	
-		parameter_names[index] = defined_parameters[index].name;
 		types[index]           = defined_parameters[index].type;
 	}
     
     // Create parameter name maping:
 	map_s parameter_name_map = 
-        createMap(parameter_names, num_defined_parameters);
+        createParameterMap(
+            num_defined_parameters,
+            defined_parameters
+        );
     
-    // Create config lists:
-    char   **config_names;
-    
-    if (is_superconfig == true) {
-        
-        config_names = malloc(sizeof(char*) * (size_t) num_defined_subconfigs);
-        
-        for (int32_t index = 0; index < num_defined_subconfigs; index++) 
-        {	
-            config_names[index] = defined_subconfigs[index].name;
-        } 
-    }
-    else
-    {
-        config_names = malloc(sizeof(char*));
-        num_defined_subconfigs = 1;
-        
-        *config_names = config.name;
-    }
-    
-    // Create config name maping:
+    // Create config lists:    
     map_s config_name_map = 
-        createMap(config_names, num_defined_subconfigs);
+        createConfigMap(
+            defined_subconfigs,
+            num_defined_subconfigs,
+            config
+        ); 
+    
+    if (is_superconfig == false) {
+        num_defined_subconfigs = 1;
+    }
     
 	// Create dictionary array to hold extra parameters:
 	dict_s **all_extra_parameters = malloc(sizeof(dict_s*)* (size_t) num_configs);
@@ -979,6 +1066,9 @@ void* readConfig(
 		int32_t          line_index  = 0;
         char            *config_name = NULL;
         loader_config_s  subconfig   = default_subconfig;
+        
+        parameter_s     *defined_parameters = config.defined_parameters;
+        parameter_s      default_parameter  = config.default_parameter;
 		
 		dict_s  *extra_parameters     = NULL;
 		dict_s  *num_extra_parameters = NULL;
@@ -1097,6 +1187,13 @@ void* readConfig(
                     // Intilise subconfig to default:
                     subconfig = 
                         default_subconfig;
+                        
+                    // Set default parameters:    
+                    defined_parameters = overwriteParameters(
+                        config.defined_parameters,
+                        parameter_name_map,
+                        subconfig
+                    );
 					
 					break;	
 				} 
@@ -1123,6 +1220,13 @@ void* readConfig(
                             {
                                 num_subconfigs_read[config_name_index]++;
                                 subconfig = defined_subconfigs[config_name_index];
+                                
+                                // Set default parameters:    
+                                defined_parameters = overwriteParameters(
+                                    config.defined_parameters,
+                                    parameter_name_map,
+                                    subconfig
+                                );
                             }
                             else
                             {

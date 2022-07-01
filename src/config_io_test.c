@@ -710,6 +710,9 @@ bool testNameRequrimentConfig(
             checkNULL(test_results, "Load config", file_name);
     }
     
+    printf("\n");
+	printTestResult(pass, "Name requirement config test.");
+    
     return pass;
 }
 
