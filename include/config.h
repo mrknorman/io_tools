@@ -1148,6 +1148,7 @@ void* readConfig(
 			
 			// Setup and reset line wide parameters:
 			bool     parameter_read       = false;
+            bool     parameter_end        = false;
 			bool     get_value            = false;
 			int32_t  parameter_start      = 0;
 
@@ -1334,23 +1335,27 @@ void* readConfig(
 				}
 
 				// Finding start parameter names in line:
-				if (strchr(parameter_separator, line_string[char_index]) && !parameter_read) 
+				if (!isspace(line_string[char_index]) && !parameter_read) 
 				{ 	
-					parameter_start = char_index + 1;
+					parameter_start = char_index;
 					parameter_read = !parameter_read;
 				}
+                
+                //
 
 				// Recording parameter name into string:
-				if (parameter_read && !strchr(parameter_separator, line_string[char_index])) 
+				if (parameter_read && !isspace(line_string[char_index])) 
 				{	
 					parameter_name[char_index - parameter_start] = 
 						line_string[char_index];
 				}
 				
 				// On parameter name end:
-				else if (strchr(parameter_separator, line_string[char_index]) && parameter_name[0]) 
+				else if (isspace(line_string[char_index]) && (!parameter_end && parameter_read))
 				{
 					
+                    parameter_end = true;
+                    
 					parameter_index = 
 						getMapIndex(parameter_name_map, parameter_name);
 										

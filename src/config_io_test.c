@@ -220,16 +220,21 @@ bool testSingleConfig(
 	      int32_t num_configs = 0; 
 		  
 	dict_s **extra_parameters = NULL;
-	test_config_s* test_results = 
-		((test_config_s**) 
+	test_config_s** all_test_results = 
+		(test_config_s**) 
 			 readConfig(
 			     verbosity,
 				 config_file_path, 
 				 loader_config,
 				 &num_configs,
 				 &extra_parameters
-			 )
-		)[0];
+			 );
+    
+    test_config_s *test_results = NULL;
+    if (all_test_results != NULL) 
+    {
+        test_results = all_test_results[0];
+    }
 	
 	if (!num_configs == expected_num_configs) {
 		pass = false; 
