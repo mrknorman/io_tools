@@ -493,11 +493,11 @@ bool testReqirmentConfig(
     const int32_t num_tests = 5;
     loader_null_test_s test_configs[] = 
     {
-        {"requirement_test_0.cfg", false},
-        {"requirement_test_1.cfg", true},
-        {"requirement_test_2.cfg", true},
-        {"requirement_test_3.cfg", false},
-        {"requirement_test_4.cfg", true},
+        {"requirement_tests/requirement_test_0.cfg", false},
+        {"requirement_tests/requirement_test_1.cfg", true},
+        {"requirement_tests/requirement_test_2.cfg", true},
+        {"requirement_tests/requirement_test_3.cfg", false},
+        {"requirement_tests/requirement_test_4.cfg", true},
     };
     
     for (int32_t index = 0; index < num_tests; index++) 
@@ -532,7 +532,7 @@ bool testExtraParameterConfig(
 	
 	#include "extra_parameter_test.h"	
 	
-	file_name = "extra_parameter_test_0.cfg";
+	file_name = "extra_parameter_tests/extra_parameter_test_0.cfg";
 	asprintf(&config_file_path, "./%s/%s", config_directory_name, file_name);
 	test_results = 
 		((test_config_s**) 
@@ -585,7 +585,7 @@ bool testExtraParameterConfig(
 	pass *=
         checkNotNULL(test_results, "Load Config", file_name);
 	
-	file_name = "extra_parameter_test_1.cfg";
+	file_name = "extra_parameter_tests/extra_parameter_test_1.cfg";
 	asprintf(&config_file_path, "./%s/%s", config_directory_name, file_name);
 	test_results = 
 		((test_config_s**) 
@@ -634,8 +634,8 @@ bool testExtraParameterConfig(
     const int32_t num_tests = 2;
     loader_null_test_s test_configs[] = 
     {
-        {"extra_parameter_test_2.cfg", true},
-        {"extra_parameter_test_3.cfg", true}
+        {"extra_parameter_tests/extra_parameter_test_2.cfg", true},
+        {"extra_parameter_tests/extra_parameter_test_3.cfg", true}
     };
     
     for (int32_t index = 0; index < num_tests; index++) 
@@ -674,9 +674,9 @@ bool testNameRequrimentConfig(
         const int32_t num_tests = 3;
         loader_null_test_s test_configs[] = 
         {
-            {"name_requirement_test_0.cfg", false},
-            {"name_requirement_test_1.cfg", false},
-            {"name_requirement_test_2.cfg", false}
+            {"name_requirement_tests/name_requirement_test_0.cfg", false},
+            {"name_requirement_tests/name_requirement_test_1.cfg", false},
+            {"name_requirement_tests/name_requirement_test_2.cfg", false}
         };
 
         for (int32_t index = 0; index < num_tests; index++) 
@@ -692,7 +692,7 @@ bool testNameRequrimentConfig(
     {
         #include "name_requirement_test_1.h"	
 
-        file_name = "name_requirement_test_3.cfg";
+        file_name = "name_requirement_tests/name_requirement_test_3.cfg";
         asprintf(&config_file_path, "./%s/%s", config_directory_name, file_name);
         test_results = 
             ((test_config_s**) 
@@ -728,11 +728,11 @@ bool testConfigRequriment(
     const int32_t num_tests = 5;
     loader_null_test_s test_configs[] = 
     {
-        {"config_requirement_test_0.cfg", false},
-        {"config_requirement_test_1.cfg", false},
-        {"config_requirement_test_2.cfg", false},
-        {"config_requirement_test_3.cfg", true},
-        {"config_requirement_test_4.cfg", true},
+        {"config_requirement_tests/config_requirement_test_0.cfg", false},
+        {"config_requirement_tests/config_requirement_test_1.cfg", false},
+        {"config_requirement_tests/config_requirement_test_2.cfg", false},
+        {"config_requirement_tests/config_requirement_test_3.cfg", true},
+        {"config_requirement_tests/config_requirement_test_4.cfg", true},
     };
     
     for (int32_t index = 0; index < num_tests; index++) 
@@ -746,7 +746,42 @@ bool testConfigRequriment(
     }
 	
 	printf("\n");
-	printTestResult(pass, "Requirement config test.");
+	printTestResult(pass, "Config Requirement config test.");
+    
+    return pass;
+}
+
+bool testNestedRequriments(
+	const int32_t  verbosity,
+	const char    *config_directory_name
+	) {
+    
+    bool pass = true;
+    
+    #include "nested_requirement_test.h"	
+    
+    const int32_t num_tests = 5;
+    loader_null_test_s test_configs[] = 
+    {
+        {"nested_requirement_tests/nested_requirement_test_0.cfg", false},
+        {"nested_requirement_tests/nested_requirement_test_1.cfg", true },
+        {"nested_requirement_tests/nested_requirement_test_2.cfg", true },
+        {"nested_requirement_tests/nested_requirement_test_3.cfg", true },
+        {"nested_requirement_tests/nested_requirement_test_4.cfg", true }
+    };
+    
+    for (int32_t index = 0; index < num_tests; index++) 
+    {
+        pass *= checkLoaderReturnNull(
+            verbosity,
+            config_directory_name,
+            loader_config,
+            test_configs[index]
+        );
+    }
+	
+	printf("\n");
+	printTestResult(pass, "Nested Requirement config test.");
     
     return pass;
 }
@@ -800,6 +835,12 @@ int main() {
             verbosity,
             config_directory_name
         );
+    
+    pass *=  
+        testNestedRequriments(
+            verbosity,
+            config_directory_name
+        ); 
     
     // Default Variable Test
 	// Comment Test

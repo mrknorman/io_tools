@@ -903,7 +903,7 @@ parameter_s *overwriteParameters(
 
             if (default_index > -1) 
             {
-                new_parameters[index] = priority_parameters[index];
+                new_parameters[default_index] = priority_parameters[index];
             } 
             else
             {
@@ -1199,7 +1199,7 @@ void* readConfig(
 				} 
 				else if (in_config && strchr(new_config, line_string[char_index])) 
 				{
-					fprintf(stderr, "Warning! Unexpected config opening '{'"); 
+					fprintf(stderr, "Warning! Unexpected config opening '{' \n"); 
 					break;
 				}
                 
