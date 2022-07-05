@@ -486,6 +486,103 @@ bool testMultiConfig(
 	return pass;
 }
 
+bool testConfigOrder(
+	const int32_t  verbosity,
+	const char    *config_directory_name
+	) {
+	
+	const char* file_name = "config_order_test.cfg";
+
+	bool pass = true;
+	
+	char* config_file_path;
+	asprintf(&config_file_path, "./%s/%s", config_directory_name, file_name);
+	
+	#include "multi_config_test.h"	
+	
+	const int32_t expected_num_parameters = 5;
+	const int32_t expected_num_configs = 3;
+		  int32_t num_configs = 0; 
+		  
+	dict_s **extra_parameters = NULL;
+	test_config_s** test_results = 
+		((test_config_s**) 
+			 readConfig(
+			     verbosity,
+				 config_file_path, 
+				 loader_config,
+				 &num_configs,
+				 &extra_parameters
+			 )
+		);
+		
+	if (!num_configs == expected_num_configs) {
+		pass = false; 
+		fprintf(
+			stderr, 
+			"Number of configs found (%i) does not match expected (%i). \n",
+			num_configs, expected_num_configs
+		);
+	}
+	
+	if (test_results == NULL) 
+	{
+		printf("Load Config returned NULL! \n");
+		pass = false;
+	} 
+	else
+	{
+		const char   *initial_string = "Config Test";
+		const float   initial_float  = 1.0f;
+		const int32_t initial_int    = 0;
+		const bool    bool_array[]   = {false, true, false};
+		const char    char_array[]   = {'a', 'b', 'c'};
+
+		uni_s *cells = malloc(sizeof(uni_s)* (size_t) ( expected_num_configs * expected_num_parameters * 2 ));
+		for (int32_t index = 0; index < expected_num_configs; index++) {
+
+			char *parameter_string;
+			asprintf(&parameter_string, "%s %i", initial_string, index);
+
+			test_config_s known_results = {
+				.parameter_string = parameter_string,
+				.parameter_float  = initial_float + ((float)index * 0.1f),
+				.parameter_int    = initial_int + index,
+				.parameter_bool   = bool_array[index],
+				.parameter_char   = char_array[index]
+			};
+
+			int32_t cell_index = index*expected_num_parameters*2;
+			
+			const test_config_s *test_result = test_results[index];
+			
+			setTableCells(
+				known_results, 
+				test_result, 
+				expected_num_parameters, 
+				cell_index, 
+				cells
+			);
+
+			pass *= 
+				configTestCompare(known_results, test_result);
+		}
+
+		plotConfigTestTable(
+			expected_num_configs, 
+			expected_num_parameters,
+			"Config Order Test",
+			cells
+		);
+	}
+	
+	printTestResult(pass, " config order test.");
+	
+	free(config_file_path);
+
+	return pass;
+}
+
 bool testReqirmentConfig(
 	const int32_t  verbosity,
 	const char    *config_directory_name
@@ -846,15 +943,18 @@ int main() {
             verbosity,
             config_directory_name
         ); 
+        
+    pass *=  
+        testConfigOrder(
+            verbosity,
+            config_directory_name
+        ); 
     
     // Default Variable Test
 	// Comment Test
-	// Min Max Variable Test
 	
 	// Default Config Test
-	// Min Max Config Test
 	
-	// Nested Requirment Test
 	// Nested Config Test
 	
 	printTestResult(pass, "all tests.");
