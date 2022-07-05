@@ -980,6 +980,26 @@ parameter_s *overwriteParameters(
     return new_parameters;
 }
 
+typedef struct configData {
+	
+	/**
+     * Union to store commonly used types.
+    */
+    
+    void *structure;
+    char *name;
+    
+} config_data_s;
+
+
+
+
+void sortConfigs(
+    ){
+
+
+}
+
 void* readConfig(
 	 const int32_t            verbosity,
      const char              *file_name,  
@@ -991,7 +1011,6 @@ void* readConfig(
 	// Paser settings:
 	const char *comment             = "#";
 	const char *new_line            = ";";
-	const char *parameter_separator = "\"";
 	const char *value_indicator     = "=";
 	const char *new_config          = "{";
 	const char *end_config          = "}";
@@ -1027,7 +1046,8 @@ void* readConfig(
         default_subconfig = config;
     }
     
-	void **config_structures = NULL;
+    void           **config_structs = NULL;
+    config_data_s   *config_data    = NULL;
 	
 	// Create parameter lists:
 	type_e  types[num_defined_parameters];
@@ -1114,8 +1134,8 @@ void* readConfig(
 	} 
 	else 
 	{
-		config_structures = 
-			calloc((size_t) num_configs, sizeof(void*));
+		config_data = 
+			calloc((size_t) num_configs, sizeof(config_data_s));
 
 		// Setup and reset config wide parameters:
 		bool             in_config   = false;
@@ -1214,7 +1234,7 @@ void* readConfig(
 					in_config   = true; 
                     name_read   = false;
                     config_name = NULL;
-					
+                    					
 					// Zeroes variables read histogram:
 					num_parameters_read = 
 						calloc((size_t) num_defined_parameters, sizeof(int32_t));
@@ -1223,15 +1243,17 @@ void* readConfig(
 					// allocate more memory:
 					if (config_index >= num_configs)
 					{
-						num_configs = (int32_t) ceil((float) num_configs * 1.5f);
-						config_structures = 
-							realloc(config_structures, sizeof(void*) * (size_t) num_configs);
+                        num_configs = (int32_t) ceil((float) num_configs * 1.5f);
+                        config_data = realloc(config_data, sizeof(config_data_s) * (size_t) num_configs);
+						
 						
 						all_extra_parameters =
 							realloc(all_extra_parameters, sizeof(dict_s *) * (size_t) num_configs);
 					}
+                    
+                    config_data[config_index].name = NULL;
 					
-					config_structures[config_index] = 
+					config_data[config_index].structure = 
 						calloc(1, compiled_struct_size);
 						
 					// Create dictionary to hold extra parameters:
@@ -1269,6 +1291,8 @@ void* readConfig(
                     if (name_read == false) 
                     {
                         config_name = strtok(&line_string[char_index + 1], close_name);
+                        config_data[config_index].name = strdup(config_name);
+                        
                         name_read = true;
                         
                         if (is_superconfig)
@@ -1455,7 +1479,7 @@ void* readConfig(
 								value_string, 
 								types, 
 								parameter_index, 
-								config_structures[config_index]
+								config_data[config_index].structure
 							);
 						}
 						else 
@@ -1499,6 +1523,50 @@ void* readConfig(
 		{
 			fclose(file);
 		}
+        
+        config_structs = calloc((size_t) config_index, sizeof(void*));
+        
+        if (is_superconfig)
+        {
+            int32_t unique_defined_subconfigs_read = 0;
+            int32_t *cumulative_missing = malloc(sizeof(int32_t) * (size_t) (num_defined_subconfigs + 1));
+            cumulative_missing[0] = 0;
+            
+            for (int32_t index = 0; index < num_defined_subconfigs; index++)
+            {
+                unique_defined_subconfigs_read += (bool) num_subconfigs_read[index];
+                cumulative_missing[index + 1] = 
+                    cumulative_missing[index] + !((bool) num_subconfigs_read[index]);
+            }
+
+            int32_t undefined_index = unique_defined_subconfigs_read;
+            for (int32_t index = 0; index < config_index; index++) 
+            {
+                const char  *config_name = config_data[index].name;
+                
+                int32_t defined_index = -1;
+                if( config_name != NULL)
+                {
+                    defined_index = getMapIndex(config_name_map, config_name);
+                }
+
+                if (defined_index > -1) 
+                {
+                    int32_t adjusted_index = defined_index - cumulative_missing[defined_index];
+                    config_structs[adjusted_index] = config_data[index].structure; 
+                }
+                else
+                {
+                    config_structs[undefined_index] = config_data[index].structure; 
+                    undefined_index++;
+                }
+
+            }
+        }
+        else
+        {
+            config_structs[0] = config_data[0].structure; 
+        }
     
         if (
             !checkConfigRequirements(
@@ -1511,15 +1579,26 @@ void* readConfig(
                 config
             )) 
         {
-            free(config_structures);
-            config_structures = NULL; config_index = 0;
+            for (int32_t index = 0; index < config_index; index++) 
+            {
+                free(config_data[index].structure);
+                
+                if( config_data[index].name != NULL)
+                {
+                    free(config_data[index].name);
+                }
+            }
+            
+            free(config_data); free(config_structs);
+            config_structs = NULL;
+            config_data = NULL; config_index = 0;
         }
     }
 	
 	*ret_num_configs = config_index;
 	*ret_extra_parameters = all_extra_parameters;
 	
-	return config_structures;
+	return config_structs;
 }
 
 size_t *createStructureParameterMap(
