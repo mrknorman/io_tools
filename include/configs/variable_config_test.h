@@ -68,6 +68,7 @@ loader_config_s loader_config =
 	.name_necessity         = required_e,
 
 	.is_superconfig         = true,
+    .reorder                = false,
     
     .min                    = 1,
     .max                    = 1,

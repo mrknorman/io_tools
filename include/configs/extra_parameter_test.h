@@ -34,7 +34,7 @@ loader_config_s subconfig =
 	.name_necessity         = required_e,
 
 	.is_superconfig         = false,
-    .min                    = 1,
+    .min                    = 0,
     .max                    = 1,
     
 	.num_defined_parameters = num_defined_parameters,
@@ -43,7 +43,7 @@ loader_config_s subconfig =
 	.defined_parameters     = defined_parameters,
 	
 	.min_extra_parameters   = 0,
-	.max_extra_parameters   = 0,
+	.max_extra_parameters   = INT32_MAX,
 	.default_parameter      = default_parameter,
 
 	.struct_size            = sizeof(test_config_s)
@@ -68,6 +68,7 @@ loader_config_s loader_config =
 	.name_necessity         = required_e,
 
 	.is_superconfig         = true,
+    .reorder                = false,
     
     .min                    = 1,
     .max                    = 1,

@@ -35,7 +35,8 @@ typedef struct LoaderConfig{
 	char                *name;
 	necessity_e          name_necessity;
 	
-	bool                 is_superconfig;          
+	bool                 is_superconfig;    
+    bool                 reorder;
 
 	int32_t              min;
     int32_t              max;
@@ -61,5 +62,29 @@ typedef struct LoaderConfig{
 	size_t               struct_size;
 
 } loader_config_s;
+
+typedef struct LoaderData {
+	
+	/**
+     * Union to store commonly used types.
+    */
+    
+    void              *structure;
+    char              *name;
+    
+    map_s              parameter_name_map;
+    int32_t           *num_parameters_read;
+    
+    dict_s            *extra_parameters;
+    dict_s            *num_extra_parameters;
+    
+    map_s              subconfig_name_map;
+    int32_t           *num_subconfigs_read;
+    int32_t            total_num_subconfigs_read;
+    
+    struct LoaderData *subconfigs;
+    loader_config_s    config;
+    
+} loader_data_s;
 
 #endif

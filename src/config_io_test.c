@@ -687,20 +687,7 @@ bool testExtraParameterConfig(
 	pass *=
         checkNotNULL(test_results, "Load Config", file_name);
 	
-	file_name = "extra_parameter_tests/extra_parameter_test_1.cfg";
-	asprintf(&config_file_path, "./%s/%s", config_directory_name, file_name);
-	test_results = 
-		((test_config_s**) 
-			 readConfig(
-			     verbosity,
-				 config_file_path, 
-				 loader_config,
-				 &num_configs,
-				 &extra_parameters
-			 )
-		);
-	
-    if (extra_parameters != NULL)
+    if ((extra_parameters != NULL) && (num_configs >= 3))
     {
         for (int32_t index = 0; index < num_extra_parameters; index++) 
         {	
@@ -727,11 +714,24 @@ bool testExtraParameterConfig(
         printf("Extra parameters %s returned NULL! Unexpected behaviour.\n", file_name);
 		pass *= false;
     }
-    
-	free(config_file_path);
+        
+    file_name = "extra_parameter_tests/extra_parameter_test_1.cfg";
+	asprintf(&config_file_path, "./%s/%s", config_directory_name, file_name);
+	test_results = 
+		((test_config_s**) 
+			 readConfig(
+			     verbosity,
+				 config_file_path, 
+				 loader_config,
+				 &num_configs,
+				 &extra_parameters
+			 )
+		);
+        
+    free(config_file_path);
 	
 	pass *=
-        checkNULL(test_results, "Load Config", file_name);
+        checkNotNULL(test_results, "Load Config", file_name);
         
     const int32_t num_tests = 2;
     loader_null_test_s test_configs[] = 
