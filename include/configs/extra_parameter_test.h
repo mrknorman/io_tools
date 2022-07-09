@@ -42,7 +42,7 @@ loader_config_s subconfig =
 	.max_inputed_parameters = num_defined_parameters,
 	.defined_parameters     = defined_parameters,
 	
-	.min_extra_parameters   = 0,
+	.min_extra_parameters   = 1,
 	.max_extra_parameters   = INT32_MAX,
 	.default_parameter      = default_parameter,
 

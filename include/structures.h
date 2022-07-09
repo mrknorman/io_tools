@@ -1,7 +1,6 @@
 #ifndef IO_STRUCTURES_H
 #define IO_STRUCTURES_H
 
-
 typedef enum Necessity{ 
 	
 	/**

@@ -699,12 +699,18 @@ bool testExtraParameterConfig(
                 extra_parameters[3], 
                 extra_parameter_names[index]
             );
-
-            if (known_result->data.type == read_result->data.type) 
+            
+            if (read_result == NULL) 
+            {
+                fprintf(stderr, "Warning! Cannot find extra parameter %s \n", extra_parameter_names[index]);
+                pass *= false;
+            }
+            else if (known_result->data.type == read_result->data.type) 
             {
                 pass *= comapareMultiS(known_result->data, read_result->data);
                 printf("%s, %s, %s \n", MultiStoString(read_result->data), MultiStoString(known_result->data), extra_parameter_names[index]);
-            } else {
+            } 
+            else {
                 pass *= false;
             }
         }
