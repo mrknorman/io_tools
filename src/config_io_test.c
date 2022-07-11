@@ -97,9 +97,8 @@ bool checkLoaderReturnNull(
     const char *file_name     = test_config.file_name;
     const bool  null_expected = test_config.null_expected;
     
-    int32_t         num_configs = 0; 
 	test_config_s **test_results = NULL;
-	dict_s        **extra_parameters = NULL;
+    loader_data_s   config_data;
     
     char *config_file_path;
 	asprintf(&config_file_path, "./%s/%s", config_directory_name, file_name);
@@ -109,8 +108,7 @@ bool checkLoaderReturnNull(
 			     verbosity,
 				 config_file_path, 
 				 loader_config,
-				 &num_configs,
-				 &extra_parameters
+				 &config_data
 			 )
 		);
 	free(config_file_path);
@@ -210,7 +208,9 @@ bool testSingleConfig(
 
 	bool pass = true;
 	
-	char* config_file_path;
+    loader_data_s config_data;
+    
+    char* config_file_path;
 	asprintf(&config_file_path, "./%s/%s", config_directory_name, file_name);
 	
 	#include "single_config_test.h"	
@@ -218,18 +218,16 @@ bool testSingleConfig(
 	const int32_t expected_num_parameters = 5;
 	const int32_t expected_num_configs = 1;
 	      int32_t num_configs = 0; 
-		  
-	dict_s **extra_parameters = NULL;
+    
 	test_config_s** all_test_results = 
 		(test_config_s**) 
 			 readConfig(
 			     verbosity,
 				 config_file_path, 
 				 loader_config,
-				 &num_configs,
-				 &extra_parameters
+				 &config_data
 			 );
-    
+    num_configs = config_data.total_num_subconfigs_read;
     test_config_s *test_results = NULL;
     if (all_test_results != NULL) 
     {
@@ -298,27 +296,28 @@ bool testVariableConfig(
 
 	bool pass = true;
 	
-	char* config_file_path;
+    loader_data_s  config_data;
+    
+    char *config_file_path; 
 	asprintf(&config_file_path, "./%s/%s", config_directory_name, file_name);
 	
 	#include "variable_config_test.h"	
 	
-	const int32_t expected_num_parameters = 5;
-	const int32_t expected_num_configs = 5;
-		  int32_t num_configs = 0; 
-		  
-	dict_s **extra_parameters = NULL;
-	test_config_s** test_results = 
+	const int32_t         expected_num_parameters = 5;
+	const int32_t         expected_num_configs = 5;
+		  int32_t         num_configs = 0;   
+    
+    test_config_s** test_results = 
 		((test_config_s**) 
 			 readConfig(
 			     verbosity,
 				 config_file_path, 
 				 loader_config,
-				 &num_configs,
-				 &extra_parameters
+				 &config_data
 			 )
 		);
-		
+	num_configs = config_data.total_num_subconfigs_read;
+    
 	if (!num_configs == expected_num_configs) 
 	{
 		pass = false; 
@@ -398,26 +397,26 @@ bool testMultiConfig(
 
 	bool pass = true;
 	
-	char* config_file_path;
+    loader_data_s  config_data;
+    
+    char          *config_file_path;
 	asprintf(&config_file_path, "./%s/%s", config_directory_name, file_name);
 	
 	#include "multi_config_test.h"	
 	
 	const int32_t expected_num_parameters = 5;
 	const int32_t expected_num_configs = 3;
-		  int32_t num_configs = 0; 
 		  
-	dict_s **extra_parameters = NULL;
 	test_config_s** test_results = 
 		((test_config_s**) 
 			 readConfig(
 			     verbosity,
 				 config_file_path, 
 				 loader_config,
-				 &num_configs,
-				 &extra_parameters
+				 &config_data
 			 )
 		);
+    const int32_t num_configs = config_data.total_num_subconfigs_read;
 		
 	if (!num_configs == expected_num_configs) {
 		pass = false; 
@@ -495,6 +494,8 @@ bool testConfigOrder(
 
 	bool pass = true;
 	
+    loader_data_s config_data;
+    
 	char* config_file_path;
 	asprintf(&config_file_path, "./%s/%s", config_directory_name, file_name);
 	
@@ -504,17 +505,16 @@ bool testConfigOrder(
 	const int32_t expected_num_configs = 3;
 		  int32_t num_configs = 0; 
 		  
-	dict_s **extra_parameters = NULL;
 	test_config_s** test_results = 
 		((test_config_s**) 
 			 readConfig(
 			     verbosity,
 				 config_file_path, 
 				 loader_config,
-				 &num_configs,
-				 &extra_parameters
+				 &config_data
 			 )
 		);
+    num_configs = config_data.total_num_subconfigs_read;
 		
 	if (!num_configs == expected_num_configs) {
 		pass = false; 
@@ -625,12 +625,12 @@ bool testExtraParameterConfig(
 	
 	bool pass = true;
 	
-	char* file_name = NULL;
-	int32_t num_configs = 0; 
-	test_config_s **test_results = NULL;
-	dict_s        **extra_parameters = NULL;
+	char            *file_name = NULL;
+	int32_t          num_configs = 0; 
+	test_config_s  **test_results = NULL;
+    loader_data_s    config_data;
 
-	char* config_file_path;
+	char *config_file_path;
 	
 	#include "extra_parameter_test.h"	
 	
@@ -642,10 +642,10 @@ bool testExtraParameterConfig(
 			     verbosity,
 				 config_file_path, 
 				 loader_config,
-				 &num_configs,
-				 &extra_parameters
+				 &config_data
 			 )
 		);
+    num_configs = config_data.total_num_subconfigs_read;
 	free(config_file_path);
 	
 	const int32_t num_extra_parameters = 5;
@@ -687,7 +687,7 @@ bool testExtraParameterConfig(
 	pass *=
         checkNotNULL(test_results, "Load Config", file_name);
 	
-    if ((extra_parameters != NULL) && (num_configs >= 3))
+    if ((num_configs >= 3))
     {
         for (int32_t index = 0; index < num_extra_parameters; index++) 
         {	
@@ -696,7 +696,7 @@ bool testExtraParameterConfig(
                 extra_parameter_names[index]
             );
             dict_entry_s *read_result = findDictEntry(
-                extra_parameters[3], 
+                config_data.subconfigs[3].extra_parameters, 
                 extra_parameter_names[index]
             );
             
@@ -729,10 +729,10 @@ bool testExtraParameterConfig(
 			     verbosity,
 				 config_file_path, 
 				 loader_config,
-				 &num_configs,
-				 &extra_parameters
+				 &config_data
 			 )
 		);
+    num_configs = config_data.total_num_subconfigs_read;
         
     free(config_file_path);
 	
@@ -769,10 +769,9 @@ bool testNameRequrimentConfig(
     
     bool pass = true;
 	
-	char* file_name = NULL;
-	int32_t num_configs = 0; 
-	test_config_s **test_results = NULL;
-	dict_s        **extra_parameters = NULL;
+	char           *file_name        = NULL;
+	test_config_s **test_results     = NULL;
+    loader_data_s   config_data;
 
 	char* config_file_path;
 	
@@ -808,10 +807,10 @@ bool testNameRequrimentConfig(
                      verbosity,
                      config_file_path, 
                      loader_config,
-                     &num_configs,
-                     &extra_parameters
+                     &config_data
                  )
             );
+
         free(config_file_path);
 
         pass *= 

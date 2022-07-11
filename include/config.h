@@ -1658,8 +1658,7 @@ void* readConfig(
 	 const int32_t            verbosity,
      const char              *file_name,  
 	 const loader_config_s    config,
-	       int32_t           *ret_num_configs,
-		   dict_s          ***ret_extra_parameters
+	       loader_data_s     *ret_cofig_data
     ){
 	
 	// Paser settings:
@@ -1679,25 +1678,16 @@ void* readConfig(
 		   
 	//Derived Parameters:
     
-        loader_config_s  active_config = config;
-
               int32_t          config_index             = 0;
               int32_t          num_configs              = initial_num_configs;
 
-        const size_t           compiled_struct_size     = config.struct_size;
-
         const bool             is_superconfig           = config.is_superconfig;
-
-        const int32_t          num_defined_parameters   = config.num_defined_parameters;
-              parameter_s     *defined_parameters       = config.defined_parameters;
-              parameter_s      default_parameter        = config.default_parameter;
 
               int32_t          num_defined_subconfigs   = config.num_defined_subconfigs;
         const loader_config_s *defined_subconfigs       = config.defined_subconfigs;
         
     // Initlise empty pointer:
         void    *config_structs       = NULL;
-        dict_s **all_extra_parameters = NULL;
         
 	// Opening file:
 	FILE* file;	
@@ -1734,8 +1724,6 @@ void* readConfig(
 
         config_structs = NULL;
         config_index = 0;
-        
-        all_extra_parameters = NULL;
     }
     else
     {
@@ -1744,18 +1732,9 @@ void* readConfig(
             superconfig
         );
         
-        // Create dictionary array to hold extra parameters:
-        all_extra_parameters = 
-            malloc(sizeof(dict_s*)* (size_t) superconfig.total_num_subconfigs_read); 
-
-        for (int32_t index = 0; index < superconfig.total_num_subconfigs_read; index++)
-        {
-            all_extra_parameters[index] = superconfig.subconfigs[index].extra_parameters;
-        }
     }
 		
-	*ret_extra_parameters = all_extra_parameters;
-	*ret_num_configs      = superconfig.total_num_subconfigs_read;
+	*ret_cofig_data = superconfig;
 	
 	return config_structs;
 }
