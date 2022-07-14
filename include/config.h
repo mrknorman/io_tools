@@ -1179,7 +1179,7 @@ void **setConfigStructs(
     else
     {
         config_structs = calloc((size_t) 1, sizeof(void*));
-        config_structs[0] = superconfig.subconfigs[0].structure; 
+        config_structs[0] = superconfig.structure; 
     }
     
     return config_structs;
@@ -1246,9 +1246,8 @@ typedef struct LoaderSyntax{
 
 loader_data_s readSubconfig(
     const int32_t            verbosity,
+          loader_data_s      superconfig,
           loader_syntax_s    syntax,
-          int32_t            num_configs,
-          int32_t            config_index,
           loader_config_s    config,
           FILE              *file
     ) {
@@ -1266,8 +1265,30 @@ loader_data_s readSubconfig(
           int32_t          num_defined_subconfigs   = config.num_defined_subconfigs;
     const loader_config_s *defined_subconfigs       = config.defined_subconfigs;
     
-    loader_data_s superconfig  = 
-            setupSuperconfig(config, num_configs);
+    int32_t num_configs  = 1;
+    int32_t config_index = 0;
+    
+    superconfig.name = NULL;
+
+    superconfig.structure = 
+        calloc(1, compiled_struct_size);
+
+    // Create parameter name maping:
+    superconfig.parameter_name_map = 
+        createParameterMap(
+            num_defined_parameters,
+            defined_parameters
+        );
+
+    superconfig.num_parameters_read = 
+        calloc((size_t) num_defined_parameters, sizeof(int32_t));
+
+    superconfig.extra_parameters = 
+        makeDictionary(num_defined_parameters*100);   
+
+    // Create dictionary to count instances of extra parameters:
+    superconfig.num_extra_parameters = 
+        makeDictionary(num_defined_parameters*100);
     
     if (!checkLoaderConfig(verbosity, config) ) 
     {	
@@ -1326,97 +1347,95 @@ loader_data_s readSubconfig(
 				if (in_config && strchr(syntax.end_config, line_string[char_index])) 
 				{				
 					// Check neccesity requirements:
-					if (!checkParameterRequirements(
-							verbosity,
-							superconfig.subconfigs[config_index].num_parameters_read,
-							defined_parameters,
-							num_defined_parameters,
-							config
-						) 
-						||
-						!checkExtraParameterRequirments(
-							verbosity,
-							default_parameter,
-							superconfig.subconfigs[config_index].num_extra_parameters,
-							config
-						)
+					superconfig.total_num_subconfigs_read = config_index;
+                    return superconfig;
+                    
+				} 
+				else if (!in_config && strchr(syntax.end_config, line_string[char_index])) 
+				{
+                    superconfig.total_num_subconfigs_read = config_index;
+                    return superconfig;
+				}
+
+				// Checks for new config opening anywhere in line:
+				if (!in_config && strchr(syntax.start_config, line_string[char_index]))
+				{                      
+                    in_config   = true; 
+                    name_read   = false;
+                    config_name = NULL;
+
+                    // If number of configs greater than allocated in memory,
+                    // allocate more memory:
+                    if ((config_index >= num_configs) && (is_superconfig))
+                    {
+                        num_configs = (int32_t) ceil((float) num_configs * 1.5f);
+                        superconfig.subconfigs = 
+                            realloc(superconfig.subconfigs, sizeof(loader_data_s) * (size_t) num_configs);
+                    }
+
+                    // Intilise subconfig to default:
+                    config = 
+                        default_config;
+
+                    // Set default parameters:    
+                    config.defined_parameters = overwriteParameters(
+                        superconfig.config.defined_parameters,
+                        superconfig.parameter_name_map,
+                        config
+                    );
+                                        
+                    if (superconfig.config.is_superconfig) 
+                    {
+                        superconfig.subconfigs[config_index].config = config;
+                        
+                        superconfig.subconfigs[config_index] = readSubconfig(
+                            verbosity,
+                            superconfig.subconfigs[config_index],
+                            syntax,
+                            config,
+                            file
+                        );  
+                        
+                         if (!checkParameterRequirements(
+                            verbosity,
+                            superconfig.subconfigs[config_index].num_parameters_read,
+                            config.defined_parameters,
+                            num_defined_parameters,
+                            config
+                        ) 
+                        ||
+                        !checkExtraParameterRequirments(
+                            verbosity,
+                            default_parameter,
+                            superconfig.subconfigs[config_index].num_extra_parameters,
+                            config
+                        )
                         ||
                         !checkNameRequirments(
                             verbosity,
                             name_read,
                             config
                         ))
-					{
-                        superconfig.total_num_subconfigs_read = 0;
-						return superconfig;
-					}
+                        {
+                            superconfig.total_num_subconfigs_read = 0;
+
+                            return superconfig;
+                        }
+                    }		
                     
                     in_config = false; 
 					config_index++; 
-					
-					break;
-				} 
-				else if (!in_config && strchr(syntax.end_config, line_string[char_index])) 
-				{
-					fprintf(stderr, "Warning! Unexpected config closing '}'\n"); 
-					break;
-				}
-
-				// Checks for new config opening anywhere in line:
-				if (!in_config && strchr(syntax.start_config, line_string[char_index]))
-				{
-					in_config   = true; 
-                    name_read   = false;
-                    config_name = NULL;
-
-					// If number of configs greater than allocated in memory,
-					// allocate more memory:
-					if (config_index >= num_configs)
-					{
-                        num_configs = (int32_t) ceil((float) num_configs * 1.5f);
-                        superconfig.subconfigs = 
-                            realloc(superconfig.subconfigs, sizeof(loader_data_s) * (size_t) num_configs);
-					}
-                    
-                    superconfig.subconfigs[config_index].name = NULL;
-					
-					superconfig.subconfigs[config_index].structure = 
-						calloc(1, compiled_struct_size);
-                        
-                    // Create parameter name maping:
-                    superconfig.subconfigs[config_index].parameter_name_map = 
-                        createParameterMap(
-                            num_defined_parameters,
-                            defined_parameters
-                        );
-                        
-                    superconfig.subconfigs[config_index].num_parameters_read = 
-                        calloc((size_t) num_defined_parameters, sizeof(int32_t));
-						
-					superconfig.subconfigs[config_index].extra_parameters = 
-                        makeDictionary(num_defined_parameters*100);   
-										
-					// Create dictionary to count instances of extra parameters:
-					superconfig.subconfigs[config_index].num_extra_parameters = 
-						makeDictionary(num_defined_parameters*100);
-                    
-                    // Intilise subconfig to default:
-                    config = 
-                        default_config;
-                        
-                    // Set default parameters:    
-                    defined_parameters = overwriteParameters(
-                        superconfig.config.defined_parameters,
-                        superconfig.subconfigs[config_index].parameter_name_map,
-                        config
-                    );
-					
-					break;	
-				} 
+					                    
+                    break;	
+				}                 
 				else if (in_config && strchr(syntax.start_config, line_string[char_index])) 
 				{
-					fprintf(stderr, "Warning! Unexpected config opening '{' \n"); 
-					break;
+                    {
+                        fprintf(stderr, "Warning! Unexpected config opening '{' \n"); 
+                        
+                        superconfig.total_num_subconfigs_read = 0;
+						return superconfig;
+                    }
 				}
                 
                 // Checks for config name character and reads name if found:
@@ -1425,7 +1444,7 @@ loader_data_s readSubconfig(
                     if (name_read == false) 
                     {
                         config_name = strtok(&line_string[char_index + 1], syntax.end_name);
-                        superconfig.subconfigs[config_index].name = strdup(config_name);
+                        superconfig.name = strdup(config_name);
                         
                         name_read = true;
                         
@@ -1440,9 +1459,9 @@ loader_data_s readSubconfig(
                                 config = defined_subconfigs[config_name_index];
                                 
                                 // Set default parameters:    
-                                defined_parameters = overwriteParameters(
+                                config.defined_parameters = overwriteParameters(
                                     superconfig.config.defined_parameters,
-                                    superconfig.subconfigs[config_index].parameter_name_map,
+                                    superconfig.parameter_name_map,
                                     config
                                 );
                             }
@@ -1508,16 +1527,17 @@ loader_data_s readSubconfig(
 				
 				// On parameter name end:
 				else if (isspace(line_string[char_index]) && (!parameter_end && parameter_read))
-				{
+				{                
                     parameter_end = true;
                     
 					parameter_index = 
-						getMapIndex(superconfig.subconfigs[config_index].parameter_name_map, parameter_name);
-										
+						getMapIndex(superconfig.parameter_name_map, parameter_name);
+                        										
 					if (parameter_index > -1) 
 					{
 						parameter_type = superconfig.config.defined_parameters[parameter_index].type;
-						superconfig.subconfigs[config_index].num_parameters_read[parameter_index]++;
+						superconfig.num_parameters_read[parameter_index]++;
+                        
 						parameter_recognised = true;
 					} 
 					else 
@@ -1526,7 +1546,7 @@ loader_data_s readSubconfig(
 						
 						dict_entry_s* entry = 
 							findDictEntry_(
-								superconfig.subconfigs[config_index].num_extra_parameters, 
+								superconfig.num_extra_parameters, 
 								parameter_name
 							);
 						
@@ -1537,7 +1557,7 @@ loader_data_s readSubconfig(
 							data.type = int_e;
 							
 							insertDictEntry(
-								superconfig.subconfigs[config_index].num_extra_parameters, 
+								superconfig.num_extra_parameters, 
 								data, 
 								parameter_name
 							);		
@@ -1593,7 +1613,7 @@ loader_data_s readSubconfig(
 						int32_t extra_parameter_start_index = 0;
 						
 						if     ((parameter_recognised) 
-							&& (superconfig.subconfigs[config_index].num_parameters_read[parameter_index] > 1))
+							&& (superconfig.num_parameters_read[parameter_index] > 1))
 						{
 							extra_parameter_start_index = 2;
 						} 
@@ -1603,26 +1623,26 @@ loader_data_s readSubconfig(
 						}
 						
 						if (   (parameter_recognised) 
-							&& (superconfig.subconfigs[config_index].num_parameters_read[parameter_index] < 2)) 
+							&& (superconfig.num_parameters_read[parameter_index] < 2)) 
 						{
 							castToVoidArray(
 								verbosity,
 								value_string, 
 								types, 
 								parameter_index, 
-								superconfig.subconfigs[config_index].structure
+								superconfig.structure
 							);
 						}
 						else 
 						{
 							addExtraParameter(
 								verbosity,
-								superconfig.subconfigs[config_index].extra_parameters,
+								superconfig.extra_parameters,
 								parameter_name,
 								parameter_type,
 								parameter_index, 
 								extra_parameter_start_index, 
-								superconfig.subconfigs[config_index].num_parameters_read[parameter_index],
+								superconfig.num_parameters_read[parameter_index],
 								value_string
 							);
 						}
@@ -1692,14 +1712,14 @@ void* readConfig(
 	// Opening file:
 	FILE* file;	
 	// Error checking:
-    loader_data_s superconfig;
+    loader_data_s superconfig =
+            setupSuperconfig(config, num_configs);
     if (checkOpenFile(verbosity, file_name, "r", &file))
     {
         superconfig = readSubconfig(
             verbosity,
+            superconfig,
             syntax,
-            num_configs,
-            config_index,
             config,
             file
         );
@@ -1721,7 +1741,7 @@ void* readConfig(
         (config_index <= 0))
     {
         freeConfigData(superconfig);
-
+        
         config_structs = NULL;
         config_index = 0;
     }
@@ -1730,8 +1750,7 @@ void* readConfig(
         config_structs = setConfigStructs(
             superconfig.config,
             superconfig
-        );
-        
+        ); 
     }
 		
 	*ret_cofig_data = superconfig;

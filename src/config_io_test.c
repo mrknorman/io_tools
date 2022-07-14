@@ -893,6 +893,37 @@ bool testNestedRequriments(
     return pass;
 }
 
+bool testNestedConfig(
+	const int32_t  verbosity,
+	const char    *config_directory_name
+	) {
+    
+    bool pass = true;
+    
+    #include "nested_config_test.h"	
+    
+    const int32_t num_tests = 1;
+    loader_null_test_s test_configs[] = 
+    {
+        {"nested_config_tests/nested_config_test_0.cfg", false}
+    };
+    
+    for (int32_t index = 0; index < num_tests; index++) 
+    {
+        pass *= checkLoaderReturnNull(
+            verbosity,
+            config_directory_name,
+            loader_config,
+            test_configs[index]
+        );
+    }
+	
+	printf("\n");
+	printTestResult(pass, "Nested config test.");
+    
+    return pass;
+}
+
 int main() {
 	
 	const int32_t verbosity = 3;
@@ -951,6 +982,12 @@ int main() {
         
     pass *=  
         testConfigOrder(
+            verbosity,
+            config_directory_name
+        ); 
+        
+    pass *=  
+        testNestedConfig(
             verbosity,
             config_directory_name
         ); 

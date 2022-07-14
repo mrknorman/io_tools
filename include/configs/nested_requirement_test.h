@@ -82,6 +82,8 @@ parameter_s priority_parameters_4[] =
 };
 
 int32_t num_priority_parameters[] = {5,3,1,2,1};
+bool    is_superconfigs[]          = {false,true,false,false,false};
+
 parameter_s *priority_parameters[] =
 {
     priority_parameters_0,
@@ -100,6 +102,9 @@ for (int32_t index = 0; index < num_defined_subconfigs; index++)
     
     char *name; asprintf(&name, "nested_requirement_test_%i", index);
     defined_subconfigs[index].name = name;
+    
+    defined_subconfigs[index].is_superconfig         = is_superconfigs[index],
+
     
     defined_subconfigs[index].num_defined_parameters = num_priority_parameters[index];
     defined_subconfigs[index].defined_parameters     = priority_parameters[index];
