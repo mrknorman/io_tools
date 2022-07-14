@@ -31,26 +31,38 @@ path_s newPath(
     const char *full_path
     ) {
     
-    const size_t length = strlen(full_path);
+	
+	char *full_path_copy = strdup(full_path);
+    const size_t length = strlen(full_path_copy);
+	
+	if (full_path_copy[length - 1] == '/') 
+	{
+		full_path_copy[length - 1] = '\0';
+	}
     
-    char * base_name = malloc(sizeof(char) * length);
-    char * dir_name  = malloc(sizeof(char) * length);
+    char *base_name = malloc(sizeof(char) * length);
+    char *dir_name  = malloc(sizeof(char) * length);
     
-    bool base = 1;
+    bool in_base = true;
     
     int32_t base_index = 0, dir_index = 0;
-    for (size_t index = 0; index < length; index++) {
-        
-        const char letter = full_path[length - 1 - index];
-        
-        base *= (letter != '/');
-                
-        if (base) {
-        
+    for (size_t index = 0; index < length; index++) 
+	{
+        const char letter = full_path_copy[length - 1 - index];
+
+		if ((letter == '/') && in_base) 
+		{
+			in_base = false;
+			continue;
+		}
+                        
+        if (in_base) 
+		{
             base_name[base_index] = letter;
             base_index++;
-        } else {
-        
+        } 
+		else
+		{
             dir_name[dir_index] = letter;
             dir_index++;
         }
@@ -59,7 +71,7 @@ path_s newPath(
         dir_name [dir_index ] = '\0';
     }
     
-    const path_s path = (const path_s) {full_path, strrev(dir_name), strrev(base_name)};
+    const path_s path = (const path_s) {full_path_copy, strrev(dir_name), strrev(base_name)};
     
     free(dir_name); free(base_name);
     
@@ -71,25 +83,25 @@ void printPath(
     ) {
 	
 	printf("Full path: \"%s\". \n", path.full     );
-	printf("Full path: \"%s\". \n", path.directory);
-	printf("Full path: \"%s\". \n", path.base     );
+	printf("Directory: \"%s\". \n", path.directory);
+	printf("Base: \"%s\". \n", path.base     );
 }
 
 int32_t mkpath(
-    const char   * directory, 
-    const mode_t   mode
+    const char   *directory, 
+    const mode_t  mode
     ) {
+	
+	struct stat sb;
+	const size_t length = strlen(directory);
 		
-    struct stat sb;
-
-    if (!directory) {
-    
+    if (!directory) 
+	{
         errno = EINVAL;
         return 1;
     }
-
-    if (!stat(directory, &sb)) {
-        
+    else if (!stat(directory, &sb)) 
+	{
         return 0;
     }
 	
@@ -97,7 +109,8 @@ int32_t mkpath(
 	
 	mkpath(new_path.directory, mode);
 	
-    return mkdir(new_path.full, mode);
+	printf("%s \n", new_path.full);
+	return mkdir(new_path.full, mode);
 }
 
 bool checkFileExists(
@@ -115,14 +128,15 @@ bool checkFileExists(
 
 	FILE* file = fopen(file_name, "r");
 	
-	if (file) {
-
+	if (file) 
+	{
 	    /* File exists. */
 
 	    fclose(file);
 
-	} else if (ENOENT == errno) {
-
+	} 
+	else if (ENOENT == errno) 
+	{
 		/* Directory does not exist. */
 
 		exists = 0;
@@ -131,14 +145,15 @@ bool checkFileExists(
             
             fprintf(stderr, "Warning! File \"%s\" does not exist.\n", file_name);
         }
-	} else {
-
+	} 
+	else 
+	{
 		/* opendir() failed for some other reason. */
 
 		exists = 0;
         
-        if ( verbosity >= 1 ) {
-            
+        if ( verbosity >= 1 ) 
+		{
             fprintf(stderr, "Failed to open file, \"%s\", for unknown reason.\n", file_name);
         }
 	}
@@ -147,10 +162,10 @@ bool checkFileExists(
 }
 
 bool checkOpenFile(
-    const int32_t    verbosity, 
-    const char     * file_name, 
-    const char     * mode, 
-          FILE    ** ret_file
+    const int32_t   verbosity, 
+    const char     *file_name, 
+    const char     *mode, 
+          FILE    **ret_file
     ) {
 
 	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
@@ -161,31 +176,34 @@ bool checkOpenFile(
 
 	bool exists = 1;
 
-	FILE* file = fopen(file_name, mode);
+	FILE *file = fopen(file_name, mode);
 	
-	if (file) {
-
+	if (file) 
+	{
 	    /* File exists. */
 
 	    *ret_file = file;
 
-	} else if (ENOENT == errno) {
-
+	} 
+	else if (ENOENT == errno) 
+	{
 		/* Directory does not exist. */
 
 		exists = 0;
         
-        if ( verbosity >= 1 ) {
-
+        if ( verbosity >= 1 ) 
+		{
             fprintf(stderr, "Warning! File \"%s\" does not exist.\n", file_name);  
         }
-	} else {
+	} 
+	else 
+	{
 		/* opendir() failed for some other reason. */
 
 		exists = 0;
         
-        if ( verbosity >= 1 ) {
-
+        if ( verbosity >= 1 ) 
+		{
             fprintf(stderr, "Failed to open file, \"%s\", for unknown reason.\n", file_name);
         }
 	}
@@ -194,9 +212,9 @@ bool checkOpenFile(
 }
 
 bool createFile(
-    const int32_t   verbosity, 
-    const char    * file_name, 
-    const char    * mode
+    const int32_t  verbosity, 
+    const char    *file_name, 
+    const char    *mode
     ) {
 
 	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
@@ -205,18 +223,19 @@ bool createFile(
 	//
 	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
 		
-	bool success = 0;
+	bool success = false;
 
-	if ( fopen(file_name, mode) == NULL ) {
-        
+	if ( fopen(file_name, mode) == NULL) 
+	{
         if ( verbosity >= 1 ) {
             fprintf(stderr, "Error creating file \"%s\". Returning.\n", file_name);
         }
 
-		success = 0;
-	} else {
-
-		success = 1;
+		success = true;
+	} 
+	else 
+	{
+		success = true;
 	}
 
 	return success;
@@ -235,21 +254,23 @@ bool createOpenFile(
 	//
 	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
 
-	bool success = 0;
+	bool success = false;
 
 	FILE* file = fopen(file_name, mode);
 
-	if ( file == NULL ) {
-        
-        if (verbosity >= 1) {
+	if ( file == NULL ) 
+	{
+        if (verbosity >= 1) 
+		{
             fprintf(stderr, "Warning! Error creating file \"%s\". Returning.\n", file_name);
         }
  
-		success = 0;
-	} else {
-
+		success = true;
+	} 
+	else 
+	{
 		*ret_file = file;
-		success = 1;
+		success   = true;
 	}
 
 	return success;
@@ -267,24 +288,25 @@ bool checkCreateFile(
 	//
 	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
 
-	bool success = 0;
+	bool success = false;
     
-	if ( !checkFileExists(verbosity, file_name) ) {
-        
-        if (verbosity >= 2) {
+	if ( !checkFileExists(verbosity, file_name) ) 
+	{
+        if (verbosity >= 2) 
+		{
             printf("File \"%s\" does not exist. Attemping to create.\n", file_name );
         }
 
-		if ( createFile(verbosity, file_name, mode) ) {
-
-			success = 1;
-		} else {
-
-			success = 0;
+		if ( createFile(verbosity, file_name, mode) ) 
+		{
+			success = true;
+		} else 
+		{
+			success = false;
 		}
-	} else {
-
-		success = 1;
+	} else 
+	{
+		success = true;
 	}
 
 	return success;
@@ -301,20 +323,26 @@ bool checkDirectoryExists(
 	//
 	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
 	
-	bool exists = 1;
+	bool exists = true;
 
 	DIR* directory = opendir(directory_name);
 		
-	if (directory) {
+	if (directory) 
+	{
 	    /* Directory exists. */
 	    closedir(directory);
-	} else if (ENOENT == errno) {
-		exists = 0;
+	} 
+	else if (ENOENT == errno) 
+	{
+		exists = false;
 	    /* Directory does not exist. */
-	} else {
-		exists = 0;
+	} 
+	else 
+	{
+		exists = false;
         
-        if (verbosity >= 1) {
+        if (verbosity >= 1) 
+		{
             fprintf(stderr, "Failed to open directory \"%s\", for unknown reason.\n", directory_name);
         }
 	    /* opendir() failed for some other reason. */
@@ -334,21 +362,29 @@ bool checkOpenDirectory(
 	//
 	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
 
-	bool exists = 1;
+	bool exists = true;
 
 	DIR* directory = opendir(directory_name);
 	
-	if (directory) {
+	if (directory) 
+	{
 	    /* Directory exists. */
+		
 	    *ret_directory = directory;
-	} else if (ENOENT == errno) {
-		exists = 0;
+	} 
+	else if (ENOENT == errno) 
+	{
+		/* Directory does not exist. */
+		
+		exists = false;
 		fprintf(stderr, "Warning! Cannot find directory \"%s\".\n", directory_name);
-	    /* Directory does not exist. */
-	} else {
-		exists = 0;
+	} 
+	else 
+	{
+		/* opendir() failed for some other reason. */
+
+		exists = false;
 		fprintf(stderr, "Warning! Failed to open directory \"%s\", for unknown reason.\n", directory_name);
-	    /* opendir() failed for some other reason. */
 	}
 
 	return exists;
@@ -366,13 +402,14 @@ bool createDirectory(
 
 	bool success = 0;
 	
-	if ( mkpath(directory_name, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != 0 ) {
-
+	if ( mkpath(directory_name, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != 0 ) 
+	{
 		fprintf(stderr, "Error creating directory \"%s\". Returning. \n", directory_name);
 
 		success = 0;
-	} else {
-
+	}
+	else 
+	{
 		success = 1;
 	}
 
@@ -392,13 +429,14 @@ bool createOpenDirectory(
 
 	bool success = 0;
 
-	if ( mkpath(directory_name, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != 0 ) {
-
+	if ( mkpath(directory_name, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != 0 ) 
+	{
 		fprintf(stderr, "Error creating directory \"%s\". Returning. \n", directory_name);
 
 		success = 0;
-	} else {
- 		
+	} 
+	else 
+	{
  		checkOpenDirectory(directory_name, ret_directory);
 
 		success = 1;
@@ -420,23 +458,23 @@ bool checkCreateDirectory(
 	
 	bool success = 0;
 	
-	if ( !checkDirectoryExists(1, directory_name) ) {
-		
-		if (verbosity >= 2) {
-			
+	if ( !checkDirectoryExists(1, directory_name) ) 
+	{
+		if (verbosity >= 2) 
+		{
 			printf("Directory \"%s\" does not exist. Attemping to create.\n", directory_name );
 		}
 				
-		if ( createDirectory(directory_name) ){
-
+		if ( createDirectory(directory_name))
+		{
 			success = 1;
-		} else {
-
+		} else 
+		{
 			success = 0;
 		}
 		
-	} else {
-
+	} else 
+	{
 		success = 1;
 	}
 	
@@ -468,7 +506,8 @@ int32_t countLinesInTextFile(
 	fgetpos(file, &position);
 
 	char*   buffer = NULL; size_t size = 0;
-	while (getline(&buffer, &size, file) != EOF) {
+	while (getline(&buffer, &size, file) != EOF) 
+	{
 		num_lines++;
 	}
 
@@ -499,7 +538,7 @@ bool readFileDouble(
 	//
 	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
 		
-	bool     success   = 0;
+	bool     success   = false;
 
 	int32_t  init_num_lines = 100;
 	int32_t  curr_num_lines = init_num_lines;
@@ -510,8 +549,8 @@ bool readFileDouble(
 	int32_t  line_index = 0;
 		
 	FILE* file = NULL;
-	if( checkOpenFile(3, file_name, "r", &file) ) {
-		
+	if( checkOpenFile(3, file_name, "r", &file) ) 
+	{
 		int32_t  num_lines = countLinesInTextFile(file);
 		
 		size_t num_elements = (size_t) (num_lines * num_cols);
@@ -524,18 +563,18 @@ bool readFileDouble(
 			size = (size_t) getline(&buffer, &size, file); 
 		}
 
-		switch(mode) {
-
+		switch(mode) 
+		{
 			case 0: //Column index first:
 
 				while (getline(&buffer, &size, file) != EOF)
 				{	
 					if(line_index >= curr_num_lines)
-						{
-							size_t num_elements = (size_t) ((curr_num_lines + init_num_lines) * num_cols);
-							data = realloc(data, sizeof(float) * num_elements);
-							curr_num_lines += init_num_lines;
-						}
+					{
+						size_t num_elements = (size_t) ((curr_num_lines + init_num_lines) * num_cols);
+						data = realloc(data, sizeof(float) * num_elements);
+						curr_num_lines += init_num_lines;
+					}
 
 					char* first = strtok(buffer, delimeter);
 					
@@ -578,11 +617,12 @@ bool readFileDouble(
 		*lines_read = line_index;
 		*data_ret = data;
 
-		success = 1;
+		success = true;
 		fclose(file);
-	} else {
-
-		success = 0;
+	} 
+	else 
+	{
+		success = false;
 	}
 	
 	return success;
@@ -610,20 +650,20 @@ bool writeFileDouble(
 	//
 	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
 
-	bool success = 0;
+	bool success = false;
 
 	FILE* file;
-	if( createOpenFile(1, file_name, "w+", &file) ) {
-
+	if( createOpenFile(1, file_name, "w+", &file) )
+	{
 		//Skips to start line:
 		for (int32_t line_index = 0; line_index < start_line; ++line_index) { fprintf(file, "\n"); }
 
-		switch(mode) {
-
+		switch(mode) 
+		{
 			case 0: //Column index first:
 
-				for (int32_t line_index = 0; line_index < num_lines; line_index++) {
-
+				for (int32_t line_index = 0; line_index < num_lines; line_index++) 
+				{
 					//Skips to start column
 					for (int32_t col_index = 1; col_index < start_col; ++col_index) { fprintf(file, "%s", delimeter); }
 
@@ -636,8 +676,8 @@ bool writeFileDouble(
 
 			case 1: //Row index first:
 
-				for (int32_t line_index = 0; line_index < num_lines; line_index++) {
-
+				for (int32_t line_index = 0; line_index < num_lines; line_index++) 
+				{
 					//Skips to start column
 					for (int32_t col_index = 1; col_index < start_col; ++col_index) { fprintf(file, "%s", delimeter); }
 
@@ -649,11 +689,13 @@ bool writeFileDouble(
 			break;
 		}
 
-		success = 1;
+		success = true;
 		fclose(file);
-	} else {
+	} 
+	else 
+	{
 
-		success = 0;
+		success = false;
 		fprintf(stderr, "Warning! Failed to create file \"%s\"!\n", file_name);
 	}
 
@@ -672,7 +714,7 @@ bool readDirectoryContents(
 	//
 	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
 	
-	bool    success = 0;
+	bool    success = false;
 
 	int32_t   init_num_strings = 100;
 	int32_t   curr_num_strings = init_num_strings;
@@ -681,8 +723,8 @@ bool readDirectoryContents(
 	int32_t name_index = 0;
 
 	DIR* directory;
-	if ( checkOpenDirectory(directory_name, &directory) ) {
-
+	if ( checkOpenDirectory(directory_name, &directory) ) 
+	{
 		struct dirent* ent;
 		while((ent = readdir(directory)) != NULL)
 		{
@@ -701,13 +743,14 @@ bool readDirectoryContents(
 			name_index++;
 		}
 
-		success = 1;
+		success = true;
 		closedir(directory);
 
-	} else {
-
+	} 
+	else 
+	{
 		fprintf(stderr, "Warning! Failed to open directory \"%s\"!\n", directory_name);
-		success = 0;
+		success = false;
 	}
 
 	if (name_index == 0)
@@ -772,7 +815,6 @@ void filterbyExtension(
 
 				filt_index++;
 			}
-
 		}
 	}
 
@@ -816,13 +858,13 @@ void filterbyPrefix(
 	int32_t curr_num_filt = init_num_filt;
 	char** filt       = malloc(sizeof(char*)* (size_t) init_num_filt);
 
-	for (int32_t input_index = 0; input_index < num_input; ++input_index){
-
+	for (int32_t input_index = 0; input_index < num_input; ++input_index)
+	{
 		char test_prefix[prefix_length];
 		sprintf(test_prefix, "%.*s", (int) prefix_length, input[input_index]);
 
-		if (!strcmp(test_prefix, prefix)){
-
+		if (!strcmp(test_prefix, prefix))
+		{
 			if(filt_index >= curr_num_filt)
 			{
 				filt = realloc(filt, sizeof(char*) * (size_t) curr_num_filt * 2);
@@ -859,22 +901,22 @@ bool writeStringToFile(
     int32_t return_value = 0;
     
     FILE* file;    
-    if ( checkOpenFile(verbosity, file_name, "w+", &file) ) {
-       
+    if ( checkOpenFile(verbosity, file_name, "w+", &file) ) 
+	{
         fputs(string, file);
         
         fclose(file);
         
         return_value = 1;
-    } else {
-        
+    } 
+	else 
+	{
       return_value = 0;
     
-      if (verbosity > 0) {
-          
+      if (verbosity > 0) 
+	  {
           printf("Warning! Failed to open or create the file: %s\n", file_name);
       }
-        
     }
     
     return return_value;
