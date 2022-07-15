@@ -586,7 +586,7 @@ int32_t StringToKey(
 	return key;
 }
 
-int getDictHashCode(
+int32_t getDictHashCode(
 	const dict_s *dict      , 
 	const char   *string_key
 	) {
@@ -603,8 +603,16 @@ int getDictHashCode(
      * @return int32_t hash: hash to dictionary index.
      */
 
-   int32_t key = StringToKey(string_key);
-   return key % dict->length;
+   const int32_t key = StringToKey(string_key);
+   
+   int32_t hash = -1;
+   
+   if (dict->length > 0) 
+   {
+        hash = key % dict->length;
+   }
+   
+   return hash;
 }
 
 int32_t insertDictEntry(
@@ -634,31 +642,36 @@ int32_t insertDictEntry(
 	
 	const int32_t hash = getDictHashCode(dict, string_key);
 	
-	dict_entry_s* entry = malloc(sizeof(dict_entry_s));
+    if ((hash >= 0) && (hash < dict->length))
+    {
+        dict_entry_s* entry = malloc(sizeof(dict_entry_s));
+
+        *entry = (dict_entry_s) {  
+            data            ,
+            hash            ,
+            string_key      ,
+            dict->last_entry,
+            NULL
+        };
+
+        if ( dict->last_entry != NULL) {
+
+            dict->last_entry->next_entry = entry;
+        }
+
+        int32_t index = hash;
+        while (dict->entries[index] != NULL){
+
+            index++; index %= dict->length; //Wrap around. 
+        }
+    
+        dict->entries[index] = entry;
+        dict->last_entry     = entry;
+        
+        return 0;
+    }
 	
-	*entry = (dict_entry_s) {  
-		data            ,
-		hash            ,
-		string_key      ,
-		dict->last_entry,
-		NULL
-	};
-		
-	if ( dict->last_entry != NULL) {
-		
-		dict->last_entry->next_entry = entry;
-	}
-		
-	int32_t index = hash;
-	while (dict->entries[index] != NULL){
-		
-		index++; index %= dict->length; //Wrap around. 
-	}
-		
-	dict->entries[index] = entry;
-	dict->last_entry     = entry;
-	
-	return 0;
+	return 1;
 }
 
 int32_t findHashIndex(
@@ -676,22 +689,27 @@ int32_t findHashIndex(
      */
 	 
 	const int32_t hash = getDictHashCode(dict, string_key);
-	      int32_t index = hash;
-	
-	const int32_t stop_index = ((hash - 1) < 0) ? (dict->length - 1) : (hash - 1);
-	
-	while (dict->entries[index] != NULL) {
-		
-		if (!strcmp(dict->entries[index]->string_key, string_key)) {
-			
-			return index;
-		} else if (index == stop_index) {
-			
-			return -1;		
-		}
-			
-		index++; index %= dict->length; //Wrap around. 
-	}
+    
+    if ((hash >= 0) && (hash < dict->length))
+    {
+              int32_t index = hash;
+
+        const int32_t stop_index = ((hash - 1) < 0) ? (dict->length - 1) : (hash - 1);
+
+        while (dict->entries[index] != NULL) 
+        {
+            if (!strcmp(dict->entries[index]->string_key, string_key)) 
+            {
+                return index;
+            } 
+            else if (index == stop_index) 
+            {
+                return -1;		
+            }
+
+            index++; index %= dict->length; //Wrap around. 
+        }
+    }
 	
 	return -1;
 }
@@ -710,13 +728,18 @@ dict_entry_s *findDictEntry_(
      * @return dict_entry_s entry: Returns dict entry if successful, else return NULL.
      */
 	
-	const int32_t index = findHashIndex(dict, string_key);
-	
-	dict_entry_s *entry = NULL;
-	if (index >= 0) {
-		
-		entry = dict->entries[index];
-	} 
+	const int32_t hash  = findHashIndex(dict, string_key);
+    dict_entry_s *entry = NULL;
+
+    if ((hash >= 0) && (hash < dict->length))
+    {
+        const int32_t index = hash;
+        
+        if (index >= 0) 
+        {	
+            entry = dict->entries[index];
+        }
+    }
 
 	return entry;
 }
@@ -760,28 +783,33 @@ void deleteDictEntry(
      * @return none.
      */
 	
-	const int32_t index = findHashIndex(dict, string_key);
+	const int32_t hash = findHashIndex(dict, string_key);
 	
-	if (index >= 0) {
-		
-		if (dict->entries[index]->previous_entry != NULL) {
-			if (dict->entries[index]->next_entry != NULL) {
+    if ((hash >= 0) && (hash < dict->length))
+    {
+        const int32_t index = hash; 
 
-				dict->entries[index]->previous_entry->next_entry = dict->entries[index]->next_entry;
-				dict->entries[index]->next_entry->previous_entry = dict->entries[index]->previous_entry;
+        if (index >= 0) {
 
-			} else {
+            if (dict->entries[index]->previous_entry != NULL) {
+                if (dict->entries[index]->next_entry != NULL) {
 
-				dict->entries[index]->previous_entry->next_entry = NULL;
-				dict->last_entry = dict->entries[index]->previous_entry;
-			}
-		} 
-		
-		dict->num_entries--;
-		free(dict->entries[index]);
-        
-        dict->entries[index] = NULL;
-	}
+                    dict->entries[index]->previous_entry->next_entry = dict->entries[index]->next_entry;
+                    dict->entries[index]->next_entry->previous_entry = dict->entries[index]->previous_entry;
+
+                } else {
+
+                    dict->entries[index]->previous_entry->next_entry = NULL;
+                    dict->last_entry = dict->entries[index]->previous_entry;
+                }
+            } 
+
+            dict->num_entries--;
+            free(dict->entries[index]);
+
+            dict->entries[index] = NULL;
+        }
+    }
 }
 
 dict_entry_s** returnAllEntries(

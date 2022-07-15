@@ -105,7 +105,6 @@ for (int32_t index = 0; index < num_defined_subconfigs; index++)
     
     defined_subconfigs[index].is_superconfig         = is_superconfigs[index],
 
-    
     defined_subconfigs[index].num_defined_parameters = num_priority_parameters[index];
     defined_subconfigs[index].defined_parameters     = priority_parameters[index];
 }

@@ -521,7 +521,7 @@ bool testConfigOrder(
 	return pass;
 }
 
-bool testReqirmentConfig(
+bool testReqirementConfig(
 	const int32_t  verbosity,
 	const char    *config_directory_name
 	) {
@@ -551,7 +551,7 @@ bool testReqirmentConfig(
     }
 	
 	printf("\n");
-	printTestResult(pass, "Requirement config test.");
+	printTestResult(pass, "Requirement test.");
 	
 	return pass;
 }
@@ -890,7 +890,7 @@ int main() {
 		);
 	
 	pass *= 
-		testReqirmentConfig(
+		testReqirementConfig(
 			verbosity,
 			config_directory_name
 		);

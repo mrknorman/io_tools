@@ -93,8 +93,7 @@ int32_t mkpath(
     ) {
 	
 	struct stat sb;
-	const size_t length = strlen(directory);
-		
+    
     if (!directory) 
 	{
         errno = EINVAL;
