@@ -180,8 +180,8 @@ char* pullValueFromLine(
 	const type_e  type
 	) {
 	//Splits string from value indicator onwards until new line symbol.
-	char * parameter_copy = strdup(parameter_start);
-	char * value_string   = strtok(parameter_copy, new_line);
+	char *parameter_copy = strdup(parameter_start);
+	char *value_string   = strtok(parameter_copy, new_line);
 	
 	switch (type) 
 	{	
@@ -599,15 +599,6 @@ bool checkConfigRequirements(
 		sum += num_read[index];
 	}
     
-    if (!is_superconfig)
-    {
-        total_min = 0;
-        total_max = 1;
-        
-        extra_min = 0;
-        extra_max = 1;
-    }
-    
 	bool pass = true;
 	
 	for (int32_t index = 0; index < num_subconfigs*is_superconfig; index++) 
@@ -640,21 +631,24 @@ bool checkConfigRequirements(
 		}
 	}
 	
-	pass *= 
-		checkNumConfigs(
-			verbosity,
-			total_num_read,
-			total_min,
-			total_max
-		);
-        
-    pass *=
-        checkNumExtraConfigs(
-			verbosity,
-			total_num_read - sum,
-			extra_min,
-			extra_max
-		);
+    if (is_superconfig)
+    {
+        pass *= 
+            checkNumConfigs(
+                verbosity,
+                total_num_read,
+                total_min,
+                total_max
+            );
+
+        pass *=
+            checkNumExtraConfigs(
+                verbosity,
+                total_num_read - sum,
+                extra_min,
+                extra_max
+            );
+    }
     	    
     return pass;
 }
@@ -1062,41 +1056,41 @@ parameter_s *overwriteParameters(
 }
 
 void freeConfigData(
-    loader_data_s superconfig
+    loader_data_s config_data
     ) {
     
-    for (int32_t index = 0; index < superconfig.total_num_subconfigs_read; index++) 
+    for (int32_t index = 0; index < config_data.total_num_subconfigs_read; index++) 
     {
-        if (superconfig.subconfigs[index].structure != NULL) 
+        if (config_data.subconfigs[index].structure != NULL) 
         {
-            free(superconfig.subconfigs[index].structure);
+            free(config_data.subconfigs[index].structure);
         }
-        if( superconfig.subconfigs[index].name != NULL)
+        if( config_data.subconfigs[index].name != NULL)
         {
-            free(superconfig.subconfigs[index].name);
+            free(config_data.subconfigs[index].name);
         }
     }
     
-    if (superconfig.extra_parameters != NULL)
+    if (config_data.extra_parameters != NULL)
     {
-        free(superconfig.extra_parameters);
+        free(config_data.extra_parameters);
     }
     
-    free(superconfig.subconfigs);
-    superconfig.subconfigs = NULL;
+    free(config_data.subconfigs);
+    config_data.subconfigs = NULL;
 }
 
 void **reorderConfigs(
     const loader_config_s    config,
-    const loader_data_s superconfig
+    const loader_data_s config_data
     ) {
     
     const int32_t num_defined = config.num_defined_subconfigs;
 
-    const map_s             name_map       = superconfig.subconfig_name_map;
-    const int32_t          *num_read       = superconfig.num_subconfigs_read;
-    const int32_t           total_num_read = superconfig.total_num_subconfigs_read;
-    const loader_data_s *subconfig_data = superconfig.subconfigs;
+    const map_s             name_map       = config_data.subconfig_name_map;
+    const int32_t          *num_read       = config_data.num_subconfigs_read;
+    const int32_t           total_num_read = config_data.total_num_subconfigs_read;
+    const loader_data_s    *subconfig_data = config_data.subconfigs;
     
     void **config_structs = calloc((size_t) total_num_read, sizeof(void*));
     
@@ -1138,11 +1132,11 @@ void **reorderConfigs(
 }
 
 void **keepConfigs(
-    const loader_data_s superconfig
+    const loader_data_s config_data
     ) {
     
-    const int32_t        total_num_read = superconfig.total_num_subconfigs_read;
-    const loader_data_s *subconfig_data = superconfig.subconfigs;
+    const int32_t        total_num_read = config_data.total_num_subconfigs_read;
+    const loader_data_s *subconfig_data = config_data.subconfigs;
     
     void **config_structs = calloc((size_t) total_num_read, sizeof(void*));
     
@@ -1156,7 +1150,7 @@ void **keepConfigs(
 
 void **setConfigStructs(
     const loader_config_s     config,
-    const loader_data_s  superconfig
+    const loader_data_s   config_data
     ) {
     
     const bool is_superconfig = config.is_superconfig;
@@ -1169,24 +1163,24 @@ void **setConfigStructs(
         if (reorder) 
         {
             config_structs = 
-                reorderConfigs(config, superconfig);
+                reorderConfigs(config, config_data);
         }
         else
         {
             config_structs = 
-                keepConfigs(superconfig);
+                keepConfigs(config_data);
         }
     }
     else
     {
         config_structs = calloc((size_t) 1, sizeof(void*));
-        config_structs[0] = superconfig.structure; 
+        config_structs[0] = config_data.structure; 
     }
     
     return config_structs;
 }
 
-loader_data_s setupSuperconfig(
+loader_data_s setupConfigData(
     const loader_config_s config,
     const int32_t         num_configs
     ) {
@@ -1197,14 +1191,14 @@ loader_data_s setupSuperconfig(
     const int32_t          num_defined_parameters   = config.num_defined_parameters;
           parameter_s     *defined_parameters       = config.defined_parameters;
     
-    loader_data_s superconfig = {
+    loader_data_s config_data = {
        .name       = NULL,
        .subconfigs = NULL,
        .config     = config
     };
        
     // Create config lists:    
-    superconfig.subconfig_name_map = 
+    config_data.subconfig_name_map = 
         createConfigMap(
             config.defined_subconfigs,
             config.num_defined_subconfigs,
@@ -1212,36 +1206,38 @@ loader_data_s setupSuperconfig(
         ); 
       
     // Allocate memory for subconfigs:
-    superconfig.subconfigs = 
+    config_data.subconfigs = 
         calloc((size_t) num_configs, sizeof(loader_data_s));
         
     // Create bins to hold number of each parameter name read:
-    superconfig.num_subconfigs_read = 
+    config_data.num_subconfigs_read = 
         calloc((size_t) config.num_defined_parameters, sizeof(int32_t));
     
-    superconfig.name = NULL;
+    config_data.name = NULL;
 
-    superconfig.structure = 
+    config_data.structure = 
         calloc(1, compiled_struct_size);
 
     // Create parameter name maping:
-    superconfig.parameter_name_map = 
+    config_data.parameter_name_map = 
         createParameterMap(
             num_defined_parameters,
             defined_parameters
         );
 
-    superconfig.num_parameters_read = 
+    config_data.num_parameters_read = 
         calloc((size_t) num_defined_parameters, sizeof(int32_t));
-
-    superconfig.extra_parameters = 
+    
+    config_data.total_num_subconfigs_read = 0;
+    
+    config_data.extra_parameters = 
         makeDictionary(num_defined_parameters*100);   
 
     // Create dictionary to count instances of extra parameters:
-    superconfig.num_extra_parameters = 
+    config_data.num_extra_parameters = 
         makeDictionary(num_defined_parameters*100);
 
-    return superconfig;
+    return config_data;
 }
 
 loader_config_s setupDefaultConfig(
@@ -1261,22 +1257,116 @@ loader_config_s setupDefaultConfig(
     return default_config;
 }
 
-typedef struct LoaderSyntax{
-    const char *comment;
-    const char *new_line;
-    const char *value_indicator;
-    const char *start_config;
-    const char *end_config;
-    const char *string_separator;
-    const char *char_separator;
-    const char *start_name;
-    const char *end_name;
-} loader_syntax_s;
+bool checkAllParameterRequirments(
+    const int32_t         verbosity,
+    const loader_data_s   config_data,
+    const loader_config_s default_config,
+    const loader_config_s superconfig
+    ) {
+    
+    bool pass = true;
+    
+    loader_config_s config = default_config;
+
+    const char *name = config_data.name;
+    if (name != NULL)
+    {
+        const map_s subconfig_name_map =
+            createConfigMap(
+                superconfig.defined_subconfigs,
+                superconfig.num_defined_subconfigs,
+                superconfig
+            );
+
+        const int32_t config_name_index = 
+                getMapIndex(subconfig_name_map, name);
+
+        if (config_name_index > -1) 
+        {
+            config = superconfig.defined_subconfigs[config_name_index];
+
+            config.defined_parameters = overwriteParameters(
+                config_data.config.defined_parameters,
+                config_data.parameter_name_map,
+                config
+            );
+            
+            config.num_defined_parameters = config_data.config.num_defined_parameters;
+        }
+    }
+
+    // Check neccesity requirements:
+    if (!checkParameterRequirements(
+        verbosity,
+        config_data.num_parameters_read,
+        config.defined_parameters,
+        config.num_defined_parameters,
+        config
+    ) 
+    ||
+    !checkExtraParameterRequirments(
+        verbosity,
+        config.default_parameter,
+        config_data.num_extra_parameters,
+        config
+    )
+    ||
+    !checkNameRequirments(
+        verbosity,
+        config_data.name,
+        config
+    ))
+    {
+        pass = false;
+    }
+    
+    return pass;
+}
+
+bool checkAllRequirements(
+    const int32_t         verbosity,
+    const loader_data_s   config_data,
+    const loader_config_s config,
+    const loader_config_s superconfig
+    ) {
+    
+    bool pass = true;
+    
+    if (config.is_superconfig)
+    {
+        if (!checkConfigRequirements(
+                verbosity,
+                config.is_superconfig,
+                config_data.num_subconfigs_read,
+                config_data.total_num_subconfigs_read,
+                config.defined_subconfigs,
+                config.num_defined_subconfigs,
+                config))
+        {
+            pass = false;
+        }
+    }
+    else
+    {
+        if (!checkAllParameterRequirments(
+            verbosity,
+            config_data,
+            config,
+            superconfig
+            ))
+        {
+            pass = false;
+        }
+    }
+    
+    return pass;
+}
 
 loader_data_s readSubconfig(
     const int32_t            verbosity,
           loader_syntax_s    syntax,
           loader_config_s    config,
+          loader_config_s    superconfig,
           FILE              *file
     ) {
     
@@ -1288,14 +1378,13 @@ loader_data_s readSubconfig(
           parameter_s      default_parameter      = config.default_parameter;
 
           int32_t          num_defined_subconfigs = config.num_defined_subconfigs;
-    const loader_config_s *defined_subconfigs     = config.defined_subconfigs;
     
     int32_t num_configs  = 1;
     int32_t config_index = 0;
     
-    //Setup superconfig:
-    loader_data_s superconfig = 
-        setupSuperconfig(config, num_configs);
+    //Setup config_data:
+    loader_data_s config_data = 
+        setupConfigData(config, num_configs);
     
     if (!checkLoaderConfig(verbosity, config) ) 
     {	
@@ -1319,7 +1408,6 @@ loader_data_s readSubconfig(
         }
 
 		// Setup and reset config wide parameters:
-		bool             in_config    = false;
         bool             name_read    = false;
 		size_t           line_length  = 1; 
 		char            *line_string  = NULL; //<-- String which will contain the read in line.
@@ -1353,162 +1441,118 @@ loader_data_s readSubconfig(
 				// Checks for config closing anywhere in line:
 				if (strchr(syntax.end_config, line_string[char_index])) 
 				{				
-					// Check neccesity requirements:
-					superconfig.total_num_subconfigs_read = config_index;
-                    
-                    if (!checkParameterRequirements(
+					config_data.total_num_subconfigs_read = config_index;
+                                                            
+                    if (!checkAllRequirements(
                         verbosity,
-                        superconfig.num_parameters_read,
-                        config.defined_parameters,
-                        num_defined_parameters,
-                        config
-                    ) 
-                    ||
-                    !checkExtraParameterRequirments(
-                        verbosity,
-                        default_parameter,
-                        superconfig.num_extra_parameters,
-                        config
-                    )
-                    ||
-                    !checkNameRequirments(
-                        verbosity,
-                        superconfig.name,
-                        config
-                    ))
+                        config_data,
+                        config,
+                        superconfig))
                     {
-                        superconfig.total_num_subconfigs_read = 0;
+                        config_data.total_num_subconfigs_read = -1;
                     }
-                    
-                    return superconfig;
+                                        
+                    return config_data;
 				} 
 
 				// Checks for new config opening anywhere in line:
-				if (!in_config && strchr(syntax.start_config, line_string[char_index]))
+				if ((strchr(syntax.start_config, line_string[char_index])) && is_superconfig)
 				{                      
-                    in_config   = true; 
                     name_read   = false;
                     config_name = NULL;
 
                     // If number of configs greater than allocated in memory,
                     // allocate more memory:
-                    if ((config_index >= num_configs) && (is_superconfig))
+                    if ((config_index >= num_configs))
                     {
                         num_configs = (int32_t) ceil((float) num_configs * 1.5f);
-                        superconfig.subconfigs = 
-                            realloc(superconfig.subconfigs, sizeof(loader_data_s) * (size_t) num_configs);
+                        config_data.subconfigs = 
+                            realloc(config_data.subconfigs, sizeof(loader_data_s) * (size_t) num_configs);
                     }
 
                     // Intilise subconfig to default:
+                    
+                    loader_config_s old_config = config;
                     config = 
                         default_config;
 
                     // Set default parameters:    
                     config.defined_parameters = overwriteParameters(
-                        superconfig.config.defined_parameters,
-                        superconfig.parameter_name_map,
+                        config_data.config.defined_parameters,
+                        config_data.parameter_name_map,
                         config
                     );
+                    
+                    config.num_defined_parameters = config_data.config.num_defined_parameters;
                                         
-                    if (superconfig.config.is_superconfig) 
-                    {
-                        superconfig.subconfigs[config_index].config = config;
-                        
-                        superconfig.subconfigs[config_index] = readSubconfig(
-                            verbosity,
-                            syntax,
-                            config,
-                            file
-                        );  
-                        
-                        const char *name = superconfig.subconfigs[config_index].name;
-                        if (name != NULL)
-                        {
-                            
-                            const int32_t config_name_index = 
-                                    getMapIndex(superconfig.subconfig_name_map, name);
-                            
-                            if (config_name_index > -1) 
-                            {
-                                superconfig.num_subconfigs_read[config_name_index]++;
-                                
-                                config = defined_subconfigs[config_name_index];
+                    config_data.subconfigs[config_index].config = config;
 
-                                config.defined_parameters = overwriteParameters(
-                                    superconfig.config.defined_parameters,
-                                    superconfig.parameter_name_map,
-                                    config
+                    config_data.subconfigs[config_index] = readSubconfig(
+                        verbosity,
+                        syntax,
+                        config,
+                        config_data.config,
+                        file
+                    );  
+
+                    if (config_data.subconfigs[config_index].total_num_subconfigs_read < 0)
+                    {
+                        config_data.total_num_subconfigs_read = -1;
+                        return config_data;
+                    }
+
+                    const char *name = config_data.subconfigs[config_index].name;
+                    if (name != NULL)
+                    {
+
+                        const int32_t config_name_index = 
+                                getMapIndex(config_data.subconfig_name_map, name);
+
+                        if (config_name_index > -1) 
+                        {
+                            config_data.num_subconfigs_read[config_name_index]++;
+                        }
+                        else
+                        {
+                            dict_entry_s* entry = 
+                                findDictEntry_(
+                                    num_extra_configs, 
+                                    name
                                 );
+
+                            if (entry == NULL) 
+                            {								
+                                multi_s data;
+                                data.value.i = 1;
+                                data.type = int_e;
+
+                                insertDictEntry(
+                                    num_extra_configs, 
+                                    data, 
+                                    name
+                                );		
+
+                                data.value.i++;	
                             }
                             else
                             {
-                                dict_entry_s* entry = 
-                                    findDictEntry_(
-                                        num_extra_configs, 
-                                        name
-                                    );
-
-                                if (entry == NULL) 
-                                {								
-                                    multi_s data;
-                                    data.value.i = 1;
-                                    data.type = int_e;
-
-                                    insertDictEntry(
-                                        num_extra_configs, 
-                                        data, 
-                                        name
-                                    );		
-
-                                    data.value.i++;	
-                                }
-                                else
-                                {
-                                    entry->data.value.i++;
-                                }
-                            }   
-                        }
-                        
-                        if (!checkParameterRequirements(
-                            verbosity,
-                            superconfig.subconfigs[config_index].num_parameters_read,
-                            config.defined_parameters,
-                            num_defined_parameters,
-                            config
-                        ) 
-                        ||
-                        !checkExtraParameterRequirments(
-                            verbosity,
-                            default_parameter,
-                            superconfig.subconfigs[config_index].num_extra_parameters,
-                            config
-                        )
-                        ||
-                        !checkNameRequirments(
-                            verbosity,
-                            name,
-                            config
-                        ))
-                        {
-                            superconfig.total_num_subconfigs_read = 0;
-
-                            return superconfig;
-                        }
-                    }		
+                                entry->data.value.i++;
+                            }
+                        }   
+                    }
                     
-                    in_config = false; 
+                    config = old_config;
+                                        
 					config_index++; 
 					                    
                     break;	
 				}                 
-				else if (in_config && strchr(syntax.start_config, line_string[char_index])) 
+				else if (strchr(syntax.start_config, line_string[char_index]))
 				{
-                    {
-                        fprintf(stderr, "Warning! Unexpected config opening '{' \n"); 
-                        
-                        superconfig.total_num_subconfigs_read = 0;
-						return superconfig;
-                    }
+                    fprintf(stderr, "Warning! Unexpected config opening '{' \n"); 
+
+                    config_data.total_num_subconfigs_read = -1;
+                    return config_data;
 				}
                 
                 // Checks for config name character and reads name if found:
@@ -1517,7 +1561,30 @@ loader_data_s readSubconfig(
                     if (name_read == false) 
                     {
                         config_name = strtok(&line_string[char_index + 1], syntax.end_name);
-                        superconfig.name = strdup(config_name);
+                        config_data.name = strdup(config_name);
+                                                
+                        const map_s subconfig_name_map =
+                        createConfigMap(
+                            superconfig.defined_subconfigs,
+                            superconfig.num_defined_subconfigs,
+                            superconfig
+                        );
+                        
+                        const int32_t config_name_index = 
+                                getMapIndex(subconfig_name_map, config_name);
+
+                        if (config_name_index > -1) 
+                        {
+                            config = superconfig.defined_subconfigs[config_name_index];
+
+                            config.defined_parameters = overwriteParameters(
+                                config_data.config.defined_parameters,
+                                config_data.parameter_name_map,
+                                config
+                            );
+
+                            config.num_defined_parameters = config_data.config.num_defined_parameters;
+                        }
                         
                         name_read = true;
                     }
@@ -1558,12 +1625,12 @@ loader_data_s readSubconfig(
                     parameter_end = true;
                     
 					parameter_index = 
-						getMapIndex(superconfig.parameter_name_map, parameter_name);
+						getMapIndex(config_data.parameter_name_map, parameter_name);
                         										
 					if (parameter_index > -1) 
 					{
-						parameter_type = superconfig.config.defined_parameters[parameter_index].type;
-						superconfig.num_parameters_read[parameter_index]++;
+						parameter_type = config_data.config.defined_parameters[parameter_index].type;
+						config_data.num_parameters_read[parameter_index]++;
                         
 						parameter_recognised = true;
 					} 
@@ -1573,7 +1640,7 @@ loader_data_s readSubconfig(
 						
 						dict_entry_s* entry = 
 							findDictEntry_(
-								superconfig.num_extra_parameters, 
+								config_data.num_extra_parameters, 
 								parameter_name
 							);
 						
@@ -1584,7 +1651,7 @@ loader_data_s readSubconfig(
 							data.type = int_e;
 							
 							insertDictEntry(
-								superconfig.num_extra_parameters, 
+								config_data.num_extra_parameters, 
 								data, 
 								parameter_name
 							);		
@@ -1640,7 +1707,7 @@ loader_data_s readSubconfig(
 						int32_t extra_parameter_start_index = 0;
 						
 						if     ((parameter_recognised) 
-							&& (superconfig.num_parameters_read[parameter_index] > 1))
+							&& (config_data.num_parameters_read[parameter_index] > 1))
 						{
 							extra_parameter_start_index = 2;
 						} 
@@ -1650,26 +1717,26 @@ loader_data_s readSubconfig(
 						}
 						
 						if (   (parameter_recognised) 
-							&& (superconfig.num_parameters_read[parameter_index] < 2)) 
+							&& (config_data.num_parameters_read[parameter_index] < 2)) 
 						{
 							castToVoidArray(
 								verbosity,
 								value_string, 
 								types, 
 								parameter_index, 
-								superconfig.structure
+								config_data.structure
 							);
 						}
 						else 
 						{
 							addExtraParameter(
 								verbosity,
-								superconfig.extra_parameters,
+								config_data.extra_parameters,
 								parameter_name,
 								parameter_type,
 								parameter_index, 
 								extra_parameter_start_index, 
-								superconfig.num_parameters_read[parameter_index],
+								config_data.num_parameters_read[parameter_index],
 								value_string
 							);
 						}
@@ -1695,90 +1762,72 @@ loader_data_s readSubconfig(
 			}
 		}
         
-        superconfig.total_num_subconfigs_read = config_index;
+        config_data.total_num_subconfigs_read = config_index;
     }
-        
-    return superconfig;
+    
+    if (!checkAllRequirements(
+        verbosity,
+        config_data,
+        superconfig,
+        superconfig))
+    {
+        config_data.total_num_subconfigs_read = -1;
+    }
+    
+    return config_data;
 }
 
 void* readConfig(
 	 const int32_t            verbosity,
      const char              *file_name,  
 	 const loader_config_s    config,
-	       loader_data_s     *ret_cofig_data
+	       loader_data_s     *ret_cofig_data,
+           int64_t           *file_position
     ){
-	
-	// Paser settings:
-    loader_syntax_s syntax = { 
-        .comment          = "#",
-        .new_line         = ";",
-        .value_indicator  = "=",
-        .start_config     = "{",
-        .end_config       = "}",
-        .string_separator = "\"",
-        .char_separator   = "\'",
-        .start_name       = "[",
-        .end_name         = "]"
-    };
-
-        const int32_t initial_num_configs = 1;
-		   
-	//Derived Parameters:
-    
-              int32_t          config_index             = 0;
-              int32_t          num_configs              = initial_num_configs;
-
-        const bool             is_superconfig           = config.is_superconfig;
-
-              int32_t          num_defined_subconfigs   = config.num_defined_subconfigs;
-        const loader_config_s *defined_subconfigs       = config.defined_subconfigs;
         
     // Initlise empty pointer:
-        void    *config_structs       = NULL;
+    void    *config_structs       = NULL;
         
 	// Opening file:
 	FILE* file;	
     
-    loader_data_s superconfig;
+    printf("%i \n", file_position[0]);
+    
+    loader_data_s config_data;
+    config_data.total_num_subconfigs_read = -1;
+    
     if (checkOpenFile(verbosity, file_name, "r", &file))
     {
-        superconfig = readSubconfig(
+    
+        file += *file_position;
+        
+        config_data = readSubconfig(
             verbosity,
             syntax,
+            config,
             config,
             file
         );
         
-        config_index = superconfig.total_num_subconfigs_read;
+        *file_position = ftell(file);
+        
+        fclose(file);
     } 
-        
-    if ((
-        !checkConfigRequirements(
-            verbosity,
-            is_superconfig,
-            superconfig.num_subconfigs_read,
-            superconfig.total_num_subconfigs_read,
-            defined_subconfigs,
-            num_defined_subconfigs,
-            superconfig.config
-        ) )
-        ||
-        (config_index <= 0))
+    
+    if (config_data.total_num_subconfigs_read < 0)
     {
-        freeConfigData(superconfig);
-        
+        freeConfigData(config_data);
         config_structs = NULL;
-        config_index = 0;
     }
     else
     {
         config_structs = setConfigStructs(
-            superconfig.config,
-            superconfig
+            config_data.config,
+            config_data
         ); 
     }
 		
-	*ret_cofig_data = superconfig;
+	*ret_cofig_data = config_data;
 	
 	return config_structs;
 }

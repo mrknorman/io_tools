@@ -40,13 +40,17 @@ bool checkLoaderReturnNull(
     
     char *config_file_path;
 	asprintf(&config_file_path, "./%s/%s", config_directory_name, file_name);
+    
+    int64_t file_position[] = {0};
+    
 	test_results = 
 		((test_config_s**) 
 			 readConfig(
 			     verbosity,
 				 config_file_path, 
 				 loader_config,
-				 &config_data
+				 &config_data,
+                 file_position
 			 )
 		);
 	free(config_file_path);
@@ -157,14 +161,20 @@ bool testSingleConfig(
 	const int32_t expected_num_configs = 1;
 	      int32_t num_configs = 0; 
     
+    int64_t file_position[] = {0};
+
 	test_config_s** all_test_results = 
 		(test_config_s**) 
 			 readConfig(
 			     verbosity,
 				 config_file_path, 
 				 loader_config,
-				 &config_data
+				 &config_data,
+                 file_position
 			 );
+             
+    printf("%i \n", file_position);
+
     num_configs = config_data.total_num_subconfigs_read;
     test_config_s *test_results = NULL;
     if (all_test_results != NULL) 
@@ -172,7 +182,7 @@ bool testSingleConfig(
         test_results = all_test_results[0];
     }
 	
-	if (!num_configs == expected_num_configs) {
+	if (!num_configs == (expected_num_configs - 1)) {
 		pass = false; 
 		fprintf(
 			stderr, 
@@ -195,7 +205,7 @@ bool testSingleConfig(
 			.parameter_bool   = false,
 			.parameter_char   = 'a'
 		};
-
+        
 		uni_s *cells = malloc(sizeof(uni_s)* (size_t) ( expected_num_configs * expected_num_parameters * 2 ));
 
 		const int32_t cell_index = 0; 
@@ -245,13 +255,15 @@ bool testVariableConfig(
 	const int32_t         expected_num_configs = 5;
 		  int32_t         num_configs = 0;   
     
+    int64_t file_position[] = {0};
     test_config_s** test_results = 
 		((test_config_s**) 
 			 readConfig(
 			     verbosity,
 				 config_file_path, 
 				 loader_config,
-				 &config_data
+				 &config_data,
+                 file_position
 			 )
 		);
 	num_configs = config_data.total_num_subconfigs_read;
@@ -344,14 +356,16 @@ bool testMultiConfig(
 	
 	const int32_t expected_num_parameters = 5;
 	const int32_t expected_num_configs = 3;
-		  
+    
+    int64_t file_position[] = {0};
 	test_config_s** test_results = 
 		((test_config_s**) 
 			 readConfig(
 			     verbosity,
 				 config_file_path, 
 				 loader_config,
-				 &config_data
+				 &config_data,
+                 file_position
 			 )
 		);
     const int32_t num_configs = config_data.total_num_subconfigs_read;
@@ -442,14 +456,16 @@ bool testConfigOrder(
 	const int32_t expected_num_parameters = 5;
 	const int32_t expected_num_configs = 3;
 		  int32_t num_configs = 0; 
-		  
+    
+    int64_t file_position[] = {0};
 	test_config_s** test_results = 
 		((test_config_s**) 
 			 readConfig(
 			     verbosity,
 				 config_file_path, 
 				 loader_config,
-				 &config_data
+				 &config_data,
+                 file_position
 			 )
 		);
     num_configs = config_data.total_num_subconfigs_read;
@@ -574,13 +590,16 @@ bool testExtraParameterConfig(
 	
 	file_name = "extra_parameter_tests/extra_parameter_test_0.cfg";
 	asprintf(&config_file_path, "./%s/%s", config_directory_name, file_name);
+    
+    int64_t file_position[] = {0};
 	test_results = 
 		((test_config_s**) 
 			 readConfig(
 			     verbosity,
 				 config_file_path, 
 				 loader_config,
-				 &config_data
+				 &config_data,
+                 file_position
 			 )
 		);
     num_configs = config_data.total_num_subconfigs_read;
@@ -661,13 +680,16 @@ bool testExtraParameterConfig(
         
     file_name = "extra_parameter_tests/extra_parameter_test_1.cfg";
 	asprintf(&config_file_path, "./%s/%s", config_directory_name, file_name);
+    
+    *file_position = 0;
 	test_results = 
 		((test_config_s**) 
 			 readConfig(
 			     verbosity,
 				 config_file_path, 
 				 loader_config,
-				 &config_data
+				 &config_data,
+                 file_position
 			 )
 		);
     num_configs = config_data.total_num_subconfigs_read;
@@ -739,13 +761,16 @@ bool testNameRequrimentConfig(
 
         file_name = "name_requirement_tests/name_requirement_test_3.cfg";
         asprintf(&config_file_path, "./%s/%s", config_directory_name, file_name);
+        
+        int64_t file_position[] = {0};
         test_results = 
             ((test_config_s**) 
                  readConfig(
                      verbosity,
                      config_file_path, 
                      loader_config,
-                     &config_data
+                     &config_data,
+                     file_position
                  )
             );
 
@@ -840,10 +865,15 @@ bool testNestedConfig(
     
     #include "nested_config_test.h"	
     
-    const int32_t num_tests = 1;
+    const int32_t num_tests = 4;
     loader_null_test_s test_configs[] = 
     {
-        {"nested_config_tests/nested_config_test_0.cfg", false}
+        {"nested_config_tests/nested_config_test_0.cfg", false},
+        {"nested_config_tests/nested_config_test_1.cfg", true},
+        {"nested_config_tests/nested_config_test_2.cfg", true},
+        {"nested_config_tests/nested_config_test_3.cfg", true}
+
+
     };
     
     for (int32_t index = 0; index < num_tests; index++) 

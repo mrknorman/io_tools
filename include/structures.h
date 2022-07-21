@@ -86,4 +86,32 @@ typedef struct LoaderData {
     
 } loader_data_s;
 
+typedef struct LoaderSyntax{
+    const char *comment;
+    const char *new_line;
+    const char *value_indicator;
+    const char *start_config;
+    const char *end_config;
+    const char *string_separator;
+    const char *char_separator;
+    const char *start_name;
+    const char *end_name;
+    const char* end_section;
+} loader_syntax_s;
+
+// Paser settings:
+loader_syntax_s syntax = 
+{ 
+    .comment          = "#",
+    .new_line         = ";",
+    .value_indicator  = "=",
+    .start_config     = "{",
+    .end_config       = "}",
+    .string_separator = "\"",
+    .char_separator   = "\'",
+    .start_name       = "[",
+    .end_name         = "]",
+    .end_section      = "%"
+};
+
 #endif
