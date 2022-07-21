@@ -1598,6 +1598,28 @@ loader_data_s readSubconfig(
                     }
 					break; 
 				}
+                
+                // Checks for new segment character returns if found:
+				if (strchr(syntax.end_section, line_string[char_index])) 
+				{ 	
+                    //TODO: Add in error checking to check if in config.
+                    
+                    //Skip line:
+                    getline(&line_string, &line_length, file);
+                    
+					config_data.total_num_subconfigs_read = config_index;
+                                                            
+                    if (!checkAllRequirements(
+                        verbosity,
+                        config_data,
+                        config,
+                        superconfig))
+                    {
+                        config_data.total_num_subconfigs_read = -1;
+                    }
+                                        
+                    return config_data;
+				}
     
 				// Checks for comment character and starts a new line if found:
 				if (strchr(syntax.comment, line_string[char_index])) 
@@ -1789,17 +1811,14 @@ void* readConfig(
     void    *config_structs       = NULL;
         
 	// Opening file:
-	FILE* file;	
-    
-    printf("%i \n", file_position[0]);
-    
+	FILE* file = NULL;	
+        
     loader_data_s config_data;
     config_data.total_num_subconfigs_read = -1;
     
     if (checkOpenFile(verbosity, file_name, "r", &file))
-    {
-    
-        file += *file_position;
+    {        
+        fseek(file, *file_position, SEEK_SET);
         
         config_data = readSubconfig(
             verbosity,
@@ -1813,7 +1832,7 @@ void* readConfig(
         
         fclose(file);
     } 
-    
+        
     if (config_data.total_num_subconfigs_read < 0)
     {
         freeConfigData(config_data);

@@ -892,6 +892,175 @@ bool testNestedConfig(
     return pass;
 }
 
+bool testMultiTypeConfig(
+	const int32_t  verbosity,
+	const char    *config_directory_name
+	) {
+    
+    #include "multi_config_test.h"	
+    
+    char *file_name = "multi_type_test.cfg";
+
+	bool pass = true;
+	
+    loader_data_s config_data;
+    
+    char* config_file_path;
+	asprintf(&config_file_path, "./%s/%s", config_directory_name, file_name);
+	
+	int32_t expected_num_parameters = 5;
+	int32_t expected_num_configs = 1;
+    int32_t num_configs = 0; 
+    
+    int64_t file_position[] = {0};
+
+	test_config_s** all_test_results = 
+		(test_config_s**) 
+			 readConfig(
+			     verbosity,
+				 config_file_path, 
+				 subconfig,
+				 &config_data,
+                 file_position
+			 );
+             
+    printf("%i \n", file_position);
+
+    num_configs = config_data.total_num_subconfigs_read;
+    test_config_s *test_results = NULL;
+    if (all_test_results != NULL) 
+    {
+        test_results = all_test_results[0];
+    }
+	
+	if (!num_configs == (expected_num_configs - 1)) {
+		pass = false; 
+		fprintf(
+			stderr, 
+			"Number of configs found (%i) does not match expected (%i). \n",
+			num_configs, expected_num_configs
+		);
+	}
+	
+	if (test_results == NULL) 
+	{
+		printf("Load Config returned NULL! \n");
+		pass = false;
+	} 
+	else
+	{
+		test_config_s known_results = {
+			.parameter_string = "Config Test",
+			.parameter_float  = 1.1f,
+			.parameter_int    = 1,
+			.parameter_bool   = false,
+			.parameter_char   = 'a'
+		};
+        
+		uni_s *cells = malloc(sizeof(uni_s)* (size_t) ( expected_num_configs * expected_num_parameters * 2 ));
+
+		const int32_t cell_index = 0; 
+		setTableCells(
+			known_results, 
+			test_results, 
+			expected_num_parameters, 
+			cell_index, 
+			cells
+		);
+		
+		pass *= 
+			configTestCompare(known_results, test_results);
+		
+		plotConfigTestTable(
+			expected_num_configs, 
+			expected_num_parameters,
+			"Single Config Test",
+			cells
+		);
+	}
+    
+	expected_num_parameters = 5;
+	expected_num_configs = 3;
+    
+	all_test_results = 
+		((test_config_s**) 
+			 readConfig(
+			     verbosity,
+				 config_file_path, 
+				 loader_config,
+				 &config_data,
+                 file_position
+			 )
+		);
+    num_configs = config_data.total_num_subconfigs_read;
+		
+	if (!num_configs == expected_num_configs) {
+		pass = false; 
+		fprintf(
+			stderr, 
+			"Number of configs found (%i) does not match expected (%i). \n",
+			num_configs, expected_num_configs
+		);
+	}
+	
+	if (all_test_results == NULL) 
+	{
+		printf("Load Config returned NULL! \n");
+		pass = false;
+	} 
+	else
+	{
+		const char *  initial_string = "Config Test";
+		const float   initial_float  = 1.0f;
+		const int32_t initial_int    = 0;
+		const bool    bool_array[]   = {false, true, false};
+		const char    char_array[]   = {'a', 'b', 'c'};
+
+		uni_s *cells = malloc(sizeof(uni_s)* (size_t) ( expected_num_configs * expected_num_parameters * 2 ));
+		for (int32_t index = 0; index < expected_num_configs; index++) {
+
+			char *parameter_string;
+			asprintf(&parameter_string, "%s %i", initial_string, index);
+
+			test_config_s known_results = {
+				.parameter_string = parameter_string,
+				.parameter_float  = initial_float + ((float)index * 0.1f),
+				.parameter_int    = initial_int + index,
+				.parameter_bool   = bool_array[index],
+				.parameter_char   = char_array[index]
+			};
+
+			int32_t cell_index = index*expected_num_parameters*2;
+			
+			const test_config_s *test_result = all_test_results[index];
+			
+			setTableCells(
+				known_results, 
+				test_result, 
+				expected_num_parameters, 
+				cell_index, 
+				cells
+			);
+
+			pass *= 
+				configTestCompare(known_results, test_result);
+		}
+
+		plotConfigTestTable(
+			expected_num_configs, 
+			expected_num_parameters,
+			"Multi Type Test",
+			cells
+		);
+	}
+	
+	printTestResult(pass, "multi type test.");
+	
+	free(config_file_path);
+
+	return pass;
+}
+
 int main() {
 	
 	const int32_t verbosity = 3;
@@ -960,12 +1129,11 @@ int main() {
             config_directory_name
         ); 
     
-    // Default Variable Test
-	// Comment Test
-	
-	// Default Config Test
-	
-	// Nested Config Test
+    pass *=  
+        testMultiTypeConfig(
+            verbosity,
+            config_directory_name
+        ); 
 	
 	printTestResult(pass, "all tests.");
 	
