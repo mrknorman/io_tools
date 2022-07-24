@@ -34,6 +34,7 @@ loader_config_s subconfig =
 	.name_necessity         = required_e,
 
 	.is_superconfig         = false,
+	.inherit                = true,
     .min                    = 1,
     .max                    = 1,
     

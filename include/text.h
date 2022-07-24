@@ -651,7 +651,7 @@ bool writeFileDouble(
 
 	bool success = false;
 
-	FILE* file;
+	FILE* file = NULL;
 	if( createOpenFile(1, file_name, "w+", &file) )
 	{
 		//Skips to start line:
@@ -689,11 +689,14 @@ bool writeFileDouble(
 		}
 
 		success = true;
-		fclose(file);
+		
+		if (file != NULL)
+		{
+			fclose(file);
+		}
 	} 
 	else 
 	{
-
 		success = false;
 		fprintf(stderr, "Warning! Failed to create file \"%s\"!\n", file_name);
 	}

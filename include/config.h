@@ -1284,14 +1284,17 @@ bool checkAllParameterRequirments(
         if (config_name_index > -1) 
         {
             config = superconfig.defined_subconfigs[config_name_index];
-
-            config.defined_parameters = overwriteParameters(
-                config_data.config.defined_parameters,
-                config_data.parameter_name_map,
-                config
-            );
-            
-            config.num_defined_parameters = config_data.config.num_defined_parameters;
+			
+			if (config.inherit) 
+			{
+				config.defined_parameters = overwriteParameters(
+					config_data.config.defined_parameters,
+					config_data.parameter_name_map,
+					config
+				);
+				
+				config.num_defined_parameters = config_data.config.num_defined_parameters;
+			}
         }
     }
 
@@ -1475,15 +1478,18 @@ loader_data_s readSubconfig(
                     loader_config_s old_config = config;
                     config = 
                         default_config;
+					
+					if (config.inherit)
+					{
+						// Set default parameters:    
+						config.defined_parameters = overwriteParameters(
+							config_data.config.defined_parameters,
+							config_data.parameter_name_map,
+							config
+						);
 
-                    // Set default parameters:    
-                    config.defined_parameters = overwriteParameters(
-                        config_data.config.defined_parameters,
-                        config_data.parameter_name_map,
-                        config
-                    );
-                    
-                    config.num_defined_parameters = config_data.config.num_defined_parameters;
+						config.num_defined_parameters = config_data.config.num_defined_parameters;
+					}
                                         
                     config_data.subconfigs[config_index].config = config;
 
@@ -1576,14 +1582,17 @@ loader_data_s readSubconfig(
                         if (config_name_index > -1) 
                         {
                             config = superconfig.defined_subconfigs[config_name_index];
+							
+							if (config.inherit)
+							{
+								config.defined_parameters = overwriteParameters(
+									config_data.config.defined_parameters,
+									config_data.parameter_name_map,
+									config
+								);
 
-                            config.defined_parameters = overwriteParameters(
-                                config_data.config.defined_parameters,
-                                config_data.parameter_name_map,
-                                config
-                            );
-
-                            config.num_defined_parameters = config_data.config.num_defined_parameters;
+								config.num_defined_parameters = config_data.config.num_defined_parameters;
+							}
                         }
                         
                         name_read = true;

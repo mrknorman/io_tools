@@ -34,6 +34,7 @@ typedef struct LoaderConfig{
 	char                *name;
 	necessity_e          name_necessity;
 	
+	bool                 inherit;
 	bool                 is_superconfig;    
     bool                 reorder;
 
