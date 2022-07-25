@@ -35,6 +35,7 @@ loader_config_s subsubconfig =
 	.name_necessity         = required_e,
 
 	.is_superconfig         = false,
+	.has_parameters         = true,
     .min                    = 0,
     .max                    = 1,
     
@@ -69,6 +70,7 @@ loader_config_s subconfig =
 	.name_necessity         = required_e,
 
 	.is_superconfig         = true,
+	.has_parameters         = false,
     .min                    = 1,
     .max                    = 1,
     
@@ -157,6 +159,7 @@ loader_config_s loader_config =
 	.name_necessity         = required_e,
 
 	.is_superconfig         = true,
+	.has_parameters         = false,
     .reorder                = false,
     
     .min                    = 1,

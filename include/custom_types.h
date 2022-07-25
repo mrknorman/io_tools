@@ -16,20 +16,24 @@ typedef enum Type {
      * Enum to represent type.
      */
 	
-	none_e        ,
-	bool_e        ,
-	int_e         , 
-	int_array_e   ,
-	int_jagged_e  ,
-	float_e       , 
-	float_array_e , 
+	none_e,
+	bool_e,
+	bool_array_e,
+	int_e, 
+	int_array_e,
+	int_jagged_e,
+	float_e, 
+	float_array_e, 
 	float_jagged_e, 
-	char_e        ,
-	string_e      , 
+	char_e,
+	char_array_e,
+	string_e, 
 	string_array_e
 } type_e;
 
-typedef union Universal_U {
+char *typeToString(const type_e type);
+
+typedef union UniversalU {
 	
 	/**
      * Union to store commonly used types.
@@ -42,14 +46,14 @@ typedef union Universal_U {
 	char  * s;
 } uni_u;
 
-typedef struct Universal_S {
+typedef struct UniversalS {
 	
 	/**
      * Structure to store commonly used types and their type.
      */
 	  	
 	uni_u  value;
-	type_e type ;
+	type_e type;
 	
 } uni_s;
 
@@ -71,13 +75,14 @@ uni_s UniS(
 	return return_union;
 }
 
-typedef union Universal_Multi_U {
+typedef union UniversalMultiU {
 	
 	/**
      * Union to store commonly used types and array pointers.
      */
 	
 	bool      b;
+	bool     *bb;
 	
 	int32_t   i; 
 	int32_t  *ii;
@@ -88,21 +93,23 @@ typedef union Universal_Multi_U {
 	float   **fff;
 	
 	char      c;
+	char     *cc;
+	
 	char     *s;
 	char    **ss;
 	
 } multi_u;
 
-typedef struct Universal_Multi_S {
+typedef struct UniversalMultiS {
 	
 	/**
      * Structure to store commonly used types and array pointers, 
 	 * as well as their types and lengths.
      */
 
-	multi_u  value  ;
-	type_e   type   ;
-	int32_t  length ;
+	multi_u  value;
+	type_e   type;
+	int32_t  length;
 	int32_t *lengths;	
 } multi_s;
 
@@ -126,6 +133,98 @@ multi_s MultiS(
 	return data;
 }
 
+typedef struct BoolArray {
+	int32_t  num_elements;
+	bool    *elements;
+} bool_array_s;
+
+typedef struct IntArray {
+	int32_t  num_elements;
+	int32_t *elements;
+} int_array_s;
+
+typedef struct FloatArray {
+	int32_t  num_elements;
+	float   *elements;
+} float_array_s;
+
+typedef struct CharArray {
+	int32_t  num_elements;
+	char    *elements;
+} char_array_s;
+
+typedef struct StringArray {
+	int32_t   num_elements;
+	char    **elements;
+} string_array_s;
+
+typedef union multiArray{
+	bool_array_s   bb;
+	int_array_s    ii;
+	float_array_s  ff;
+	char_array_s   cc;
+	string_array_s ss;
+} array_u;
+
+typedef struct multiArrayS{
+	array_u data;
+	type_e  type;
+} array_s;
+
+array_s ArrayS(
+	int32_t  verbosity,
+	void    *elements,
+	int32_t  num_elements,
+	type_e   type
+	) {
+	
+	array_s array;
+	
+	array.type              = type;
+	
+	switch (type) 
+	{
+		case(bool_array_e): 
+			array.data.bb.elements     = (bool*   ) elements;
+			array.data.bb.num_elements =            num_elements;
+		break;
+		
+		case(int_array_e ): 
+			array.data.ii.elements     = (int32_t*) elements;
+			array.data.ii.num_elements =            num_elements;
+		break;
+		
+		case(float_array_e ): 
+			array.data.ff.elements     = (float*  ) elements;
+			array.data.ff.num_elements =            num_elements;
+		break;
+		
+		case(char_array_e):
+			array.data.cc.elements     = (char*  ) elements;
+			array.data.cc.num_elements =           num_elements;
+		break;
+		
+		case(string_array_e):
+			array.data.ss.elements     = (char** ) elements;
+			array.data.ss.num_elements =           num_elements;
+		break;
+		
+		default:
+			if (verbosity > 1)
+			{
+				fprintf(
+					stderr,
+					"ArrayS: \nWarning! Type %s not supported when string from"
+					"array. \n",
+					typeToString(type)
+				);
+			}
+		break;
+	}
+	
+	return array;
+}
+
 size_t getSizeOfType(
 	const type_e type
 	) {
@@ -141,27 +240,30 @@ size_t getSizeOfType(
 	size_t size = 0;
 	switch(type) 
 	{	
-		case(none_e        ): size = 0                 ; break;
-		case(bool_e        ): size = sizeof(bool      ); break;
+		case(none_e        ): size = 0                ; break;
+		case(bool_e        ): size = sizeof(bool     ); break;
+		case(bool_array_e  ): size = sizeof(bool*    ); break;
 		
-		case(int_e         ): size = sizeof(int32_t   ); break;
-		case(int_array_e   ): size = sizeof(int32_t  *); break;
-		case(int_jagged_e  ): size = sizeof(int32_t **); break;			
+		case(int_e         ): size = sizeof(int32_t  ); break;
+		case(int_array_e   ): size = sizeof(int32_t* ); break;
+		case(int_jagged_e  ): size = sizeof(int32_t**); break;			
 			
-		case(float_e       ): size = sizeof(float     ); break;
-		case(float_array_e ): size = sizeof(float    *); break;
-		case(float_jagged_e): size = sizeof(float   **); break;		
+		case(float_e       ): size = sizeof(float    ); break;
+		case(float_array_e ): size = sizeof(float*   ); break;
+		case(float_jagged_e): size = sizeof(float**  ); break;		
 
-		case(char_e        ): size = sizeof(char      ); break;
-		case(string_e      ): size = sizeof(char     *); break;		
-		case(string_array_e): size = sizeof(char    **); break;
+		case(char_e        ): size = sizeof(char     ); break;
+		case(char_array_e  ): size = sizeof(char*    ); break;
+		
+		case(string_e      ): size = sizeof(char*    ); break;		
+		case(string_array_e): size = sizeof(char**   ); break;
 			
 		default:
 			
 			fprintf(
 				stderr, 
-				"Warning! Type \"%i\" not recognised! \n", 
-				type
+				"getSizeOfType: \nWarning! Type \"%s\" not recognised! \n", 
+				typeToString(type)
 			);
 		break;
 	}
@@ -169,7 +271,48 @@ size_t getSizeOfType(
 	return size;
 }
 
-char *typetoString(
+type_e getBaseType(
+	const type_e type
+	) {
+	
+	type_e base_type = none_e;
+	switch(type) 
+	{	
+		case(none_e        ): base_type = none_e           ; break;
+		
+		case(bool_e        ): base_type = bool_e  ; break;
+		case(bool_array_e  ): base_type = bool_e  ; break;
+		
+		case(int_e         ): base_type = int_e  ; break;
+		case(int_array_e   ): base_type = int_e  ; break;
+		case(int_jagged_e  ): base_type = int_e  ; break;			
+			
+		case(float_e       ): base_type = float_e ; break;
+		case(float_array_e ): base_type = float_e ; break;
+		case(float_jagged_e): base_type = float_e ; break;		
+
+		case(char_e        ): base_type = char_e  ; break;
+		case(char_array_e  ): base_type = char_e  ; break;
+		
+		case(string_e      ): base_type = string_e; break;		
+		case(string_array_e): base_type = string_e; break;
+			
+		default:
+			
+			fprintf(
+				stderr, 
+				"getSizeOfType: \nWarning! Type \"%s\" not recognised! \n", 
+				typeToString(type)
+			);
+			
+			base_type = none_e;
+		break;
+	}
+	
+	return base_type;
+}
+
+char *typeToString(
 	const type_e type
 	) {
 	
@@ -186,7 +329,8 @@ char *typetoString(
 	{	
 		case(none_e        ): string = "none"              ; break;
 		case(bool_e        ): string = "bool"              ; break;
-		
+		case(bool_array_e  ): string = "bool array"        ; break;
+
 		case(int_e         ): string = "int"               ; break;
 		case(int_array_e   ): string = "int array"         ; break;
 		case(int_jagged_e  ): string = "jagged int array"  ; break;			
@@ -196,12 +340,18 @@ char *typetoString(
 		case(float_jagged_e): string = "jagged float array"; break;		
 
 		case(char_e        ): string = "char"              ; break;
+		case(char_array_e  ): string = "char array"        ; break;
+		
 		case(string_e      ): string = "string"            ; break;		
 		case(string_array_e): string = "string array"      ; break;
 			
 		default:
 			
-			fprintf(stderr, "Warning! Type \"%i\" not recognised! \n", type);
+			fprintf(
+				stderr,
+				"typeToString: \nWarning! Type \"%i\" not recognised! \n", 
+				type
+			);
 		break;
 	}
 	
@@ -228,6 +378,7 @@ bool comapareMultiS(
 	{	
 		case(none_e        ): pass = false; break;
 		case(bool_e        ): pass = (data_a.value.b == data_b.value.b); break;
+		case(bool_array_e  ): pass = false; break;		
 		
 		case(int_e         ): pass = (data_a.value.b == data_b.value.b); break;
 		case(int_array_e   ): pass = false; break;
@@ -238,16 +389,142 @@ bool comapareMultiS(
 		case(float_jagged_e): pass = false; break;		
 
 		case(char_e        ): pass = (data_a.value.b == data_b.value.b); break;
+		case(char_array_e  ): pass = false; break;		
+
 		case(string_e      ): pass = (bool) !strcmp(data_a.value.s, data_b.value.s); break;		
 		case(string_array_e): pass = false; break;
 			
 		default:
 			
-			fprintf(stderr, "Warning! Type \"%i\" not recognised! \n", type);
+			fprintf(
+				stderr, 
+				"comapareMultiS: \nWarning! Type \"%s\" not recognised! \n",
+				typeToString(type)
+			);
 		break;
 	}
 	
 	return pass;
+}
+
+bool stringToBool(
+	const int32_t  verbosity,
+	const char    *string
+	) {
+	
+	bool    value     = false;
+	
+	if isdigit(string[0]) 
+	{
+		int32_t bool_value = atoi(string);
+
+		if ((bool_value > 1) || (bool_value < 0)) 
+		{
+			if (verbosity > 1) 
+			{
+				fprintf(
+					stderr, 
+					"stringToBool: \nWarning! Bool value %s not recognised! \n", 
+					string
+				);
+			}
+			value = false;
+		} 
+		else 
+		{
+			value = (bool) atoi(string); 
+		}
+	} 
+	else if (!strcmp(string, "true")) 
+	{
+		value = true;
+	} 
+	else if (!strcmp(string, "false")) 
+	{
+		value = false;
+	} 
+	else 
+	{
+		if (verbosity > 1) 
+		{
+			fprintf(
+				stderr, 
+				"stringToBool: \nWarning! Bool value %s not recognised! \n", 
+				string
+			);
+		}
+		value = false;
+	}
+
+	return value;
+}
+
+int32_t stringToInt(
+	const int32_t  verbosity,
+	const char    *string
+	) {
+	
+	int32_t value = 0;
+	
+	if ( strchr(string, '.') ) 
+	{
+		fprintf(
+			stderr, 
+			"stringToInt: \nWarning! Decimal detected in: %s, ignoring post"
+			" decimal values. \n", 
+			string
+		);
+
+		char *string_copy = strdup(string);
+		strtok(string_copy, ".");
+
+		string = string_copy;
+	}
+
+	if isdigit(string[0]) 
+	{
+		value = (int32_t) atoi(string); 
+	} 
+	else 
+	{	
+		if (verbosity > 1) 
+		{
+			fprintf(
+				stderr, 
+				"stringToInt: \nWarning! Int value %s not recognised! \n", 
+				string
+			);
+		}
+		value = 0;
+	}
+	
+	return value;
+}
+
+float stringToFloat(
+	const int32_t  verbosity,
+	const char    *string
+	) {
+	
+	float value = 0.0f;
+	
+	if isdigit(string[0]) 
+	{
+		value = (float) atof(string); 
+	} else 
+	{
+		if (verbosity > 1) 
+		{
+			fprintf(
+				stderr, 
+				"stringToFloat: \nWarning! Float value %s not recognised! \n",
+				string
+			);
+		}
+		value = 0.0f;
+	}
+	
+	return value;
 }
 
 multi_s StringToMultiS(
@@ -265,106 +542,115 @@ multi_s StringToMultiS(
      */
 	multi_s value;
 	value.type = type;
-	
+		
 	switch(type)
 	{	
 		case(none_e):
 		break;
 		
 		case(bool_e  ): 
-			if isdigit(string[0]) 
-			{
-				int32_t bool_value = atoi(string);
-				
-				if ((bool_value > 1) || (bool_value < 0)) 
-				{
-					if (verbosity > 1) 
-					{
-						fprintf(stderr, "Warning! Bool value %s not recognised! \n", string);
-					}
-					value.value.b = false;
-				} 
-				else 
-				{
-					value.value.b = (bool) atoi(string); 
-				}
-			} 
-			else if (!strcmp(string, "true")) 
-			{
-				value.value.b = true;
-			} 
-			else if (!strcmp(string, "false")) 
-			{
-				value.value.b = false;
-			} 
-			else 
-			{
-				if (verbosity > 1) 
-				{
-					fprintf(stderr, "Warning! Bool value %s not recognised! \n", string);
-				}
-				value.value.b = false;
-			}
+			value.value.b = stringToBool(
+				verbosity,
+				string
+			);
 		break;
 		
 		case(int_e   ): 
-			
-			if ( strchr(string, '.') ) 
-			{
-				fprintf(stderr, "Warning! Decimal detected in: %s, ignoring post decimal values. \n", string);
-				
-				char* string_copy = strdup(string);
-				strtok(string_copy, ".");
-				
-				string = string_copy;
-			}
-			
-			if isdigit(string[0]) 
-			{
-				value.value.i = (int32_t) atoi(string); 
-			} 
-			else 
-			{	
-				if (verbosity > 1) 
-				{
-					fprintf(stderr, "Warning! Int value %s not recognised! \n", string);
-				}
-				value.value.i = 0;
-			}
+			value.value.i = stringToInt(
+				verbosity,
+				string
+			);
 		break;
 		
 		case(float_e ):
-			if isdigit(string[0]) 
-			{
-				value.value.f = (float) atof(string); 
-			} else 
-			{
-				if (verbosity > 1) 
-				{
-					fprintf(stderr, "Warning! Float value %s not recognised! \n", string);
-				}
-				value.value.f = 0.0f;
-			}
+			value.value.f = stringToFloat(
+				verbosity,
+				string
+			);
 		break;
 		
 		case(char_e  ): 
 			value.value.c = (char) string[0]; 
 		break;
-		
+
 		case(string_e): 
 			asprintf(&value.value.s, "%s", string); 
-		break;		
+		break;
 	
 		default:
 			if (verbosity > 1) 
 			{
-				fprintf(stderr, "Warning! Type \"%i\" not recognised! \n", type);
+				fprintf(
+					stderr, 
+					"StringToMultiS: \nWarning! Type \"%s\" not recognised! \n", 
+					typeToString(type)
+				);
 			}
-			value.value.f = 0.0f;
+			value.value.ff = NULL;
 		break;
 	}
 	
 	return value;
+}
+
+array_s stringToArrayS(
+	const int32_t  verbosity,
+	const char    *string,
+	const type_e   type
+	) {
+	
+	const char *delimiter = ",";
+	
+	char *string_copy = strdup(string);
+	
+	const type_e  base_type            = getBaseType(type);
+	const size_t  size                 = getSizeOfType(base_type);
+	const int32_t initial_num_elements = 1;
+	      int32_t num_elements         = initial_num_elements;
+		 	
+	void *elements = malloc(sizeof(multi_s)*(size_t)num_elements);
+
+	char *buffer = NULL;
+	buffer = strtok(string_copy, delimiter);
+	
+	int32_t index = 0;	   
+	/* walk through other tokens */
+	while( buffer != NULL ) 
+	{				
+		int32_t position = index*(int32_t)size;
+		multi_s element = 
+			StringToMultiS(
+					verbosity,
+					buffer,
+					base_type
+				);
+				
+		memcpy(&((char*)elements)[position], &element, size);			
+		index++;
+		
+		if (index > num_elements)
+		{
+			num_elements *= 2; 
+			elements = realloc(elements, size * (size_t) num_elements);
+		}
+		
+		buffer = strtok(NULL, delimiter);
+	}
+	
+	num_elements = index;
+
+	elements = realloc(elements, size * (size_t) num_elements);
+	
+	array_s array = ArrayS(
+		verbosity,
+		elements,
+		num_elements,
+		type
+	);
+		
+	free(string_copy);
+	
+	return array;
 }
 
 char *MultiStoString(
@@ -382,24 +668,30 @@ char *MultiStoString(
 	char* string;
 	switch(data.type) 
 	{	
-		case(none_e        ): printf("Warning! Cannot convert None to string!"); break;
-		case(bool_e        ): asprintf(&string, "%i", (int)    data.value.b  );  break;
-		
-		case(int_e         ): asprintf(&string, "%i",          data.value.i  );  break;
-		case(int_array_e   ): asprintf(&string, "%p", (void *) data.value.ii );  break;
-		case(int_jagged_e  ): asprintf(&string, "%p", (void *) data.value.iii);  break;			
+		case(none_e        ): printf("MultiStoString: \nWarning! Cannot convert None to string!"); break;
+		case(bool_e        ): asprintf(&string, "%i", (int32_t) data.value.b  ); break;
+		case(bool_array_e  ): asprintf(&string, "%p", (void *)  data.value.bb ); break;
+
+		case(int_e         ): asprintf(&string, "%i",           data.value.i  ); break;
+		case(int_array_e   ): asprintf(&string, "%p", (void *)  data.value.ii ); break;
+		case(int_jagged_e  ): asprintf(&string, "%p", (void *)  data.value.iii); break;			
 			
-		case(float_e       ): asprintf(&string, "%f",          data.value.f  );  break;
-		case(float_array_e ): asprintf(&string, "%p", (void *) data.value.ff );  break;
-		case(float_jagged_e): asprintf(&string, "%p", (void *) data.value.fff);  break;		
+		case(float_e       ): asprintf(&string, "%f",           data.value.f  ); break;
+		case(float_array_e ): asprintf(&string, "%p", (void *)  data.value.ff ); break;
+		case(float_jagged_e): asprintf(&string, "%p", (void *)  data.value.fff); break;		
 
 		case(char_e        ): asprintf(&string, "%c", data.value.c  ); break;
+		case(char_array_e  ): asprintf(&string, "%p", (void *)  data.value.cc ); break;
+
 		case(string_e      ): string = data.value.s; break;		
-		case(string_array_e): asprintf(&string, "%p", (void *) data.value.ss ); break;
+		case(string_array_e): asprintf(&string, "%p", (void *)  data.value.ss ); break;
 			
 		default:
-			
-			fprintf(stderr, "Warning! Type \"%i\" not recognised! \n", data.type);
+			fprintf(
+				stderr, 
+				"MultiStoString: \nWarning! Type \"%s\" not recognised! \n", 
+				typeToString(data.type)
+			);
 		break;
 	}
 	
@@ -441,6 +733,14 @@ void freeMultiS(
 		
 		break;
 		
+		case(bool_array_e   ): 
+			
+			if (data.value.bb  != NULL) 
+			{
+				free(data.value.bb); 
+			} 
+		break;
+		
 		case(int_array_e   ): 
 			
 			if (data.value.ii  != NULL) 
@@ -454,6 +754,14 @@ void freeMultiS(
 			if (data.value.ff  != NULL) 
 			{
 				free(data.value.ff);
+			} 
+		break;
+		
+		case(char_array_e   ): 
+			
+			if (data.value.cc != NULL) 
+			{
+				free(data.value.cc); 
 			} 
 		break;
 		
@@ -511,7 +819,11 @@ void freeMultiS(
 		
 		default:
 
-			fprintf(stderr, "Warning! Type \"%i\" not recognised! \n", data.type);
+			fprintf(
+				stderr, 
+				"freeMultiS: \nWarning! Type \"%s\" not recognised! \n", 
+				typeToString(data.type)
+			);
 		break;
 	}
 }
@@ -762,7 +1074,7 @@ dict_entry_s *findDictEntry(
 	
 	if (entry == NULL)
 	{
-		fprintf(stderr, "Warning! Cannot find entry! %s. \n", string_key);
+		fprintf(stderr, "findDictEntry: \nWarning! Cannot find entry! %s. \n", string_key);
 		return NULL;
 	}
 	

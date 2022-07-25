@@ -33,6 +33,7 @@ loader_config_s loader_config =
 	.name_necessity         = required_e,
 
 	.is_superconfig         = false,
+	.has_parameters         = true,
     .reorder                = false,
 
 	.min                    = 1,

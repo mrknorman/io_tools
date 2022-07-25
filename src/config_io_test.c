@@ -11,6 +11,7 @@
 #include "console.h"
 
 #include "single_config_test.h"	
+#include "complex_test.h"	
 
 typedef struct TestLoaderNull{
 	
@@ -173,8 +174,6 @@ bool testSingleConfig(
                  file_position
 			 );
              
-    printf("%i \n", file_position);
-
     num_configs = config_data.total_num_subconfigs_read;
     test_config_s *test_results = NULL;
     if (all_test_results != NULL) 
@@ -616,7 +615,7 @@ bool testExtraParameterConfig(
 			
 	multi_s known_extra_parameters[] = 
 	{
-		MultiS(known_string, string_e, 1, NULL),
+		MultiS( known_string, string_e, 1, NULL),
 		MultiS(&known_float , float_e , 1, NULL),
 		MultiS(&known_int   , int_e   , 1, NULL),
 		MultiS(&known_bool  , bool_e  , 1, NULL),
@@ -667,7 +666,16 @@ bool testExtraParameterConfig(
                 pass *= comapareMultiS(known_result->data, read_result->data);
                 printf("%s, %s, %s \n", MultiStoString(read_result->data), MultiStoString(known_result->data), extra_parameter_names[index]);
             } 
-            else {
+            else 
+			{
+				fprintf(
+					stderr,
+					"testExtraParameterConfig: \nWarning! Values do not match:"
+					" %s, %s, %s. \n", 
+					MultiStoString(read_result->data), 
+					MultiStoString(known_result->data),
+					extra_parameter_names[index]
+				);
                 pass *= false;
             }
         }
@@ -872,8 +880,6 @@ bool testNestedConfig(
         {"nested_config_tests/nested_config_test_1.cfg", true},
         {"nested_config_tests/nested_config_test_2.cfg", true},
         {"nested_config_tests/nested_config_test_3.cfg", true}
-
-
     };
     
     for (int32_t index = 0; index < num_tests; index++) 
@@ -924,8 +930,6 @@ bool testMultiTypeConfig(
                  file_position
 			 );
              
-    printf("%i \n", file_position);
-
     num_configs = config_data.total_num_subconfigs_read;
     test_config_s *test_results = NULL;
     if (all_test_results != NULL) 
@@ -1061,6 +1065,81 @@ bool testMultiTypeConfig(
 	return pass;
 }
 
+bool testComplexConfig(
+	const int32_t  verbosity,
+	const char    *config_directory_name
+	) {
+    
+    bool pass = true;
+    
+    #include "complex_test.h"	
+    
+    const int32_t num_tests = 1;
+    loader_null_test_s test_configs[] = 
+    {
+        {"complex_test.cfg", false}
+    };
+	
+	
+	loader_null_test_s test_config = test_configs[0];
+	
+	const char *file_name     = test_config.file_name;
+    const bool  null_expected = test_config.null_expected;
+    
+	test_config_s **test_results = NULL;
+    loader_data_s   config_data;
+    
+    char *config_file_path;
+	asprintf(&config_file_path, "./%s/%s", config_directory_name, file_name);
+    
+    int64_t file_position[] = {0};
+    
+	test_results = 
+		((test_config_s**) 
+			 readConfig(
+			     verbosity,
+				 config_file_path, 
+				 loader_config,
+				 &config_data,
+                 file_position
+			 )
+		);
+	free(config_file_path);
+	
+	network_config_s network_config = 
+		*((network_config_s*) config_data.subconfigs[0].structure);
+	
+	printf("%f \n", network_config.speed_of_light);
+		
+	loader_data_s detector_data = config_data.subconfigs[0].subconfigs[0];
+	const int32_t num_detectors = detector_data.total_num_subconfigs_read;
+	
+	detector_s* detectors = malloc(sizeof(detector_s) * (size_t)num_detectors);  
+	for (int32_t index = 0; index < num_detectors; index++)
+	{
+		detectors[index] = 
+			*((detector_s*) detector_data.subconfigs[index].structure);
+		printf("%i, %i, %i \n", detectors[index].latitude[0], detectors[index].latitude[1], detectors[index].latitude[2]);
+	}
+
+
+
+    for (int32_t index = 0; index < num_tests; index++) 
+    {
+        pass *= checkLoaderReturnNull(
+            verbosity,
+            config_directory_name,
+            loader_config,
+            test_configs[index]
+        );
+    }
+	
+	printf("\n");
+	printTestResult(pass, "Complex config test.");
+    
+    return pass;
+}
+
 int main() {
 	
 	const int32_t verbosity = 3;
@@ -1131,6 +1210,12 @@ int main() {
     
     pass *=  
         testMultiTypeConfig(
+            verbosity,
+            config_directory_name
+        ); 
+	
+	  pass *=  
+        testComplexConfig(
             verbosity,
             config_directory_name
         ); 

@@ -23,49 +23,56 @@ typedef struct construct_s {
 
 size_t getTotalTypeArraySize(
     const type_e   *types, 
-    const int32_t   length
+    const int32_t   num_elements
     ) {
 
-	size_t total_size = 0;
+	size_t total_size = 0u;
 
-	for (int32_t index = 0; index < length; index++) {
-		
+	for (int32_t index = 0; index < num_elements; index++) 
+	{	
 		total_size += getSizeOfType(types[index]);
 	}
 	
-	return total_size; 
+	return total_size;
 } 
 
 bool checkTypeOrder(
 	const int32_t  verbosity,
     const type_e  *types, 
-    const int32_t  length
+    const int32_t  num_elements
    ) {
 	
 	bool return_value = true;
 	
-	size_t last_value = getSizeOfType(types[0]);;
-    size_t value;
+	size_t value      = 0u;
+	size_t last_value = 0u;
+	
+	if (num_elements > 0)
+	{
+		last_value = getSizeOfType(types[0]);
+	}
 
-	for (int32_t index = 1; index < length - 1; index++ ){
-    
+	for (int32_t index = 1; index < num_elements - 1; index++)
+	{
         value = getSizeOfType(types[index]);
 		
-		if(value > last_value) {
-		
+		if(value > last_value) 
+		{
 			return_value = false;
 			
-			if (verbosity > 0) {
+			if (verbosity > 0) 
+			{
 				fprintf(stderr, 
-					"Error! Struture elements must be aranged in decreasing size to ensure no padding is added! Exiting. Types: %s: %zu > %s: %zu. \n", 
-					typetoString(types[index]), 
+					"checkTypeOrder: \nError! Struture elements must be aranged"
+					" in decreasing size to ensure no padding is added!"
+					" Exiting. Types: %s: %zu > %s: %zu. \n", 
+					typeToString(types[index]), 
 					getSizeOfType(types[index]), 
-					typetoString(types[index - 1]), 
+					typeToString(types[index - 1]), 
 					last_value
 				);
 			}
 		}
-        
         last_value = value;
 	}
 	
@@ -81,28 +88,35 @@ bool checkStructSize(
 	
 	bool return_value = true;
 	
-	if (size > compiled_size) {	
-		
-		if (verbosity > 0) {
+	if (size > compiled_size) 
+	{		
+		if (verbosity > 0) 
+		{
 			fprintf(
 				stderr, 
-				"Error! Inputted struct size: (%zu) is larger than compiled structure: (%zu), exiting.\n", 
+				"checkStructSize: \nError! Inputted struct size: (%zu) is"
+				"larger than compiled structure: (%zu), exiting.\n", 
 				size, 
 				compiled_size
 			);
 		}
 		
 		return_value = false;
-	} else if (
+	} 
+	else if (
 			(compiled_size >= 8) 
 			&& 
 			(size < compiled_size - largest_memory_alignment)
-		) {
+		) 
+	{
 		
-		if (verbosity > 0) {
+		if (verbosity > 0) 
+		{
 			fprintf(
 				stderr, 
-				"Warning! Inputted struct size: (%zu) is smaller than compiled structure, even acounting for padding: (%zu), exiting.\n", 
+				"checkStructSize: \n Warning! Inputted struct size: (%zu) is"
+				"smaller than compiled structure, even acounting for padding:"
+				" (%zu), exiting.\n", 
 				size, 
 				compiled_size - largest_memory_alignment
 			);
@@ -123,11 +137,47 @@ void castToVoid(
 	
 	const size_t size = getSizeOfType(type);
 	
-	multi_s value_m = StringToMultiS(verbosity, string, type);
-	void *value = (void*) &value_m;
+	void *value = NULL;
+	
+	switch(type)
+	{	
+		case(none_e):
+		break;
+		
+		case(bool_e  ):
+		case(int_e   ):
+		case(float_e ):
+		case(char_e  ):
+		case(string_e): 
+			;multi_s value_m = StringToMultiS(verbosity, string, type);
+			value          = (void*) &value_m;
+		break;
+		
+		case(bool_array_e  ):
+		case(int_array_e   ):
+		case(float_array_e ):
+		case(char_array_e  ):
+		case(string_array_e): 
+			;array_s array_m = stringToArrayS(verbosity, string, type);
+			value           = (void*) &array_m.data.ff.elements;
+		break;
+		
+		
+		default:
+			if (verbosity > 1) 
+			{
+				fprintf(
+					stderr, 
+					"StringToMultiS: \nWarning! Type \"%i\" not recognised! \n", 
+					type
+				);
+			}
+		break;
+	}
+	
+	
 	memcpy(structure, value, size);
 }
-
 
 void castToVoidArray(
 	const int32_t  verbosity,
@@ -138,7 +188,8 @@ void castToVoidArray(
     ){
 	
 	const type_e type = types[index];
-	const size_t structure_position = getTotalTypeArraySize(types, index);	
+	const size_t structure_position = 
+		getTotalTypeArraySize(types, index);	
 	
 	castToVoid(
 		verbosity,
@@ -148,7 +199,7 @@ void castToVoidArray(
 	);
 }
 
-char* separateString(
+char *separateString(
 	      char *string,
 	const char *separator,
 	const char *name
@@ -160,7 +211,8 @@ char* separateString(
 
 		fprintf(
             stderr, 
-            "Error! Could not find closing %s, for parameter %s. \n", 
+            "separateString: Error! Could not find closing %s, for parameter"
+			" %s. \n", 
             separator, 
             name
         );
@@ -172,28 +224,26 @@ char* separateString(
 }
 
 char* pullValueFromLine(
-	const char   *parameter_start,
-	const char   *new_line,
-	const char   *string_separator,
-	const char   *char_separator,
-	const char   *parameter_name,
-	const type_e  type
+	const char            *parameter_start,              
+	const loader_syntax_s  syntax,
+	const char            *parameter_name,
+	const type_e           type
 	) {
 	//Splits string from value indicator onwards until new line symbol.
 	char *parameter_copy = strdup(parameter_start);
-	char *value_string   = strtok(parameter_copy, new_line);
+	char *value_string   = strtok(parameter_copy, syntax.new_line);
 	
 	switch (type) 
 	{	
 		case (none_e):
 		
-			strtok(value_string, string_separator);
-			char* string_c = strtok(NULL, string_separator);
+			strtok(value_string, syntax.string_separator);
+			char* string_c = strtok(NULL, syntax.string_separator);
 			
             if (string_c == NULL) 
             {	
-                strtok(value_string, char_separator);
-				string_c = strtok(NULL, string_separator);
+                strtok(value_string, syntax.char_separator);
+				string_c = strtok(NULL, syntax.string_separator);
 				
                 if (string_c == NULL) 
                 {
@@ -218,7 +268,7 @@ char* pullValueFromLine(
 			value_string = 
 				separateString(
                     value_string, 
-                    string_separator, 
+                    syntax.string_separator, 
                     parameter_name
                 );
 		break;
@@ -227,7 +277,7 @@ char* pullValueFromLine(
 			value_string =
 				separateString(
                     value_string, 
-                    char_separator, 
+                    syntax.char_separator, 
                     parameter_name
                 );	
 		break; 
@@ -238,6 +288,17 @@ char* pullValueFromLine(
                 " =", 
                 &value_string
             );
+			removeStringChars(
+				value_string, 
+				syntax.start_array, 
+				&value_string
+			);
+			removeStringChars(
+				value_string, 
+				syntax.end_array, 
+				&value_string
+			);
+
 		break;
 	}
 	
@@ -268,8 +329,10 @@ bool checkNumParameters(
 		{
 			fprintf(
 				stderr, 
-				"Error! Total num variables (%i) greater than max allowed (%i)! \n",
-				sum, max
+				"checkNumParameters: \nError! Total num variables (%i) greater"
+				" than max allowed (%i)! \n",
+				sum, 
+				max
 			); 
 		}
 	}
@@ -281,8 +344,10 @@ bool checkNumParameters(
 		{
 			fprintf(
 				stderr, 
-				"Error! Total num variables (%i) smaller than minimum required (%i)! \n",
-				sum, min
+				"checkNumParameters: \nError! Total num variables (%i) smaller"
+				" than minimum required (%i)! \n",
+				sum, 
+				min
 			); 
 		}
 	} 
@@ -307,7 +372,8 @@ bool checkNumConfigs(
 		{
 			fprintf(
 				stderr, 
-				"Error! Total num configs (%i) greater than max allowed (%i)! \n",
+				"checkNumConfigs: \nError! Total num configs (%i) greater than"
+				" max allowed (%i)! \n",
 				total_num_read, max
 			); 
 		}
@@ -320,7 +386,8 @@ bool checkNumConfigs(
 		{
 			fprintf(
 				stderr, 
-				"Error! Total num configs (%i) smaller than minimum required (%i)! \n",
+				"checkNumConfigs: \nError! Total num configs (%i) smaller than"
+				" minimum required (%i)! \n",
 				total_num_read, min
 			); 
 		}
@@ -346,7 +413,8 @@ bool checkNumExtraConfigs(
 		{
 			fprintf(
 				stderr, 
-				"Error! Total num extra configs (%i) greater than max allowed (%i)! \n",
+				"checkNumExtraConfigs: \nError! Total num extra configs (%i)"
+				" greater than max allowed (%i)! \n",
 				total_num_read, max
 			); 
 		}
@@ -359,7 +427,8 @@ bool checkNumExtraConfigs(
 		{
 			fprintf(
 				stderr, 
-				"Error! Total num extra configs (%i) smaller than minimum required (%i)! \n",
+				"checkNumExtraConfigs: \nError! Total num extra configs (%i)"
+				"smaller than minimum required (%i)! \n",
 				total_num_read, min
 			); 
 		}
@@ -396,7 +465,8 @@ bool checkNumExtraParameters(
 		{
 			fprintf(
 				stderr, 
-				"Error! Total num extra variables (%i) greater than max allowed (%i)! \n",
+				"checkNumExtraParameters: \nError! Total num extra variables" 
+				"(%i) greater than max allowed (%i)! \n",
 				sum, max
 			); 
 		}
@@ -409,7 +479,8 @@ bool checkNumExtraParameters(
 		{
 			fprintf(
 				stderr, 
-				"Error! Total num extra variables (%i) smaller than minimum required (%i)! \n",
+				"checkNumExtraParameters: \n Error! Total num extra variables"
+				" (%i) smaller than minimum required (%i)! \n",
 				sum, min
 			); 
 		}
@@ -444,7 +515,8 @@ bool checkParameterRequirements(
 		{
 			fprintf(
 				stderr, 
-				"Warning! Num instances (%i) of variable \"%s\" lower than required (%i)! \n", 
+				"checkParameterRequirements: \nWarning! Num instances (%i) of"
+				" variable \"%s\" lower than required (%i)!\n", 
 				read, name, min
 			);
 			
@@ -454,7 +526,8 @@ bool checkParameterRequirements(
 		{
 			fprintf(
 				stderr, 
-				"Warning! Num instances (%i) of variable \"%s\" higher than allowed (%i) \n", 
+				"checkParameterRequirements: \nWarning! Num instances (%i) of"
+				" variable \"%s\" higher than allowed (%i)!\n", 
 				read, name, max
 			);
 			
@@ -504,7 +577,8 @@ bool checkExtraParameterRequirments(
 		{
 			fprintf(
 				stderr, 
-				"Warning! Num instances (%i) of variable \"%s\" lower than required (%i)! \n", 
+				"checkExtraParameterRequirments: \n Warning! Num instances (%i)"
+				" of variable \"%s\" lower than required (%i)! \n", 
 				read, name, min
 			);
 			
@@ -514,7 +588,8 @@ bool checkExtraParameterRequirments(
 		{
 			fprintf(
 				stderr, 
-				"Warning! Num instances (%i) of variable \"%s\" higher than allowed (%i) \n", 
+				"checkExtraParameterRequirments: \n Warning! Num instances (%i)"
+				" of variable \"%s\" higher than allowed (%i) \n", 
 				read, name, max
 			);
 			
@@ -552,7 +627,10 @@ bool checkNameRequirments(
             
             if ((verbosity > 0) && !pass) 
             {
-                fprintf(stderr, "Error! Config Name required. \n");
+                fprintf(
+					stderr, 
+					"checkNameRequirments: \nError! Config Name required. \n"
+				);
             }
         break;
         
@@ -565,7 +643,11 @@ bool checkNameRequirments(
             
             if ((verbosity > 0) && !pass) 
             {
-                fprintf(stderr, "Error! Unnamed configs are set to be excluded. \n");
+                fprintf(
+					stderr, 
+					"checkNameRequirments: \nError! Unnamed configs are not"
+					" allowed in this context. \n"
+				);
             }
         break;
         
@@ -613,7 +695,8 @@ bool checkConfigRequirements(
 		{
 			fprintf(
 				stderr, 
-				"Warning! Num instances (%i) of config \"%s\" lower than required (%i)! \n", 
+				"checkConfigRequirements: \nWarning! Num instances (%i) of"
+				" config \"%s\" lower than required (%i)! \n", 
 				read, name, min
 			);
 			
@@ -623,7 +706,8 @@ bool checkConfigRequirements(
 		{
 			fprintf(
 				stderr, 
-				"Warning! Num instances (%i) of config \"%s\" higher than allowed (%i) \n", 
+				"checkConfigRequirements: \nWarning! Num instances (%i) of "
+				" config \"%s\" higher than allowed (%i) \n", 
 				read, name, max
 			);
 			
@@ -683,26 +767,67 @@ type_e guessDataTypeFromString(
 }
 
 type_e guessTypeFromConfigContext(
-	      char *string,
-	const char* string_separator,
-	const char* char_separator
+	                 char *string,
+	const loader_syntax_s  syntax
 	) {
 	
 	type_e estimated_type;
-	if (strchr(string, string_separator[0])) 
+	if (strchr(string, *syntax.string_separator)) 
 	{
 		estimated_type = string_e;
-		removeStringChars(string, string_separator, &string);
+		removeStringChars(string, syntax.string_separator, &string);
 	}
-	if (strchr(string, char_separator[0])){
+	else if (strchr(string, *syntax.char_separator))
+	{
 		estimated_type = char_e;
-		removeStringChars(string, char_separator, &string);
+		removeStringChars(string, syntax.char_separator, &string);
+	} 
+	else if (strchr(string, *syntax.start_array))
+	{
+		removeStringChars(string, syntax.start_array, &string);
+		removeStringChars(string, syntax.end_array, &string);
+		
+		estimated_type = guessTypeFromConfigContext(string, syntax);
+		
+		switch (estimated_type)
+		{
+			case bool_e:
+				estimated_type = bool_array_e;
+			break;
+			
+			case int_e:
+				estimated_type = int_array_e;
+			break;
+			
+			case float_e:
+				estimated_type = float_array_e;
+			break;
+			
+			case char_e:
+				estimated_type = char_array_e;
+			break;
+			
+			case string_e:
+				estimated_type = string_array_e;
+			break;
+			
+			default:
+				fprintf(
+					stderr, 
+					"guessTypeFromConfigContext \nWarning! Arrays of arrays not"
+					"handled by config loader. This error could be caused by an"
+					"extra \"%s\" in config file.\n",
+					syntax.start_array
+				);
+				estimated_type = none_e;
+			break;
+		}
 	} 
 	else {
 		estimated_type = 
 			guessDataTypeFromString(string);
 	}
-	
+		
 	return estimated_type;
 }
 
@@ -750,7 +875,8 @@ bool checkDefaultParameter(
 		{
 			fprintf(
 				stderr, 
-				"Error! Min num parameter instances greater than max for parameter: \"%s\"! Returning Null!", 
+				"checkDefaultParameter: \nError! Min num parameter instances"
+				"greater than max for parameter: \"%s\"!", 
 				name
 			);
 		}
@@ -784,7 +910,8 @@ bool checkParameters(
 			{
 				fprintf(
 					stderr, 
-					"Error! Min num parameter instances greater than max for parameter: \"%s\"! Returning Null!", 
+					"checkParameters: \nError! Min num parameter instances"
+					" greater than max for parameter: \"%s\"!", 
 					name
 				);
 			}
@@ -798,7 +925,8 @@ bool checkParameters(
 			{
 				fprintf(
 					stderr, 
-					"Error! Defined parameter \"%s\" cannot have type none_e! Returning Null!", 
+					"checkParameters: \n Error! Defined parameter \"%s\" cannot"
+					" have type none_e!", 
 					name
 				);
 			}
@@ -831,7 +959,8 @@ bool checkDefaultConfig(
             {
                 fprintf(
                     stderr, 
-                    "Error! Min num config instances greater than max for config: \"%s\"! Returning Null!", 
+                    "checkDefaultConfig: \nError! Min num config instances"
+					"greater than max for config: \"%s\"!", 
                     name
                 );
             }
@@ -868,7 +997,8 @@ bool checkConfigs(
                 {
                     fprintf(
                         stderr, 
-                        "Error! Min num config instances greater than max for config: \"%s\"! Returning Null!", 
+                        "checkConfigs: \nError! Min num config instances"
+						"greater than max for config: \"%s\"!", 
                         name
                     );
                 }
@@ -891,12 +1021,16 @@ bool checkLoaderConfig(
 
     const bool             is_superconfig           = config.is_superconfig;
 
-    const int32_t          num_defined_parameters   = config.num_defined_parameters;
-          parameter_s     *defined_parameters       = config.defined_parameters;
+    const int32_t          num_defined_parameters   = 
+		config.num_defined_parameters;
+          parameter_s     *defined_parameters       = 
+		config.defined_parameters;
           parameter_s      default_parameter        = config.default_parameter;
 
-          int32_t          num_defined_subconfigs   = config.num_defined_subconfigs;
-    const loader_config_s *defined_subconfigs       = config.defined_subconfigs;
+          int32_t          num_defined_subconfigs   = 
+		config.num_defined_subconfigs;
+    const loader_config_s *defined_subconfigs       = 
+		config.defined_subconfigs;
     
     // Calculate struct size from types list:
     
@@ -1014,11 +1148,18 @@ parameter_s *overwriteParameters(
     const loader_config_s  priority_config
     ) {
     
-    const int32_t      num_priority_parameters  = priority_config.num_defined_parameters;
-    const parameter_s *priority_parameters      = priority_config.defined_parameters;
+    const int32_t      num_priority_parameters  = 
+		priority_config.num_defined_parameters;
+    const parameter_s *priority_parameters      = 
+		priority_config.defined_parameters;
     
-    parameter_s *new_parameters = malloc(sizeof(parameter_s) * (size_t) default_parameter_map.length);
-    memcpy(new_parameters, default_parameters, sizeof(parameter_s) * (size_t) default_parameter_map.length);
+    parameter_s *new_parameters = 
+		malloc(sizeof(parameter_s) * (size_t) default_parameter_map.length);
+    memcpy(
+		new_parameters, 
+		default_parameters, 
+		sizeof(parameter_s) * (size_t) default_parameter_map.length
+	);
 
     // Create config lists:    
     map_s priority_name_map = 
@@ -1033,7 +1174,8 @@ parameter_s *overwriteParameters(
 
         if (parameter_name != NULL) 
         {
-            int32_t default_index = getMapIndex(default_parameter_map, parameter_name);
+            int32_t default_index = 
+				getMapIndex(default_parameter_map, parameter_name);
 
             if (default_index > -1) 
             {
@@ -1041,13 +1183,23 @@ parameter_s *overwriteParameters(
             } 
             else
             {
-                fprintf(stderr, "Warning! Subparameter %s name at not found in defined parameters! \n.", parameter_name);
+                fprintf(
+					stderr, 
+					"overwriteParameters: \nWarning! Parameter \"%s\" name not"
+					" found in defined parameters! \n.", 
+					parameter_name
+				);
                 break;
             }
         }
         else
         {
-            fprintf(stderr, "Warning! Subparameter name at index %i not found, check num defined parameters \n.", index);
+            fprintf(
+				stderr, 
+				"overwriteParameters: \nWarning! Parameter name at index (%i)"
+				" not found, check num defined parameters \n.", 
+				index
+			);
             break;
         }
     }
@@ -1059,8 +1211,11 @@ void freeConfigData(
     loader_data_s config_data
     ) {
     
-    for (int32_t index = 0; index < config_data.total_num_subconfigs_read; index++) 
-    {
+    for (
+		int32_t index = 0; 
+		index < config_data.total_num_subconfigs_read; 
+		index++
+	) {
         if (config_data.subconfigs[index].structure != NULL) 
         {
             free(config_data.subconfigs[index].structure);
@@ -1074,10 +1229,15 @@ void freeConfigData(
     if (config_data.extra_parameters != NULL)
     {
         free(config_data.extra_parameters);
+		config_data.extra_parameters = NULL;
+    }
+	
+	if (config_data.subconfigs != NULL)
+    {
+		free(config_data.subconfigs);
+		config_data.subconfigs = NULL;
     }
     
-    free(config_data.subconfigs);
-    config_data.subconfigs = NULL;
 }
 
 void **reorderConfigs(
@@ -1087,15 +1247,19 @@ void **reorderConfigs(
     
     const int32_t num_defined = config.num_defined_subconfigs;
 
-    const map_s             name_map       = config_data.subconfig_name_map;
+    const map_s             name_map       = 
+		config_data.subconfig_name_map;
     const int32_t          *num_read       = config_data.num_subconfigs_read;
-    const int32_t           total_num_read = config_data.total_num_subconfigs_read;
+    const int32_t           total_num_read = 
+		config_data.total_num_subconfigs_read;
     const loader_data_s    *subconfig_data = config_data.subconfigs;
     
     void **config_structs = calloc((size_t) total_num_read, sizeof(void*));
     
     int32_t unique_defined_read = 0;
-    int32_t *cumulative_missing = malloc(sizeof(int32_t) * (size_t) (num_defined + 1));
+	
+    int32_t *cumulative_missing = 
+		malloc(sizeof(int32_t) * (size_t) (num_defined + 1));
     cumulative_missing[0] = 0;
 
     for (int32_t index = 0; index < num_defined; index++)
@@ -1118,7 +1282,8 @@ void **reorderConfigs(
 
         if (defined_index > -1) 
         {
-            int32_t adjusted_index = defined_index - cumulative_missing[defined_index];
+            int32_t adjusted_index = 
+				defined_index - cumulative_missing[defined_index];
             config_structs[adjusted_index] = subconfig_data[index].structure; 
         }
         else
@@ -1186,10 +1351,13 @@ loader_data_s setupConfigData(
     ) {
     
     //Derived Parameters:
-    const size_t           compiled_struct_size     = config.struct_size;
+    const size_t       compiled_struct_size   = config.struct_size;
     
-    const int32_t          num_defined_parameters   = config.num_defined_parameters;
-          parameter_s     *defined_parameters       = config.defined_parameters;
+    const int32_t      num_defined_parameters = config.num_defined_parameters;
+          parameter_s *defined_parameters     = config.defined_parameters;
+		  int32_t      num_defined_subconfigs = config.num_defined_subconfigs;
+
+
     
     loader_data_s config_data = {
        .name       = NULL,
@@ -1231,11 +1399,15 @@ loader_data_s setupConfigData(
     config_data.total_num_subconfigs_read = 0;
     
     config_data.extra_parameters = 
-        makeDictionary(num_defined_parameters*100);   
+        makeDictionary((1+num_defined_parameters)*100);   
 
     // Create dictionary to count instances of extra parameters:
     config_data.num_extra_parameters = 
-        makeDictionary(num_defined_parameters*100);
+        makeDictionary((1+num_defined_parameters)*100);
+	
+	// Create dictionary to count instances of extra subconfigs:
+	config_data.num_extra_configs    = 
+        makeDictionary((1+num_defined_subconfigs)*100);
 
     return config_data;
 }
@@ -1293,7 +1465,8 @@ bool checkAllParameterRequirments(
 					config
 				);
 				
-				config.num_defined_parameters = config_data.config.num_defined_parameters;
+				config.num_defined_parameters = 
+					config_data.config.num_defined_parameters;
 			}
         }
     }
@@ -1349,7 +1522,8 @@ bool checkAllRequirements(
             pass = false;
         }
     }
-    else
+    
+	if (config.has_parameters)
     {
         if (!checkAllParameterRequirments(
             verbosity,
@@ -1374,13 +1548,11 @@ loader_data_s readSubconfig(
     ) {
     
     //Derived Parameters:
-    const bool             is_superconfig         = config.is_superconfig;
+    const bool         is_superconfig         = config.is_superconfig;
 
-    const int32_t          num_defined_parameters = config.num_defined_parameters;
-          parameter_s     *defined_parameters     = config.defined_parameters;
-          parameter_s      default_parameter      = config.default_parameter;
-
-          int32_t          num_defined_subconfigs = config.num_defined_subconfigs;
+    const int32_t      num_defined_parameters = config.num_defined_parameters;
+          parameter_s *defined_parameters     = config.defined_parameters;
+          parameter_s  default_parameter      = config.default_parameter;
     
     int32_t num_configs  = 1;
     int32_t config_index = 0;
@@ -1394,7 +1566,7 @@ loader_data_s readSubconfig(
 		num_configs = 0;
 		if (verbosity > 0) 
 		{
-			fprintf(stderr, "Warning! Cannot load config. \n");
+			fprintf(stderr, "readSubconfig: \nWarning! Cannot load config. \n");
 		}
 	} 
 	else 
@@ -1413,12 +1585,10 @@ loader_data_s readSubconfig(
 		// Setup and reset config wide parameters:
         bool             name_read    = false;
 		size_t           line_length  = 1; 
-		char            *line_string  = NULL; //<-- String which will contain the read in line.
+		// String which will contain the read in line:
+		char            *line_string  = NULL; 
 		int32_t          line_index   = 0;
         char            *config_name  = NULL;
-        
-        dict_s  *num_extra_configs    = 
-            makeDictionary(num_defined_subconfigs*100);
 
 		// Reading file, loop over lines:
 		while (getline(&line_string, &line_length, file) != EOF) 
@@ -1459,8 +1629,10 @@ loader_data_s readSubconfig(
 				} 
 
 				// Checks for new config opening anywhere in line:
-				if ((strchr(syntax.start_config, line_string[char_index])) && is_superconfig)
-				{                      
+				if (
+					   (strchr(syntax.start_config, line_string[char_index])) 
+					&& is_superconfig
+				) {                      
                     name_read   = false;
                     config_name = NULL;
 
@@ -1470,14 +1642,16 @@ loader_data_s readSubconfig(
                     {
                         num_configs = (int32_t) ceil((float) num_configs * 1.5f);
                         config_data.subconfigs = 
-                            realloc(config_data.subconfigs, sizeof(loader_data_s) * (size_t) num_configs);
+                            realloc(
+								config_data.subconfigs, 
+								sizeof(loader_data_s) * (size_t) num_configs
+							);
                     }
 
                     // Intilise subconfig to default:
                     
                     loader_config_s old_config = config;
-                    config = 
-                        default_config;
+                                    config     = default_config;
 					
 					if (config.inherit)
 					{
@@ -1488,7 +1662,8 @@ loader_data_s readSubconfig(
 							config
 						);
 
-						config.num_defined_parameters = config_data.config.num_defined_parameters;
+						config.num_defined_parameters = 
+							config_data.config.num_defined_parameters;
 					}
                                         
                     config_data.subconfigs[config_index].config = config;
@@ -1500,6 +1675,8 @@ loader_data_s readSubconfig(
                         config_data.config,
                         file
                     );  
+					
+					char_index = 0;
 
                     if (config_data.subconfigs[config_index].total_num_subconfigs_read < 0)
                     {
@@ -1522,7 +1699,7 @@ loader_data_s readSubconfig(
                         {
                             dict_entry_s* entry = 
                                 findDictEntry_(
-                                    num_extra_configs, 
+                                    config_data.num_extra_configs, 
                                     name
                                 );
 
@@ -1533,7 +1710,7 @@ loader_data_s readSubconfig(
                                 data.type = int_e;
 
                                 insertDictEntry(
-                                    num_extra_configs, 
+                                    config_data.num_extra_configs, 
                                     data, 
                                     name
                                 );		
@@ -1555,7 +1732,12 @@ loader_data_s readSubconfig(
 				}                 
 				else if (strchr(syntax.start_config, line_string[char_index]))
 				{
-                    fprintf(stderr, "Warning! Unexpected config opening '{' \n"); 
+                    fprintf(
+						stderr, 
+						"readSubconfig: \nWarning! Unexpected config opening:"
+						" '{' in config %s.\n", 
+						config_data.name
+					); 
 
                     config_data.total_num_subconfigs_read = -1;
                     return config_data;
@@ -1566,7 +1748,8 @@ loader_data_s readSubconfig(
 				{ 	
                     if (name_read == false) 
                     {
-                        config_name = strtok(&line_string[char_index + 1], syntax.end_name);
+                        config_name = 
+							strtok(&line_string[char_index + 1], syntax.end_name);
                         config_data.name = strdup(config_name);
                                                 
                         const map_s subconfig_name_map =
@@ -1581,7 +1764,8 @@ loader_data_s readSubconfig(
 
                         if (config_name_index > -1) 
                         {
-                            config = superconfig.defined_subconfigs[config_name_index];
+                            config = 
+								superconfig.defined_subconfigs[config_name_index];
 							
 							if (config.inherit)
 							{
@@ -1591,7 +1775,8 @@ loader_data_s readSubconfig(
 									config
 								);
 
-								config.num_defined_parameters = config_data.config.num_defined_parameters;
+								config.num_defined_parameters = 
+									config_data.config.num_defined_parameters;
 							}
                         }
                         
@@ -1601,7 +1786,9 @@ loader_data_s readSubconfig(
                     {
                         fprintf(
                             stderr, 
-                            "Warning! More than one name detected inside config %s, ignoring all but first. \n", 
+                            "readSubconfig: \nWarning! More than one name"
+							" detected inside config %s, ignoring all but"
+							" first. \n", 
                             config_name
                         );
                     }
@@ -1612,9 +1799,8 @@ loader_data_s readSubconfig(
 				if (strchr(syntax.end_section, line_string[char_index])) 
 				{ 	
                     //TODO: Add in error checking to check if in config.
-                    
                     //Skip line:
-                    getline(&line_string, &line_length, file);
+                    //getline(&line_string, &line_length, file);
                     
 					config_data.total_num_subconfigs_read = config_index;
                                                             
@@ -1651,8 +1837,10 @@ loader_data_s readSubconfig(
 				}
 				
 				// On parameter name end:
-				else if (isspace(line_string[char_index]) && (!parameter_end && parameter_read))
-				{                
+				else if (
+					   isspace(line_string[char_index]) 
+					&& (!parameter_end && parameter_read)
+				) {                
                     parameter_end = true;
                     
 					parameter_index = 
@@ -1660,7 +1848,8 @@ loader_data_s readSubconfig(
                         										
 					if (parameter_index > -1) 
 					{
-						parameter_type = config_data.config.defined_parameters[parameter_index].type;
+						parameter_type = 
+							config_data.config.defined_parameters[parameter_index].type;
 						config_data.num_parameters_read[parameter_index]++;
                         
 						parameter_recognised = true;
@@ -1702,8 +1891,10 @@ loader_data_s readSubconfig(
 						{
 							fprintf(
 								stderr, 
-								"Warning! Unrecognised parameter name: \"%s\".\n", 
-								parameter_name
+								"readSubconfig: \nWarning! Unrecognised"
+								" parameter name: \"%s\" in config %s.\n", 
+								parameter_name,
+								config_name
 							);
 						}
 					}
@@ -1712,24 +1903,23 @@ loader_data_s readSubconfig(
 				}
 
 				//Finds the value after detecting value indicatior character
-				if (get_value && strchr(syntax.value_indicator, line_string[char_index])) 
-				{	
-					char* value_string = 
-					pullValueFromLine(
-						&line_string[char_index],
-						syntax.new_line,
-						syntax.string_separator,
-						syntax.char_separator,
-						parameter_name,
-						parameter_type 
-					);
+				if (
+					   get_value
+					&& strchr(syntax.value_indicator, line_string[char_index])
+				) {	
+					char *value_string = 
+						pullValueFromLine(
+							&line_string[char_index],
+							syntax,
+							parameter_name,
+							parameter_type 
+						);
 					
 					if (parameter_type == none_e) 
 					{
 						parameter_type = guessTypeFromConfigContext(
 							value_string, 
-							syntax.string_separator, 
-							syntax.char_separator
+							syntax
 						);
 					}
 					
@@ -1737,9 +1927,9 @@ loader_data_s readSubconfig(
 					{	
 						int32_t extra_parameter_start_index = 0;
 						
-						if     ((parameter_recognised) 
-							&& (config_data.num_parameters_read[parameter_index] > 1))
-						{
+						if (   (parameter_recognised) 
+							&& (config_data.num_parameters_read[parameter_index] > 1)
+						) {
 							extra_parameter_start_index = 2;
 						} 
 						else
@@ -1748,8 +1938,8 @@ loader_data_s readSubconfig(
 						}
 						
 						if (   (parameter_recognised) 
-							&& (config_data.num_parameters_read[parameter_index] < 2)) 
-						{
+							&& (config_data.num_parameters_read[parameter_index] < 2)
+						) {
 							castToVoidArray(
 								verbosity,
 								value_string, 
@@ -1778,7 +1968,9 @@ loader_data_s readSubconfig(
                         {
                             fprintf(
                                 stderr, 
-                                "Warning! No value string read! \n"
+                                "readSubconfig: \nWarning! No value string read"
+								" in config %s! \n",
+								config_name
                             );
                         }
 					}
@@ -1797,11 +1989,12 @@ loader_data_s readSubconfig(
     }
     
     if (!checkAllRequirements(
-        verbosity,
-        config_data,
-        superconfig,
-        superconfig))
-    {
+			verbosity,
+			config_data,
+			superconfig,
+			superconfig
+		)
+	) {
         config_data.total_num_subconfigs_read = -1;
     }
     
@@ -1824,7 +2017,9 @@ void* readConfig(
         
     loader_data_s config_data;
     config_data.total_num_subconfigs_read = -1;
-    
+	config_data.extra_parameters          = NULL;
+	config_data.subconfigs                = NULL;
+	
     if (checkOpenFile(verbosity, file_name, "r", &file))
     {        
         fseek(file, *file_position, SEEK_SET);
@@ -1841,7 +2036,7 @@ void* readConfig(
         
         fclose(file);
     } 
-        
+    
     if (config_data.total_num_subconfigs_read < 0)
     {
         freeConfigData(config_data);
@@ -1903,7 +2098,12 @@ void pullUInt16ArrayFromStruct(
 	
 	for (int32_t index = start; index < stop; index++) 
 	{
-		pointer = (uint16_t*) pullValueFromStruct(structure, construct->structure_map[index], sizeof(uint16_t));
+		pointer = 
+			(uint16_t*) pullValueFromStruct(
+				structure, 
+				construct->structure_map[index], 
+				sizeof(uint16_t)
+			);
 		array[index - start] = *pointer;
 	}
 	

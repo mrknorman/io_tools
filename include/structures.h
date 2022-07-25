@@ -36,6 +36,7 @@ typedef struct LoaderConfig{
 	
 	bool                 inherit;
 	bool                 is_superconfig;    
+	bool                 has_parameters;
     bool                 reorder;
 
 	int32_t              min;
@@ -81,6 +82,8 @@ typedef struct LoaderData {
     map_s              subconfig_name_map;
     int32_t           *num_subconfigs_read;
     int32_t            total_num_subconfigs_read;
+	
+	dict_s            *num_extra_configs;
     
     struct LoaderData *subconfigs;
     loader_config_s    config;
@@ -97,7 +100,9 @@ typedef struct LoaderSyntax{
     const char *char_separator;
     const char *start_name;
     const char *end_name;
-    const char* end_section;
+    const char *end_section;
+	const char *start_array;
+	const char *end_array;
 } loader_syntax_s;
 
 // Paser settings:
@@ -112,7 +117,9 @@ loader_syntax_s syntax =
     .char_separator   = "\'",
     .start_name       = "[",
     .end_name         = "]",
-    .end_section      = "%"
+    .end_section      = "%",
+	.start_array      = "(",
+	.end_array        = ")"
 };
 
 #endif
