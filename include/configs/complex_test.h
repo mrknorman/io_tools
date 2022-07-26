@@ -43,12 +43,214 @@ typedef struct NetworkConfig{
 
 } network_config_s;
 
+typedef struct WaveformConfig {
+
+	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
+	//
+	// Structure to hold waveform configuration. NOTE: Organise in order of type size. 
+	//
+	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
+	
+	char   *name;
+
+	float   sample_rate;
+	float   min_duration;
+	float   max_duration;
+	
+	float   subwaveforms_per_stream_mu;
+	float   subwaveforms_per_stream_sigma;
+	float   subwaveforms_per_stream_min;
+	float   subwaveforms_per_stream_max;
+	
+	int32_t num_subwaveforms;
+	int32_t num_subwaveform_layers;
+	int32_t min_num_repeats;
+	int32_t max_num_repeats;
+	
+} waveform_config_s;
+
+typedef struct SubwaveformConfig {
+
+	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
+	//
+	// Structure to hold subwaveformnal configuration. NOTE: Organise in order of type size. 
+	//
+	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
+	char   *name;
+	char   *path;
+    
+	float   mass_1_min; 
+	float   mass_1_max;
+	float   mass_2_min;
+	float   mass_2_max;
+	
+	float   iota_min;
+	float   iota_max;
+	float   distance_min;
+	float   distance_max;
+	float   sigma_min;
+	float   sigma_max;
+	float   power_min;
+	float   power_max;
+	float   a_max;
+	float   a_min;
+	float   phaze_min;
+	float   phaze_max;
+	float   frequency_min;
+	float   frequency_max;
+	float   max_mass_ratio;
+	
+	int32_t distribution_type;
+	int32_t k_max;
+	int32_t k_min;
+	int32_t type;
+	
+	bool    active; 
+
+} subwaveform_config_s;
+
+typedef struct NoiseConfig {
+
+	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
+	//
+	// Structure to hold noise configuration. NOTE: Organise in order of type size. 
+	//
+	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
+	char    *name;
+	float    amplitude_sigma;
+	float    amplitude_mu;
+	float    amplitude_min;
+	float    amplitude_max;
+
+	int32_t  type;
+
+	bool     active;
+
+} noise_config_s;
+
+typedef struct NoiseGroup {
+
+	int32_t config_index;
+	int32_t source_type;
+
+} noise_group_s;
+
+typedef struct SnrGroup {
+	
+	char  *name; 
+	float  snr_mu;
+	float  snr_sigma;
+	float  snr_min;
+	float  snr_max;
+
+} snr_group_s;
+
+typedef struct CoherenceGroup {
+	
+	char    *name; 
+	int32_t  config_index;
+	int32_t  source_type;
+
+} coherence_group_s;
+
+typedef struct SubinjectionConfig {
+
+	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
+	//
+	// Structure to hold subinjection configuration. NOTE: Organise in order of type size.
+	//
+	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
+	
+	char     *name;
+	
+	int32_t   waveform_index;
+	int32_t   coherence_group;
+	int32_t   snr_group;
+	
+	int32_t   source_type;
+
+	bool      active;
+
+	bool      add_time_difference;
+	bool      simulate_detector_response;
+	bool      simulate_polarisation_response;
+	bool      simulate_orientation_response;
+
+	bool      snr_adjust;
+	bool      used_in_snr;
+	bool      use_network_snr;
+	
+} subinjection_config_s;
+
+typedef struct InjectionConfig {
+
+	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
+	//
+	// Structure to hold runtime variables.
+	//
+	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
+	
+	char      *name;
+	char      *debug_directory_path;
+	
+	float     *snr_mu;
+	float     *snr_sigma;
+	float     *snr_min;
+	float     *snr_max;
+	
+	float      injections_per_stream_mu;
+	float      injections_per_stream_sigma;
+	float      injections_per_stream_min;
+	float      injections_per_stream_max;
+
+	float      subinjections_per_stream_mu;
+	float      subinjections_per_stream_sigma;
+	float      subinjections_per_stream_min;
+	float      subinjections_per_stream_max;
+
+	float      front_padding, back_padding;
+	float      stream_sample_rate;
+	float      center_time_min, center_time_max;
+	
+	int32_t    stream_length;
+	int32_t    num_streams;
+	int32_t    num_detectors;
+	int32_t    num_injections;
+
+	int32_t    num_injection_types;
+	int32_t    num_coherence_groups;
+	int32_t    num_unique_coherence_groups;
+	int32_t    num_snr_groups;
+	int32_t    num_unique_snr_groups;
+
+	int32_t    num_segments;
+	int32_t    segment_length;
+	
+    int32_t    snr_distribution;
+	
+} injection_config_s;
+
+typedef struct ExampleConfig_s {
+	
+	char   *name;
+    char   *label;
+	
+	int32_t num_injection_types;
+	int32_t num_streams;
+	int32_t noise_type;
+
+	bool    active;
+	bool    add_injections;
+	bool    add_noise;
+
+} example_config_s;
+
 #else
-//Default Parameters
+// Default Parameters:
 parameter_s default_parameter = 
 	{"default_parameter", none_e, 0, 0};
 
-//Detectors:
+// Detectors:
 const int32_t num_detector_parameters = 19;
 parameter_s detector_parameters[] = 
 {
@@ -101,7 +303,7 @@ loader_config_s detector_subconfig =
 
 loader_config_s default_detector[] = {detector_subconfig};
 
-loader_config_s detectors_subconfig = 
+loader_config_s detector_loader_config = 
 {
 	.name                   = "detectors",
 	.name_necessity         = required_e,
@@ -133,7 +335,7 @@ loader_config_s detectors_subconfig =
 	.struct_size            = sizeof(detector_s)
 };
 
-loader_config_s default_detectors[] = {detectors_subconfig};
+loader_config_s default_detectors[] = {detector_loader_config};
 
 // Network:
 const int32_t num_network_parameters = 4;
@@ -145,7 +347,7 @@ parameter_s network_parameters[] =
 	{"num_dimensions"   , int_e  , 1, 1}	
 };
 
-loader_config_s network_subconfig = 
+loader_config_s network_loader_config = 
 {
 	.name                   = "network",
 	.name_necessity         = required_e,
@@ -178,12 +380,905 @@ loader_config_s network_subconfig =
 	.struct_size            = sizeof(network_config_s)
 };
 
-const int32_t num_defined_subconfigs = 1;
-loader_config_s defined_subconfigs[] = {
-	network_subconfig
+// Subwaveform: 
+
+// ~~~~ Gausian Window:
+const int32_t num_gaussian_parameters = 4;
+parameter_s gaussian_parameters[] = 
+{
+	{"sigma_min", float_e, 1, 1},
+	{"sigma_max", float_e, 1, 1},
+	{"power_min", float_e, 1, 1},
+	{"power_max", float_e, 1, 1}
 };
 
-loader_config_s default_subconfig[] = {network_subconfig};
+// ~~~~ Triangular Window:
+const int32_t num_triangular_parameters = 0;
+parameter_s *triangular_parameters = NULL;
+
+// ~~~~ Welch Window:
+const int32_t num_welch_parameters = 0;
+parameter_s *welch_parameters = NULL;
+
+// ~~~~ Rectangular Window:
+const int32_t num_rectangular_parameters = 0;
+parameter_s *rectangular_parameters = NULL;
+
+// ~~~~ Sine Window:
+const int32_t num_sine_parameters = 0;
+parameter_s *sine_parameters = NULL;
+
+// ~~~~ Power Sine Window:
+const int32_t num_power_sine_parameters = 2;
+parameter_s power_sine_parameters[] = 
+{
+	{"power_min", float_e, 1, 1},
+	{"power_max", float_e, 1, 1}
+};
+
+// ~~~~ Cosine sum Window:
+const int32_t num_cosine_sum_parameters = 4;
+parameter_s cosine_sum_parameters[] = 
+{
+	{"a_min", float_e, 1, 1},
+	{"a_max", float_e, 1, 1},
+	{"k_min", int_e  , 1, 1},
+	{"k_max", int_e  , 1, 1}
+};
+
+// ~~~~ Tukey Window:
+const int32_t num_tukey_parameters = 2;
+parameter_s tukey_parameters[] = 
+{
+	{"a_min", float_e, 1, 1},
+	{"a_max", float_e, 1, 1}
+};
+
+// ~~~~ Possion Window:
+const int32_t num_possion_parameters = 2;
+parameter_s possion_parameters[] = 
+{
+	{"a_min", float_e, 1, 1},
+	{"a_max", float_e, 1, 1}
+};
+
+// ~~~~ Sine Wave:
+const int32_t num_sine_wave_parameters = 2;
+parameter_s sine_wave_parameters[] = 
+{
+	{"frequency_min", float_e, 1, 1},
+	{"frequency_max", float_e, 1, 1}
+};
+
+// ~~~~ Triangular Wave:
+const int32_t num_triangular_wave_parameters = 6;
+parameter_s triangular_wave_parameters[] = 
+{
+	{"frequency_min", float_e, 1, 1},
+	{"frequency_max", float_e, 1, 1},
+	{"phase_min"    , float_e, 1, 1},
+	{"phase_max"    , float_e, 1, 1},
+	{"k_min"        , float_e, 1, 1},
+	{"k_max"        , float_e, 1, 1}
+};
+
+// ~~~~ Saw Wave:
+const int32_t num_saw_wave_parameters = 6;
+parameter_s saw_wave_parameters[] = 
+{
+	{"frequency_min", float_e, 1, 1},
+	{"frequency_max", float_e, 1, 1},
+	{"phase_min"    , float_e, 1, 1},
+	{"phase_max"    , float_e, 1, 1},
+	{"k_min"        , float_e, 1, 1},
+	{"k_max"        , float_e, 1, 1}
+};
+
+// ~~~~ Inspiral:
+const int32_t num_inspiral_parameters = 10;
+parameter_s inspiral_parameters[] = 
+{
+	{"distribution_type", int_e  , 1, 1},
+	{"max_mass_ratio"   , int_e  , 1, 1},
+	{"mass_1_min"       , float_e, 1, 1},
+	{"mass_1_max"       , float_e, 1, 1},
+	{"mass_2_min"       , float_e, 1, 1},
+	{"mass_2_max"       , float_e, 1, 1},
+	{"iota_min"         , float_e, 1, 1},
+	{"iota_max"         , float_e, 1, 1},
+	{"distance_min"     , float_e, 1, 1},
+	{"distance_max"     , float_e, 1, 1}
+};
+
+// ~~~~ IMRPhenomD:
+const int32_t num_imrphenomd_parameters = 10;
+parameter_s imrphenomd_parameters[] = 
+{
+	{"distribution_type", int_e  , 1, 1},
+	{"max_mass_ratio"   , int_e  , 1, 1},
+	{"mass_1_min"       , float_e, 1, 1},
+	{"mass_1_max"       , float_e, 1, 1},
+	{"mass_2_min"       , float_e, 1, 1},
+	{"mass_2_max"       , float_e, 1, 1},
+	{"iota_min"         , float_e, 1, 1},
+	{"iota_max"         , float_e, 1, 1},
+	{"distance_min"     , float_e, 1, 1},
+	{"distance_max"     , float_e, 1, 1}
+};
+
+// ~~~~ Load Waveform:
+const int32_t num_load_parameters = 1;
+parameter_s load_parameters[] = 
+{
+	{"path", int_e  , 1, 1},
+};
+
+// Subwaveform Priority Parameters:
+
+char *subwaveform_names[] =
+{
+	"gaussian_window",
+	"triangular_window",
+	"welch_window",
+	"rectangular_window",
+	"sine_window",
+	"power_sine_window",
+	"cosine_sum_window",
+	"tukey_window",
+	"possion_window",
+	"sine_wave",
+	"triangular_wave",
+	"saw_wave",
+	"inspiral",
+	"imrphenomd",
+	"load"
+};
+
+int32_t subwaveform_num_priority_parameters[] = 
+{
+	num_gaussian_parameters,
+	num_triangular_parameters,
+	num_welch_parameters,
+	num_rectangular_parameters,
+	num_sine_parameters,
+	num_power_sine_parameters,
+	num_cosine_sum_parameters,
+	num_tukey_parameters,
+	num_possion_parameters,
+	num_sine_wave_parameters,
+	num_triangular_wave_parameters,
+	num_saw_wave_parameters,
+	num_inspiral_parameters,
+	num_imrphenomd_parameters,
+	num_load_parameters
+};
+
+parameter_s *subwaveform_priority_parameters[] =
+{
+	gaussian_parameters,
+	triangular_parameters,
+	welch_parameters,
+	rectangular_parameters,
+	sine_parameters,
+	power_sine_parameters,
+	cosine_sum_parameters,
+	tukey_parameters,
+	possion_parameters,
+	sine_wave_parameters,
+	triangular_wave_parameters,
+	saw_wave_parameters,
+	inspiral_parameters,
+	imrphenomd_parameters,
+	load_parameters
+}; 
+
+loader_config_s subwaveform_subconfig = 
+{
+	.name                   = "default_subwaveform_name",
+	.name_necessity         = required_e,
+
+	.is_superconfig         = false,
+	.has_parameters         = true,
+	.inherit                = true,
+	
+    .min                    = 0,
+    .max                    = INT32_MAX,
+    
+	.num_defined_parameters = 0,
+	.min_inputed_parameters = 2,
+	.max_inputed_parameters = 25,
+	.defined_parameters     = NULL,
+	
+	.min_extra_parameters   = 0,
+	.max_extra_parameters   = 0,
+	.default_parameter      = default_parameter,
+
+	.struct_size            = sizeof(subwaveform_config_s)
+};
+
+loader_config_s default_subwaveform_subconfig[] =
+	{subwaveform_subconfig};
+
+const int32_t num_subwaveform_types = 15;
+loader_config_s subwaveform_subconfigs[15];
+
+for (int32_t index = 0; index < num_subwaveform_types; index++)
+{
+	subwaveform_subconfigs[index]                        = 
+		subwaveform_subconfig;
+	subwaveform_subconfigs[index].name                   = 
+		subwaveform_names[index];
+	subwaveform_subconfigs[index].num_defined_parameters =
+		subwaveform_num_priority_parameters[index];
+	subwaveform_subconfigs[index].defined_parameters =
+		subwaveform_priority_parameters[index];
+}
+
+const int32_t num_subwaveform_parameters = 26;
+parameter_s subwaveform_parameters[] = 
+{
+	{"name"             , string_e, 0, 0},
+	{"path"             , string_e, 0, 0},
+	{"mass_1_min"       , float_e , 0, 0},
+	{"mass_1_max"       , float_e , 0, 0},
+	{"mass_2_min"       , float_e , 0, 0},
+	{"mass_2_max"       , float_e , 0, 0},
+	{"iota_min"         , float_e , 0, 0},
+	{"iota_max"         , float_e , 0, 0},
+	{"distance_min"     , float_e , 0, 0},
+	{"distance_max"     , float_e , 0, 0},
+	{"sigma_min"        , float_e , 0, 0},
+	{"sigma_max"        , float_e , 0, 0},
+	{"power_min"        , float_e , 0, 0},
+	{"power_max"        , float_e , 0, 0},
+	{"a_min"            , float_e , 0, 0},
+	{"a_max"            , float_e , 0, 0},
+	{"phaze_min"        , float_e , 0, 0},
+	{"phaze_max"        , float_e , 0, 0},
+	{"frequency_min"    , float_e , 0, 0},
+	{"frequency_max"    , float_e , 0, 0},
+	{"max_mass_ratio"   , float_e , 0, 0},
+	{"distribution_type", int_e   , 0, 0},
+	{"k_max"            , int_e   , 0, 0},
+	{"k_min"            , int_e   , 0, 0},
+	{"layer"            , int_e   , 1, 1},
+	{"active"           , bool_e  , 1, 1}
+};
+
+loader_config_s subwaveform_loader_config = 
+{
+	.name                   = "subwaveforms",
+	.name_necessity         = required_e,
+
+	.is_superconfig         = true,
+	.has_parameters         = false,
+	.inherit                = false,
+	
+    .min                    = 1,
+    .max                    = 1,
+    
+	.num_defined_parameters = num_subwaveform_parameters,
+	.min_inputed_parameters = 2,
+	.max_inputed_parameters = 25,
+	.defined_parameters     = subwaveform_parameters,
+	
+	.min_extra_parameters   = 0,
+	.max_extra_parameters   = 0,
+	.default_parameter      = default_parameter,
+	
+	.num_defined_subconfigs = num_subwaveform_types,
+	.min_num_subconfigs     = 0,
+	.max_num_subconfigs     = INT32_MAX,
+	.defined_subconfigs     = subwaveform_subconfigs,
+    
+    .min_extra_subconfigs   = 0,
+	.max_extra_subconfigs   = 0,
+	.default_subconfig      = default_subwaveform_subconfig,
+
+	.struct_size            = sizeof(subwaveform_config_s)
+};
+
+loader_config_s default_subwaveform[] = {subwaveform_loader_config};
+
+// Waveform:
+const int32_t num_waveform_parameters = 12;
+parameter_s waveform_parameters[] = 
+{
+	{"name"                         , string_e, 0, 0},
+	{"sample_rate"                  , float_e , 0, 0},
+	{"min_duration"                 , float_e , 1, 1},
+	{"max_duration"                 , float_e , 1, 1},
+	{"subwaveforms_per_stream_mu"   , float_e , 1, 1},
+	{"subwaveforms_per_stream_sigma", float_e , 1, 1},
+	{"subwaveforms_per_stream_min"  , float_e , 1, 1},
+	{"subwaveforms_per_stream_max"  , float_e , 1, 1},
+	{"num_subwaveforms"             , int_e   , 1, 1},
+	{"num_subwaveform_layers"       , int_e   , 1, 1},
+	{"min_num_repeats"              , int_e   , 1, 1},
+	{"max_num_repeats"              , int_e   , 1, 1}	
+};
+
+loader_config_s waveform_subconfig = 
+{
+	.name                   = "default_waveform_name",
+	.name_necessity         = optional_e,
+
+	.is_superconfig         = true,
+	.has_parameters         = true,
+	.inherit                = false,
+	
+    .min                    = 0,
+    .max                    = INT32_MAX,
+    
+	.num_defined_parameters = num_waveform_parameters,
+	.min_inputed_parameters = 10,
+	.max_inputed_parameters = 10,
+	.defined_parameters     = waveform_parameters,
+	
+	.min_extra_parameters   = 0,
+	.max_extra_parameters   = 0,
+	.default_parameter      = default_parameter,
+	
+	.num_defined_subconfigs = 0,
+	.min_num_subconfigs     = 1,
+	.max_num_subconfigs     = INT32_MAX,
+	.defined_subconfigs     = NULL,
+    
+    .min_extra_subconfigs   = 0,
+	.max_extra_subconfigs   = INT32_MAX,
+	.default_subconfig      = default_subwaveform,
+
+	.struct_size            = sizeof(waveform_config_s)
+};
+
+loader_config_s default_waveform[] = {waveform_subconfig};
+
+loader_config_s waveform_loader_config = 
+{
+	.name                   = "waveforms",
+	.name_necessity         = required_e,
+
+	.is_superconfig         = true,
+	.has_parameters         = false,
+	.inherit                = false,
+	
+    .min                    = 1,
+    .max                    = 1,
+    
+	.num_defined_parameters = num_waveform_parameters,
+	.min_inputed_parameters = 10,
+	.max_inputed_parameters = 10,
+	.defined_parameters     = waveform_parameters,
+	
+	.min_extra_parameters   = 0,
+	.max_extra_parameters   = 0,
+	.default_parameter      = default_parameter,
+	
+	.num_defined_subconfigs = 0,
+	.min_num_subconfigs     = 0,
+	.max_num_subconfigs     = INT32_MAX,
+	.defined_subconfigs     = NULL,
+    
+    .min_extra_subconfigs   = 0,
+	.max_extra_subconfigs   = INT32_MAX,
+	.default_subconfig      = default_waveform,
+
+	.struct_size            = sizeof(waveform_config_s)
+};
+
+// Noise:
+const int32_t num_noise_parameters = 7;
+parameter_s noise_parameters[] = 
+{
+	{"name"           , string_e, 0, 0},
+	{"amplitude_sigma", float_e , 1, 1},
+	{"amplitude_mu"   , float_e , 1, 1},
+	{"amplitude_min"  , float_e , 1, 1},
+	{"amplitude_max"  , float_e , 1, 1},
+	{"type"           , int_e   , 1, 1},
+	{"active"         , bool_e  , 1, 1},
+};
+
+loader_config_s noise_subconfig = 
+{
+	.name                   = "default_noise_name",
+	.name_necessity         = optional_e,
+
+	.is_superconfig         = false,
+	.has_parameters         = true,
+	.inherit                = false,
+	
+    .min                    = 0,
+    .max                    = INT32_MAX,
+    
+	.num_defined_parameters = num_noise_parameters,
+	.min_inputed_parameters = 6,
+	.max_inputed_parameters = 6,
+	.defined_parameters     = noise_parameters,
+	
+	.min_extra_parameters   = 0,
+	.max_extra_parameters   = 0,
+	.default_parameter      = default_parameter,
+
+	.struct_size            = sizeof(noise_config_s)
+};
+
+loader_config_s default_noise_subconfig[] =
+{
+	 noise_subconfig
+};
+
+loader_config_s noise_loader_config = 
+{
+	.name                   = "noise",
+	.name_necessity         = required_e,
+
+	.is_superconfig         = true,
+	.has_parameters         = false,
+	.inherit                = false,
+	
+    .min                    = 0,
+    .max                    = 1,
+    
+	.num_defined_parameters = num_noise_parameters,
+	.min_inputed_parameters = 6,
+	.max_inputed_parameters = 6,
+	.defined_parameters     = noise_parameters,
+	
+	.min_extra_parameters   = 0,
+	.max_extra_parameters   = 0,
+	.default_parameter      = default_parameter,
+	
+	.num_defined_subconfigs = 0,
+	.min_num_subconfigs     = 1,
+	.max_num_subconfigs     = INT32_MAX,
+	.defined_subconfigs     = NULL,
+    
+    .min_extra_subconfigs   = 0,
+	.max_extra_subconfigs   = INT32_MAX,
+	.default_subconfig      = default_noise_subconfig,
+
+	.struct_size            = sizeof(noise_config_s)
+};
+
+// Subinjection:
+const int32_t num_subinjection_parameters = 13;
+parameter_s subinjection_parameters[] = 
+{
+	{"name"                          , string_e, 0, 0},
+	{"waveform_index"                , int_e   , 1, 1},
+	{"coherence_group"               , int_e   , 1, 1},
+	{"snr_group"                     , int_e   , 1, 1},
+	{"source_type"                   , int_e   , 1, 1},
+	{"active"                        , bool_e  , 1, 1},
+	{"add_time_difference"           , bool_e  , 1, 1},
+	{"simulate_detector_response"    , bool_e  , 1, 1},
+	{"simulate_polarisation_response", bool_e  , 1, 1},
+	{"simulate_orientation_response" , bool_e  , 1, 1},
+	{"snr_adjust"                    , bool_e  , 1, 1},
+	{"used_in_snr"                   , bool_e  , 1, 1},
+	{"use_network_snr"               , bool_e  , 1, 1}
+};
+
+loader_config_s subinjection_subconfig = 
+{
+	.name                   = "default_subinjection_name",
+	.name_necessity         = optional_e,
+
+	.is_superconfig         = false,
+	.has_parameters         = true,
+	.inherit                = false,
+	
+    .min                    = 0,
+    .max                    = INT32_MAX,
+    
+	.num_defined_parameters = num_subinjection_parameters,
+	.min_inputed_parameters = 12,
+	.max_inputed_parameters = 12,
+	.defined_parameters     = subinjection_parameters,
+	
+	.min_extra_parameters   = 0,
+	.max_extra_parameters   = 0,
+	.default_parameter      = default_parameter,
+
+	.struct_size            = sizeof(subinjection_config_s)
+};
+
+loader_config_s default_subinjection_subconfig[] =
+{
+	 subinjection_subconfig
+};
+
+loader_config_s subinjection_loader_config = 
+{
+	.name                   = "subinjections",
+	.name_necessity         = required_e,
+
+	.is_superconfig         = true,
+	.has_parameters         = false,
+	.inherit                = false,
+	
+    .min                    = 0,
+    .max                    = 1,
+    
+	.num_defined_parameters = num_subinjection_parameters,
+	.min_inputed_parameters = 12,
+	.max_inputed_parameters = 12,
+	.defined_parameters     = subinjection_parameters,
+	
+	.min_extra_parameters   = 0,
+	.max_extra_parameters   = 0,
+	.default_parameter      = default_parameter,
+	
+	.num_defined_subconfigs = 0,
+	.min_num_subconfigs     = 1,
+	.max_num_subconfigs     = INT32_MAX,
+	.defined_subconfigs     = NULL,
+    
+    .min_extra_subconfigs   = 0,
+	.max_extra_subconfigs   = INT32_MAX,
+	.default_subconfig      = default_subinjection_subconfig,
+
+	.struct_size            = sizeof(subinjection_config_s)
+};
+
+loader_config_s default_subinjection_loader_config[] =
+{
+	 subinjection_loader_config
+};
+
+// SNR Groups:
+const int32_t num_snr_group_parameters = 5;
+parameter_s snr_group_parameters[] =
+{
+	{"name"     , string_e, 0, 0},
+	{"snr_mu"   , float_e , 1, 1},
+	{"snr_sigma", float_e , 1, 1},
+	{"snr_min"  , float_e , 1, 1},
+	{"snr_max"  , float_e , 1, 1},
+};
+
+loader_config_s snr_group_subconfig = 
+{
+	.name                   = "default_snr_group_name",
+	.name_necessity         = optional_e,
+
+	.is_superconfig         = false,
+	.has_parameters         = true,
+	.inherit                = false,
+	
+    .min                    = 0,
+    .max                    = INT32_MAX,
+    
+	.num_defined_parameters = num_snr_group_parameters,
+	.min_inputed_parameters = 4,
+	.max_inputed_parameters = 4,
+	.defined_parameters     = snr_group_parameters,
+	
+	.min_extra_parameters   = 0,
+	.max_extra_parameters   = 0,
+	.default_parameter      = default_parameter,
+
+	.struct_size            = sizeof(snr_group_s)
+};
+
+loader_config_s default_snr_group_subconfig[] =
+{
+	 snr_group_subconfig
+};
+
+loader_config_s snr_group_loader_config = 
+{
+	.name                   = "snr_groups",
+	.name_necessity         = required_e,
+
+	.is_superconfig         = true,
+	.has_parameters         = false,
+	.inherit                = false,
+	
+    .min                    = 0,
+    .max                    = 1,
+    
+	.num_defined_parameters = num_snr_group_parameters,
+	.min_inputed_parameters = 12,
+	.max_inputed_parameters = 12,
+	.defined_parameters     = snr_group_parameters,
+	
+	.min_extra_parameters   = 0,
+	.max_extra_parameters   = 0,
+	.default_parameter      = default_parameter,
+	
+	.num_defined_subconfigs = 0,
+	.min_num_subconfigs     = 1,
+	.max_num_subconfigs     = INT32_MAX,
+	.defined_subconfigs     = NULL,
+    
+    .min_extra_subconfigs   = 0,
+	.max_extra_subconfigs   = INT32_MAX,
+	.default_subconfig      = default_snr_group_subconfig,
+
+	.struct_size            = sizeof(snr_group_s)
+};
+
+// Coherence Groups:
+const int32_t num_coherence_group_parameters = 3;
+parameter_s coherence_group_parameters[] =
+{
+	{"name"        , string_e, 0, 0},
+	{"source_type" , int_e   , 1, 1},
+	{"config_index", int_e   , 1, 1}
+};
+
+loader_config_s coherence_group_subconfig = 
+{
+	.name                   = "default_coherence_group_name",
+	.name_necessity         = optional_e,
+
+	.is_superconfig         = false,
+	.has_parameters         = true,
+	.inherit                = false,
+	
+    .min                    = 0,
+    .max                    = INT32_MAX,
+    
+	.num_defined_parameters = num_coherence_group_parameters,
+	.min_inputed_parameters = 2,
+	.max_inputed_parameters = 2,
+	.defined_parameters     = coherence_group_parameters,
+	
+	.min_extra_parameters   = 0,
+	.max_extra_parameters   = 0,
+	.default_parameter      = default_parameter,
+
+	.struct_size            = sizeof(coherence_group_s)
+};
+
+loader_config_s default_coherence_group_subconfig[] =
+{
+	 coherence_group_subconfig
+};
+
+loader_config_s coherence_group_loader_config = 
+{
+	.name                   = "coherence_groups",
+	.name_necessity         = required_e,
+
+	.is_superconfig         = true,
+	.has_parameters         = false,
+	.inherit                = false,
+	
+    .min                    = 0,
+    .max                    = 1,
+    
+	.num_defined_parameters = num_coherence_group_parameters,
+	.min_inputed_parameters = 12,
+	.max_inputed_parameters = 12,
+	.defined_parameters     = coherence_group_parameters,
+	
+	.min_extra_parameters   = 0,
+	.max_extra_parameters   = 0,
+	.default_parameter      = default_parameter,
+	
+	.num_defined_subconfigs = 0,
+	.min_num_subconfigs     = 1,
+	.max_num_subconfigs     = INT32_MAX,
+	.defined_subconfigs     = NULL,
+    
+    .min_extra_subconfigs   = 0,
+	.max_extra_subconfigs   = INT32_MAX,
+	.default_subconfig      = default_coherence_group_subconfig,
+
+	.struct_size            = sizeof(coherence_group_s)
+};
+
+// Injections:
+const int32_t num_injection_parameters = 31;
+parameter_s injection_parameters[] = 
+{
+	{"name"                          , string_e      , 0, 0},
+	{"debug_directory_path"          , string_e      , 0, 0},
+	{"snr_mu"                        , float_array_e , 0, 0},
+	{"snr_sigma"                     , float_array_e , 0, 0},
+	{"snr_min"                       , float_array_e , 0, 0},
+	{"snr_max"                       , float_array_e , 0, 0},
+	{"injections_per_stream_mu"      , float_e       , 1, 1},
+	{"injections_per_stream_sigma"   , float_e       , 1, 1},
+	{"injections_per_stream_min"     , float_e       , 1, 1},
+	{"injections_per_stream_max"     , float_e       , 1, 1},
+	{"subinjections_per_stream_mu"   , float_e       , 1, 1},
+	{"subinjections_per_stream_sigma", float_e       , 1, 1},
+	{"subinjections_per_stream_min"  , float_e       , 1, 1},
+	{"subinjections_per_stream_max"  , float_e       , 1, 1},
+	{"front_padding"                 , float_e       , 1, 1},
+	{"back_padding"                  , float_e       , 1, 1},
+	{"stream_sample_rate"            , float_e       , 0, 0},
+	{"center_time_min"               , float_e       , 0, 0},
+	{"center_time_max"               , float_e       , 0, 0},
+	{"stream_length"                 , int_e         , 0, 0},
+	{"num_streams"                   , int_e         , 0, 0},
+	{"num_detectors"                 , int_e         , 0, 0},
+	{"num_injections"                , int_e         , 0, 0},
+	{"num_injection_types"           , int_e         , 0, 0},
+	{"num_coherence_groups"          , int_e         , 0, 0},
+	{"num_unique_coherence_groups"   , int_e         , 0, 0},
+	{"num_snr_groups"                , int_e         , 0, 0},
+	{"num_unique_snr_groups"         , int_e         , 0, 0},
+	{"num_segments"                  , int_e         , 0, 0},
+	{"segment_length"                , int_e         , 0, 0},
+	{"snr_distribution"              , int_e         , 1, 1}
+};
+
+loader_config_s injection_subconfig = 
+{
+	.name                   = "default_injection_name",
+	.name_necessity         = optional_e,
+
+	.is_superconfig         = true,
+	.has_parameters         = true,
+	.inherit                = false,
+	
+    .min                    = 0,
+    .max                    = INT32_MAX,
+    
+	.num_defined_parameters = num_injection_parameters,
+	.min_inputed_parameters = 11,
+	.max_inputed_parameters = 11,
+	.defined_parameters     = injection_parameters,
+	
+	.min_extra_parameters   = 0,
+	.max_extra_parameters   = 0,
+	.default_parameter      = default_parameter,
+	
+	.num_defined_subconfigs = 0,
+	.min_num_subconfigs     = 1,
+	.max_num_subconfigs     = 1,
+	.defined_subconfigs     = NULL,
+    
+    .min_extra_subconfigs   = 0,
+	.max_extra_subconfigs   = INT32_MAX,
+	.default_subconfig      = default_subinjection_loader_config,
+
+	.struct_size            = sizeof(injection_config_s)
+};
+
+loader_config_s default_injection_subconfig[] =
+{
+	 injection_subconfig
+};
+
+loader_config_s injection_loader_config = 
+{
+	.name                   = "injections",
+	.name_necessity         = required_e,
+
+	.is_superconfig         = true,
+	.has_parameters         = false,
+	.inherit                = false,
+	
+    .min                    = 0,
+    .max                    = 1,
+    
+	.num_defined_parameters = num_injection_parameters,
+	.min_inputed_parameters = 11,
+	.max_inputed_parameters = 11,
+	.defined_parameters     = injection_parameters,
+	
+	.min_extra_parameters   = 0,
+	.max_extra_parameters   = 0,
+	.default_parameter      = default_parameter,
+	
+	.num_defined_subconfigs = 0,
+	.min_num_subconfigs     = 0,
+	.max_num_subconfigs     = INT32_MAX,
+	.defined_subconfigs     = NULL,
+    
+    .min_extra_subconfigs   = 0,
+	.max_extra_subconfigs   = INT32_MAX,
+	.default_subconfig      = default_injection_subconfig,
+
+	.struct_size            = sizeof(injection_config_s)
+};
+
+loader_config_s default_injection_loader_config[] =
+{
+	 injection_loader_config
+};
+
+// Example config
+const int32_t num_example_parameters = 8;
+parameter_s example_parameters[] =
+{
+	{"name"               , string_e, 0, 0},
+	{"label"              , string_e, 1, 1},
+	{"num_injection_types", int_e   , 0, 0},
+	{"num_streams"        , int_e   , 0, 0},
+	{"noise_type"         , int_e   , 1, 1},
+	{"active"             , bool_e  , 1, 1},
+	{"add_injections"     , bool_e  , 1, 1},
+	{"add_noise"          , bool_e  , 1, 1},
+};
+
+const int32_t num_example_subconfigs = 3;
+loader_config_s example_subconfigs[] = 
+{
+	snr_group_loader_config,
+	coherence_group_loader_config,
+	injection_loader_config
+};
+
+loader_config_s example_subconfig = 
+{
+	.name                   = "default_example_name",
+	.name_necessity         = optional_e,
+
+	.is_superconfig         = true,
+	.has_parameters         = true,
+	.inherit                = false,
+	
+    .min                    = 1,
+    .max                    = 1,
+    
+	.num_defined_parameters = num_example_parameters,
+	.min_inputed_parameters = 5,
+	.max_inputed_parameters = 5,
+	.defined_parameters     = example_parameters,
+	
+	.min_extra_parameters   = 0,
+	.max_extra_parameters   = 0,
+	.default_parameter      = default_parameter,
+	
+	.num_defined_subconfigs = num_example_subconfigs,
+	.min_num_subconfigs     = 0,
+	.max_num_subconfigs     = 3,
+	.defined_subconfigs     = example_subconfigs,
+    
+    .min_extra_subconfigs   = 0,
+	.max_extra_subconfigs   = 0,
+	.default_subconfig      = default_injection_loader_config,
+
+	.struct_size            = sizeof(example_config_s)
+};
+
+loader_config_s default_example_loader_config[] = 
+{
+	example_subconfig
+};
+
+loader_config_s example_loader_config = 
+{
+	.name                   = "examples",
+	.name_necessity         = required_e,
+
+	.is_superconfig         = true,
+	.has_parameters         = false,
+	.inherit                = false,
+	
+    .min                    = 0,
+    .max                    = 1,
+	
+	.num_defined_subconfigs = num_example_subconfigs,
+	.min_num_subconfigs     = 0,
+	.max_num_subconfigs     = INT32_MAX,
+	.defined_subconfigs     = example_subconfigs,
+    
+    .min_extra_subconfigs   = 0,
+	.max_extra_subconfigs   = INT32_MAX,
+	.default_subconfig      = default_example_loader_config,
+
+	.struct_size            = sizeof(example_config_s)
+};
+
+// Dataset:
+const int32_t num_defined_subconfigs = 4;
+loader_config_s defined_subconfigs[] = 
+{
+	network_loader_config,
+	waveform_loader_config,
+	noise_loader_config,
+	example_loader_config
+};
+
+loader_config_s default_subconfig[] = {network_loader_config};
 
 loader_config_s loader_config = 
 {
@@ -207,8 +1302,8 @@ loader_config_s loader_config =
 	.default_parameter      = default_parameter,
     
     .num_defined_subconfigs = num_defined_subconfigs,
-	.min_num_subconfigs     = 1,
-	.max_num_subconfigs     = 1,
+	.min_num_subconfigs     = 4,
+	.max_num_subconfigs     = 4,
 	.defined_subconfigs     = defined_subconfigs,
     
     .min_extra_subconfigs   = 0,

@@ -481,7 +481,7 @@ int32_t stringToInt(
 		string = string_copy;
 	}
 
-	if isdigit(string[0]) 
+	if (isdigit(string[0]) || (string[0] == '-'))
 	{
 		value = (int32_t) atoi(string); 
 	} 
@@ -508,7 +508,7 @@ float stringToFloat(
 	
 	float value = 0.0f;
 	
-	if isdigit(string[0]) 
+	if (isdigit(string[0]) || (string[0] == '-')) 
 	{
 		value = (float) atof(string); 
 	} else 

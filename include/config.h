@@ -80,10 +80,11 @@ bool checkTypeOrder(
 }
 
 bool checkStructSize( 
-	const int32_t verbosity,
-	const size_t  size,
-	const size_t  compiled_size,
-	const size_t  largest_memory_alignment
+	const int32_t  verbosity,
+	const size_t   size,
+	const size_t   compiled_size,
+	const size_t   largest_memory_alignment,
+	const char    *name
 	) {
 	
 	bool return_value = true;
@@ -95,9 +96,11 @@ bool checkStructSize(
 			fprintf(
 				stderr, 
 				"checkStructSize: \nError! Inputted struct size: (%zu) is"
-				"larger than compiled structure: (%zu), exiting.\n", 
+				"larger than compiled structure: (%zu), exiting. For config"
+				"%s.\n", 
 				size, 
-				compiled_size
+				compiled_size,
+				name
 			);
 		}
 		
@@ -116,9 +119,10 @@ bool checkStructSize(
 				stderr, 
 				"checkStructSize: \n Warning! Inputted struct size: (%zu) is"
 				"smaller than compiled structure, even acounting for padding:"
-				" (%zu), exiting.\n", 
+				" (%zu), exiting. Forc config %s.\n", 
 				size, 
-				compiled_size - largest_memory_alignment
+				compiled_size - largest_memory_alignment,
+				name
 			);
 		}
 		
@@ -359,7 +363,8 @@ bool checkNumConfigs(
 	const int32_t  verbosity,
 	const int32_t  total_num_read,
 	const int32_t  min,
-	const int32_t  max
+	const int32_t  max,
+	const char    *name
 	) {
 	
 	bool pass = true;
@@ -373,8 +378,8 @@ bool checkNumConfigs(
 			fprintf(
 				stderr, 
 				"checkNumConfigs: \nError! Total num configs (%i) greater than"
-				" max allowed (%i)! \n",
-				total_num_read, max
+				" max allowed (%i) for config %s.\n",
+				total_num_read, max, name
 			); 
 		}
 	}
@@ -387,8 +392,8 @@ bool checkNumConfigs(
 			fprintf(
 				stderr, 
 				"checkNumConfigs: \nError! Total num configs (%i) smaller than"
-				" minimum required (%i)! \n",
-				total_num_read, min
+				" minimum required (%i) for config %s! \n",
+				total_num_read, min, name
 			); 
 		}
 	} 
@@ -400,7 +405,8 @@ bool checkNumExtraConfigs(
 	const int32_t  verbosity,
 	const int32_t  total_num_read,
 	const int32_t  min,
-	const int32_t  max
+	const int32_t  max,
+	const char    *name
 	) {
 	
 	bool pass = true;
@@ -414,8 +420,8 @@ bool checkNumExtraConfigs(
 			fprintf(
 				stderr, 
 				"checkNumExtraConfigs: \nError! Total num extra configs (%i)"
-				" greater than max allowed (%i)! \n",
-				total_num_read, max
+				" greater than max allowed (%i) for config %s! \n",
+				total_num_read, max, name
 			); 
 		}
 	}
@@ -428,8 +434,8 @@ bool checkNumExtraConfigs(
 			fprintf(
 				stderr, 
 				"checkNumExtraConfigs: \nError! Total num extra configs (%i)"
-				"smaller than minimum required (%i)! \n",
-				total_num_read, min
+				"smaller than minimum required (%i) for config %s! \n",
+				total_num_read, min, name
 			); 
 		}
 	} 
@@ -722,7 +728,8 @@ bool checkConfigRequirements(
                 verbosity,
                 total_num_read,
                 total_min,
-                total_max
+                total_max,
+				config.name
             );
 
         pass *=
@@ -730,7 +737,8 @@ bool checkConfigRequirements(
                 verbosity,
                 total_num_read - sum,
                 extra_min,
-                extra_max
+                extra_max,
+				config.name
             );
     }
     	    
@@ -743,7 +751,7 @@ type_e guessDataTypeFromString(
 
 	type_e guess = float_e;
 	
-	if isdigit(string[0])
+	if (isdigit(string[0]) || (string[0] == '-'))
 	{
 		if ( strchr(string, '.') ) 
 		{
@@ -1059,7 +1067,8 @@ bool checkLoaderConfig(
         verbosity, 
         struct_size, 
         compiled_struct_size, 
-        largest_memory_alignment
+        largest_memory_alignment,
+		config.name
     );
 
 	pass *= checkTypeOrder(
@@ -1356,8 +1365,6 @@ loader_data_s setupConfigData(
     const int32_t      num_defined_parameters = config.num_defined_parameters;
           parameter_s *defined_parameters     = config.defined_parameters;
 		  int32_t      num_defined_subconfigs = config.num_defined_subconfigs;
-
-
     
     loader_data_s config_data = {
        .name       = NULL,
@@ -1381,8 +1388,6 @@ loader_data_s setupConfigData(
     config_data.num_subconfigs_read = 
         calloc((size_t) config.num_defined_parameters, sizeof(int32_t));
     
-    config_data.name = NULL;
-
     config_data.structure = 
         calloc(1, compiled_struct_size);
 
@@ -1455,10 +1460,10 @@ bool checkAllParameterRequirments(
 
         if (config_name_index > -1) 
         {
-            config = superconfig.defined_subconfigs[config_name_index];
-			
 			if (config.inherit) 
 			{
+				config = superconfig.defined_subconfigs[config_name_index];
+
 				config.defined_parameters = overwriteParameters(
 					config_data.config.defined_parameters,
 					config_data.parameter_name_map,
@@ -1649,10 +1654,10 @@ loader_data_s readSubconfig(
                     }
 
                     // Intilise subconfig to default:
-                    
+                
                     loader_config_s old_config = config;
                                     config     = default_config;
-					
+						
 					if (config.inherit)
 					{
 						// Set default parameters:    
@@ -1667,7 +1672,7 @@ loader_data_s readSubconfig(
 					}
                                         
                     config_data.subconfigs[config_index].config = config;
-
+					
                     config_data.subconfigs[config_index] = readSubconfig(
                         verbosity,
                         syntax,
@@ -1751,7 +1756,7 @@ loader_data_s readSubconfig(
                         config_name = 
 							strtok(&line_string[char_index + 1], syntax.end_name);
                         config_data.name = strdup(config_name);
-                                                
+						                                                
                         const map_s subconfig_name_map =
                         createConfigMap(
                             superconfig.defined_subconfigs,
@@ -1778,8 +1783,13 @@ loader_data_s readSubconfig(
 								config.num_defined_parameters = 
 									config_data.config.num_defined_parameters;
 							}
+							else
+							{
+								default_config = 
+									setupDefaultConfig(config);
+							}
                         }
-                        
+						                        
                         name_read = true;
                     }
                     else if (verbosity > 1)
@@ -1894,7 +1904,7 @@ loader_data_s readSubconfig(
 								"readSubconfig: \nWarning! Unrecognised"
 								" parameter name: \"%s\" in config %s.\n", 
 								parameter_name,
-								config_name
+								config.name
 							);
 						}
 					}
@@ -2111,3 +2121,4 @@ void pullUInt16ArrayFromStruct(
 }
 
 #endif
+

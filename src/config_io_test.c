@@ -25,10 +25,10 @@ typedef struct TestLoaderNull{
 } loader_null_test_s;
 
 bool checkLoaderReturnNull(
-        const int32_t            verbosity,
-        const char              *config_directory_name,
-        const loader_config_s    loader_config,
-        const loader_null_test_s test_config
+        const int32_t             verbosity,
+        const char               *config_directory_name,
+        const loader_config_s     loader_config,
+        const loader_null_test_s  test_config
     ) {
     
     bool pass = true;
@@ -1119,11 +1119,14 @@ bool testComplexConfig(
 	{
 		detectors[index] = 
 			*((detector_s*) detector_data.subconfigs[index].structure);
-		printf("%i, %i, %i \n", detectors[index].latitude[0], detectors[index].latitude[1], detectors[index].latitude[2]);
+		printf(
+			"%i, %i, %i \n", 
+			detectors[index].latitude[0], 
+			detectors[index].latitude[1], 
+			detectors[index].latitude[2]
+		);
 	}
-
-
-
+	
     for (int32_t index = 0; index < num_tests; index++) 
     {
         pass *= checkLoaderReturnNull(
