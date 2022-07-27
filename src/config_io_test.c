@@ -1080,7 +1080,6 @@ bool testComplexConfig(
         {"complex_test.cfg", false}
     };
 	
-	
 	loader_null_test_s test_config = test_configs[0];
 	
 	const char *file_name     = test_config.file_name;

@@ -522,8 +522,8 @@ bool checkParameterRequirements(
 			fprintf(
 				stderr, 
 				"checkParameterRequirements: \nWarning! Num instances (%i) of"
-				" variable \"%s\" lower than required (%i)!\n", 
-				read, name, min
+				" variable \"%s\" lower than required (%i) in config %s!\n", 
+				read, name, min, config.name
 			);
 			
 			pass *= false;
@@ -533,8 +533,8 @@ bool checkParameterRequirements(
 			fprintf(
 				stderr, 
 				"checkParameterRequirements: \nWarning! Num instances (%i) of"
-				" variable \"%s\" higher than allowed (%i)!\n", 
-				read, name, max
+				" variable \"%s\" higher than allowed (%i) in config %s!\n", 
+				read, name, max, config.name
 			);
 			
 			pass *= false;
@@ -1019,6 +1019,23 @@ bool checkConfigs(
 	return pass;
 }
 
+loader_config_s setupDefaultConfig(
+    const loader_config_s    config 
+    ) {
+
+    loader_config_s  default_config;
+    if (config.is_superconfig)
+    {
+        default_config = *config.default_subconfig;
+    }
+    else
+    {
+        default_config = config;
+    }
+
+    return default_config;
+}
+
 bool checkLoaderConfig(
     const int32_t         verbosity,
     const loader_config_s config
@@ -1053,15 +1070,8 @@ bool checkLoaderConfig(
     
     bool pass = true;
     
-    loader_config_s  default_config;
-    if (is_superconfig)
-    {
-        default_config = *config.default_subconfig;
-    }
-    else
-    {
-        default_config = config;
-    }
+    loader_config_s default_config 
+		= setupDefaultConfig( config);
     	
 	pass *=	checkStructSize(
         verbosity, 
@@ -1169,7 +1179,7 @@ parameter_s *overwriteParameters(
 		default_parameters, 
 		sizeof(parameter_s) * (size_t) default_parameter_map.length
 	);
-
+	
     // Create config lists:    
     map_s priority_name_map = 
         createParameterMap(
@@ -1195,7 +1205,7 @@ parameter_s *overwriteParameters(
                 fprintf(
 					stderr, 
 					"overwriteParameters: \nWarning! Parameter \"%s\" name not"
-					" found in defined parameters! \n.", 
+					" found in defined parameters! \n", 
 					parameter_name
 				);
                 break;
@@ -1206,7 +1216,7 @@ parameter_s *overwriteParameters(
             fprintf(
 				stderr, 
 				"overwriteParameters: \nWarning! Parameter name at index (%i)"
-				" not found, check num defined parameters \n.", 
+				" not found, check num defined parameters \n", 
 				index
 			);
             break;
@@ -1366,7 +1376,8 @@ loader_data_s setupConfigData(
           parameter_s *defined_parameters     = config.defined_parameters;
 		  int32_t      num_defined_subconfigs = config.num_defined_subconfigs;
     
-    loader_data_s config_data = {
+    loader_data_s config_data = 
+	{
        .name       = NULL,
        .subconfigs = NULL,
        .config     = config
@@ -1411,27 +1422,10 @@ loader_data_s setupConfigData(
         makeDictionary((1+num_defined_parameters)*100);
 	
 	// Create dictionary to count instances of extra subconfigs:
-	config_data.num_extra_configs    = 
+	config_data.num_extra_configs = 
         makeDictionary((1+num_defined_subconfigs)*100);
 
     return config_data;
-}
-
-loader_config_s setupDefaultConfig(
-    const loader_config_s    config 
-    ) {
-
-    loader_config_s  default_config;
-    if (config.is_superconfig)
-    {
-        default_config = *config.default_subconfig;
-    }
-    else
-    {
-        default_config = config;
-    }
-
-    return default_config;
 }
 
 bool checkAllParameterRequirments(
@@ -1446,6 +1440,7 @@ bool checkAllParameterRequirments(
     loader_config_s config = default_config;
 
     const char *name = config_data.name;
+	
     if (name != NULL)
     {
         const map_s subconfig_name_map =
@@ -1654,7 +1649,6 @@ loader_data_s readSubconfig(
                     }
 
                     // Intilise subconfig to default:
-                
                     loader_config_s old_config = config;
                                     config     = default_config;
 						
@@ -1690,12 +1684,12 @@ loader_data_s readSubconfig(
                     }
 
                     const char *name = config_data.subconfigs[config_index].name;
+					
                     if (name != NULL)
                     {
-
                         const int32_t config_name_index = 
                                 getMapIndex(config_data.subconfig_name_map, name);
-
+						
                         if (config_name_index > -1) 
                         {
                             config_data.num_subconfigs_read[config_name_index]++;
@@ -1730,7 +1724,6 @@ loader_data_s readSubconfig(
                     }
                     
                     config = old_config;
-                                        
 					config_index++; 
 					                    
                     break;	
@@ -1756,7 +1749,7 @@ loader_data_s readSubconfig(
                         config_name = 
 							strtok(&line_string[char_index + 1], syntax.end_name);
                         config_data.name = strdup(config_name);
-						                                                
+						
                         const map_s subconfig_name_map =
                         createConfigMap(
                             superconfig.defined_subconfigs,
@@ -1766,7 +1759,7 @@ loader_data_s readSubconfig(
                         
                         const int32_t config_name_index = 
                                 getMapIndex(subconfig_name_map, config_name);
-
+								
                         if (config_name_index > -1) 
                         {
                             config = 
@@ -1785,11 +1778,28 @@ loader_data_s readSubconfig(
 							}
 							else
 							{
+								config_data.config = config;
+								config_data.parameter_name_map = 
+									createParameterMap(
+										config.num_defined_parameters,
+										config.defined_parameters
+									);
+								
+								if (config.is_superconfig)
+								{
+									config_data.subconfig_name_map = 
+										createConfigMap(
+											config.defined_subconfigs,
+											config.num_defined_subconfigs,
+											config
+										); 
+								}
+									
 								default_config = 
 									setupDefaultConfig(config);
 							}
                         }
-						                        
+												                        
                         name_read = true;
                     }
                     else if (verbosity > 1)
@@ -2121,4 +2131,5 @@ void pullUInt16ArrayFromStruct(
 }
 
 #endif
+
 

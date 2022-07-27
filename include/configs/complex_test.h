@@ -1,7 +1,7 @@
 #ifndef DATASET_CONFIG_STRUCTS
 #define DATASET_CONFIG_STRUCTS
 
-//Basic test config:
+#include "debug.h"	
 
 typedef struct Detector{
 
@@ -1185,6 +1185,7 @@ loader_config_s default_injection_loader_config[] =
 };
 
 // Example config
+
 const int32_t num_example_parameters = 8;
 parameter_s example_parameters[] =
 {
@@ -1268,14 +1269,240 @@ loader_config_s example_loader_config =
 	.struct_size            = sizeof(example_config_s)
 };
 
+// Debug
+const int32_t num_debug_parameters = 22;
+parameter_s debug_parameters[] = 
+{
+	{"num_plot"           , int_e , 0, 0},
+	{"num_write"          , int_e , 0, 0},
+	{"num_print"          , int_e , 0, 0},
+	{"print_depth"        , int_e , 0, 0},
+	{"active"             , bool_e, 1, 1},
+	{"plot"               , bool_e, 0, 0},
+	{"plot_samples"       , bool_e, 0, 0},
+	{"plot_locations"     , bool_e, 0, 0},
+	{"plot_psd"           , bool_e, 0, 0},
+	{"plot_snr"           , bool_e, 0, 0},
+	{"plot_interpolation" , bool_e, 0, 0},
+	{"plot_predictions"   , bool_e, 0, 0},
+	{"plot_metrics"       , bool_e, 0, 0},
+	{"write"              , bool_e, 0, 0},
+	{"write_samples"      , bool_e, 0, 0},
+	{"write_locations"    , bool_e, 0, 0},
+	{"write_psd"          , bool_e, 0, 0},
+	{"write_snr"          , bool_e, 0, 0},
+	{"write_interpolation", bool_e, 0, 0},
+	{"write_predictions"  , bool_e, 0, 0},
+	{"print"              , bool_e, 0, 0},
+	{"print_memory"       , bool_e, 0, 0}
+};
+
+loader_config_s debug_subconfig = 
+{
+	.name                   = "default_debug_name",
+	.name_necessity         = required_e,
+
+	.is_superconfig         = false,
+	.has_parameters         = true,
+	.inherit                = true,
+	
+    .min                    = 0,
+    .max                    = 1,
+    
+	.num_defined_parameters = num_debug_parameters,
+	.min_inputed_parameters = 1,
+	.max_inputed_parameters = num_debug_parameters,
+	.defined_parameters     = debug_parameters,
+	
+	.min_extra_parameters   = 0,
+	.max_extra_parameters   = 0,
+	.default_parameter      = default_parameter,
+
+	.struct_size            = sizeof(debug_config_s)
+};
+
+loader_config_s default_debug_subconfig[] =
+{
+	 debug_subconfig
+};
+
+const int32_t debug_detector_num_parameters = 7;
+parameter_s debug_detector_parameters[] =
+{
+	{"plot"           , bool_e , 1, 1},
+	{"plot_locations" , bool_e , 1, 1},
+	{"write"          , bool_e , 1, 1},
+	{"write_locations", bool_e , 1, 1},
+	{"print"          , bool_e , 1, 1},
+	{"print_depth"    , int_e  , 1, 1},
+	{"print_memory"   , bool_e , 1, 1}
+};
+
+const int32_t debug_noise_num_parameters = 14;
+parameter_s debug_noise_parameters[] =
+{
+	{"num_plot"           , int_e , 1, 1},
+	{"num_print"          , int_e , 1, 1},
+	{"num_write"          , int_e , 1, 1},
+	{"print_depth"        , int_e , 1, 1},
+	{"plot"               , bool_e, 1, 1},
+	{"plot_psd"           , bool_e, 1, 1},
+	{"plot_interpolation" , bool_e, 1, 1},
+	{"plot_samples"       , bool_e, 1, 1},
+	{"write"              , bool_e, 1, 1},
+	{"write_psd"          , bool_e, 1, 1},
+	{"write_interpolation", bool_e, 1, 1},
+	{"write_samples"      , bool_e, 1, 1},
+	{"print"              , bool_e, 1, 1},
+	{"print_memory"       , bool_e, 1, 1}
+};
+
+const int32_t debug_waveform_num_parameters = 8;
+parameter_s debug_waveform_parameters[] =
+{
+	{"num_plot"    , int_e , 1, 1},
+	{"num_write"   , int_e , 1, 1},
+	{"num_print"   , int_e , 1, 1},
+	{"print_depth" , int_e , 1, 1},
+	{"plot"        , bool_e, 1, 1},
+	{"write"       , bool_e, 1, 1},
+	{"print"       , bool_e, 1, 1},
+	{"print_memory", bool_e, 1, 1}
+};
+
+const int32_t debug_localisation_num_parameters = 10;
+parameter_s debug_localisation_parameters[] =
+{
+	{"num_plot"       , int_e , 1, 1},
+	{"num_write"      , int_e , 1, 1},
+	{"num_print"      , int_e , 1, 1},
+	{"print_depth"    , int_e , 1, 1},
+	{"plot"           , bool_e, 1, 1},
+	{"plot_locations" , bool_e, 1, 1},
+	{"write"          , bool_e, 1, 1},
+	{"write_locations", bool_e, 1, 1},
+	{"print"          , bool_e, 1, 1},
+	{"print_memory"   , bool_e, 1, 1}
+};
+
+const int32_t debug_snr_num_parameters = 14;
+parameter_s debug_snr_parameters[] =
+{
+	{"num_plot"           , int_e , 1, 1},
+	{"num_write"          , int_e , 1, 1},
+	{"num_print"          , int_e , 1, 1},
+	{"print_depth"        , int_e , 1, 1},
+	{"plot"               , bool_e, 1, 1},	
+	{"plot_psd"           , bool_e, 1, 1},
+	{"plot_interpolation" , bool_e, 1, 1},
+	{"plot_snr"           , bool_e, 1, 1},
+	{"write"              , bool_e, 1, 1},
+	{"write_psd"          , bool_e, 1, 1},
+	{"write_interpolation", bool_e, 1, 1},
+	{"write_snr"          , bool_e, 1, 1},
+	{"print"              , bool_e, 1, 1},
+	{"print_memory"       , bool_e, 1, 1}
+};  
+
+const int32_t debug_physicalisation_num_parameters = 10;
+parameter_s debug_physicalisation_parameters[] =
+{
+	{"num_plot"     , int_e , 1, 1},
+	{"num_write"    , int_e , 1, 1},
+	{"num_print"    , int_e , 1, 1},
+	{"print_depth"  , int_e , 1, 1},
+	{"plot"         , bool_e, 1, 1},
+	{"plot_samples" , bool_e, 1, 1},
+	{"write"        , bool_e, 1, 1},
+	{"write_samples", bool_e, 1, 1},
+	{"print"        , bool_e, 1, 1},
+	{"print_memory" , bool_e, 1, 1}
+};
+
+char *debug_names[] =
+{
+	"detector",
+	"noise",
+	"waveform",
+	"localisation",
+	"snr",
+	"physicalisation"
+};
+
+parameter_s *debug_priority_parameters[] =
+{
+	debug_detector_parameters,
+	debug_noise_parameters,
+	debug_waveform_parameters,
+	debug_localisation_parameters,
+	debug_snr_parameters,
+	debug_physicalisation_parameters
+};
+
+int32_t debug_num_priority_parameters[] =
+{
+	debug_detector_num_parameters,
+	debug_noise_num_parameters,
+	debug_waveform_num_parameters,
+	debug_localisation_num_parameters,
+	debug_snr_num_parameters,
+	debug_physicalisation_num_parameters
+};
+
+const int32_t num_debug_types = 6;
+loader_config_s debug_subconfigs[6];
+
+for (int32_t index = 0; index < num_debug_types; index++)
+{
+	debug_subconfigs[index]                        = debug_subconfig;
+	debug_subconfigs[index].name                   = debug_names[index];
+	debug_subconfigs[index].num_defined_parameters = debug_num_priority_parameters[index];
+	debug_subconfigs[index].defined_parameters     = debug_priority_parameters[index];
+}
+
+loader_config_s debug_loader_config = 
+{
+	.name                   = "debug",
+	.name_necessity         = required_e,
+
+	.is_superconfig         = true,
+	.has_parameters         = false,
+	.inherit                = false,
+	
+    .min                    = 0,
+    .max                    = 1,
+    
+	.num_defined_parameters = num_debug_parameters,
+	.min_inputed_parameters = 1,
+	.max_inputed_parameters = num_debug_parameters,
+	.defined_parameters     = debug_parameters,
+	
+	.min_extra_parameters   = 0,
+	.max_extra_parameters   = 0,
+	.default_parameter      = default_parameter,
+	
+	.num_defined_subconfigs = num_debug_types,
+	.min_num_subconfigs     = 0,
+	.max_num_subconfigs     = num_debug_types,
+	.defined_subconfigs     = debug_subconfigs,
+    
+    .min_extra_subconfigs   = 0,
+	.max_extra_subconfigs   = 0,
+	.default_subconfig      = default_debug_subconfig,
+
+	.struct_size            = sizeof(debug_config_s)
+};
+
 // Dataset:
-const int32_t num_defined_subconfigs = 4;
+
+const int32_t num_defined_subconfigs = 5;
 loader_config_s defined_subconfigs[] = 
 {
 	network_loader_config,
 	waveform_loader_config,
 	noise_loader_config,
-	example_loader_config
+	example_loader_config,
+	debug_loader_config
 };
 
 loader_config_s default_subconfig[] = {network_loader_config};
@@ -1286,6 +1513,7 @@ loader_config_s loader_config =
 	.name_necessity         = excluded_e,
 
 	.is_superconfig         = true,
+	.inherit                = false,
 	.has_parameters         = false,
     .reorder                = true,
     
@@ -1303,7 +1531,7 @@ loader_config_s loader_config =
     
     .num_defined_subconfigs = num_defined_subconfigs,
 	.min_num_subconfigs     = 4,
-	.max_num_subconfigs     = 4,
+	.max_num_subconfigs     = 5,
 	.defined_subconfigs     = defined_subconfigs,
     
     .min_extra_subconfigs   = 0,

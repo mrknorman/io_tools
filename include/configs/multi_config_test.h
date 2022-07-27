@@ -1,5 +1,6 @@
 #ifndef TEST_CONFIG_STRUCT
 #define TEST_CONFIG_STRUCT
+
 //Basic test config:
 typedef struct ConfigTest{
 	
