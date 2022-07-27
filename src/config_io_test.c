@@ -1083,26 +1083,20 @@ bool testComplexConfig(
 	loader_null_test_s test_config = test_configs[0];
 	
 	const char *file_name     = test_config.file_name;
-    const bool  null_expected = test_config.null_expected;
     
-	test_config_s **test_results = NULL;
     loader_data_s   config_data;
     
     char *config_file_path;
 	asprintf(&config_file_path, "./%s/%s", config_directory_name, file_name);
     
     int64_t file_position[] = {0};
-    
-	test_results = 
-		((test_config_s**) 
-			 readConfig(
-			     verbosity,
-				 config_file_path, 
-				 loader_config,
-				 &config_data,
-                 file_position
-			 )
-		);
+	 readConfig(
+		 verbosity,
+		 config_file_path, 
+		 loader_config,
+		 &config_data,
+		 file_position
+	 );
 	free(config_file_path);
 	
 	network_config_s network_config = 

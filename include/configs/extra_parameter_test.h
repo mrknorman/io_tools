@@ -17,15 +17,15 @@ typedef struct ConfigTest{
 const int32_t num_defined_parameters = 5;
 parameter_s defined_parameters[] = 
 {
-	{"parameter_string", string_e, 0, INT32_MAX},
-	{"parameter_float" , float_e , 0, INT32_MAX},
-	{"parameter_int"   , int_e   , 0, INT32_MAX},
-	{"parameter_bool"  , bool_e  , 0, INT32_MAX},	
-	{"parameter_char"  , char_e  , 0, INT32_MAX}	
+	{"parameter_string", string_e, 0, INT32_MAX, -FLT_MAX, FLT_MAX},
+	{"parameter_float" , float_e , 0, INT32_MAX, -FLT_MAX, FLT_MAX},
+	{"parameter_int"   , int_e   , 0, INT32_MAX, -FLT_MAX, FLT_MAX},
+	{"parameter_bool"  , bool_e  , 0, INT32_MAX, -FLT_MAX, FLT_MAX},	
+	{"parameter_char"  , char_e  , 0, INT32_MAX, -FLT_MAX, FLT_MAX}	
 };
 
 parameter_s default_parameter = 
-	{"default_parameter", none_e, 0, 2};
+	{"default_parameter", none_e, 0, 2, -FLT_MAX, FLT_MAX};
 
 // Subconfigs:
 loader_config_s subconfig = 

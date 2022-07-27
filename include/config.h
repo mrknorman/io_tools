@@ -7,6 +7,7 @@
 
 #include <inttypes.h>
 #include <string.h>
+#include "float.h"
 
 #include "text.h"
 #include "strings.h"
@@ -132,13 +133,127 @@ bool checkStructSize(
 	return return_value;
 }
 
-void castToVoid(
-	const int32_t verbosity,
-	const char   *string,
-	const type_e  type,
-	      void   *structure
+multi_s clipParameter(
+	const int32_t     verbosity,
+	      multi_s     data,
+		  parameter_s parameter
 	) {
 	
+	multi_u value = data.value;
+	
+	const float lower_limit = parameter.lower_limit;
+	const float upper_limit = parameter.upper_limit;
+
+	switch(data.type) 
+	{	
+		case(none_e        ): break;
+		case(bool_e        ): break;
+		case(bool_array_e  ): break;
+		
+		case(int_e         ): 
+			if((float)value.i > upper_limit)
+			{
+				if (verbosity > 1)
+				{
+					fprintf(
+						stderr, 
+						"clipParameter: \nWarning! Parameter \"%s\" value (%i)"
+						"greater than allowed (%i) clipping! \n", 
+						parameter.name,
+						value.i,
+						(int32_t) upper_limit
+					);
+				}
+				value.i = (int32_t)upper_limit;
+			}
+			else if 
+			((float)value.i < lower_limit)
+			{
+				printf("%f %f\n", lower_limit, upper_limit);
+				if (verbosity > 1)
+				{
+					fprintf(
+						stderr, 
+						"clipParameter: \nWarning! Parameter \"%s\" value (%i)"
+						"lower than allowed (%i) clipping! \n", 
+						parameter.name,
+						value.i,
+						(int32_t)lower_limit
+					);
+				}
+				value.i = (int32_t)lower_limit;
+			}
+			break;
+		case(int_array_e   ): break;
+		case(int_jagged_e  ): break;			
+			
+		case(float_e       ): break;
+			if(value.f > upper_limit)
+			{
+				if (verbosity > 1)
+				{
+					fprintf(
+						stderr, 
+						"clipParameter: \nWarning! Parameter \"%s\" value (%f)"
+						"greater than allowed (%f) clipping! \n", 
+						parameter.name,
+						value.f,
+						upper_limit
+					);
+				}
+				value.f = upper_limit;
+			}
+			else if 
+			(value.f < lower_limit)
+			{
+				if (verbosity > 1)
+				{
+					fprintf(
+						stderr, 
+						"clipParameter: \nWarning! Parameter \"%s\" value (%f)"
+						"lower than allowed (%f) clipping! \n", 
+						parameter.name,
+						value.f,
+						lower_limit
+					);
+				}
+				value.f = lower_limit;
+			}
+			break;
+		case(float_array_e ): break;
+		case(float_jagged_e): break;		
+
+		case(char_e        ): break;
+		case(char_array_e  ): break;
+		
+		case(string_e      ): break;		
+		case(string_array_e): break;
+			
+		default:
+			if (verbosity > 0)
+			{
+				fprintf(
+					stderr, 
+					"clipParameter: \nWarning! Type \"%s\" not recognised! \n", 
+					typeToString(data.type)
+				);
+			}
+		break;
+	}
+	
+	data.value = value;
+	
+	return data;
+}
+
+void castToVoid(
+	const int32_t      verbosity,
+	const char        *string,
+	const parameter_s  parameter,
+	      void         *structure
+	) {
+		
+	const type_e type        = parameter.type;
 	const size_t size = getSizeOfType(type);
 	
 	void *value = NULL;
@@ -154,7 +269,8 @@ void castToVoid(
 		case(char_e  ):
 		case(string_e): 
 			;multi_s value_m = StringToMultiS(verbosity, string, type);
-			value          = (void*) &value_m;
+			         value_m = clipParameter(verbosity, value_m, parameter);
+			           value = (void*) &value_m;
 		break;
 		
 		case(bool_array_e  ):
@@ -163,7 +279,7 @@ void castToVoid(
 		case(char_array_e  ):
 		case(string_array_e): 
 			;array_s array_m = stringToArrayS(verbosity, string, type);
-			value           = (void*) &array_m.data.ff.elements;
+			           value = (void*) &array_m.data.ff.elements;
 		break;
 		
 		
@@ -184,21 +300,21 @@ void castToVoid(
 }
 
 void castToVoidArray(
-	const int32_t  verbosity,
-	const char    *value_string,
-    const type_e  *types, 
-    const int32_t  index, 
-          void    *structure
+	const int32_t     verbosity,
+	const char       *value_string,
+    const type_e     *types, 
+	const parameter_s parameter,
+    const int32_t     index, 
+          void       *structure
     ){
 	
-	const type_e type = types[index];
 	const size_t structure_position = 
 		getTotalTypeArraySize(types, index);	
 	
 	castToVoid(
 		verbosity,
 		value_string, 
-		type, 
+		parameter, 
 		(uint8_t*) &((char*) structure)[structure_position]
 	);
 }
@@ -1964,6 +2080,7 @@ loader_data_s readSubconfig(
 								verbosity,
 								value_string, 
 								types, 
+								config.defined_parameters[parameter_index],
 								parameter_index, 
 								config_data.structure
 							);

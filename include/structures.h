@@ -1,6 +1,8 @@
 #ifndef IO_STRUCTURES_H
 #define IO_STRUCTURES_H
 
+#include "custom_types.h"
+
 typedef enum Necessity{ 
 	
 	/**
@@ -22,6 +24,8 @@ typedef struct Parameter{
 	type_e        type;
 	int32_t       min;
 	int32_t       max;
+	float         lower_limit;
+	float         upper_limit;
 	
 } parameter_s;
 

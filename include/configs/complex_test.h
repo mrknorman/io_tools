@@ -3,6 +3,7 @@
 
 #include "debug.h"	
 
+
 typedef struct Detector{
 
 	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
@@ -248,31 +249,31 @@ typedef struct ExampleConfig_s {
 #else
 // Default Parameters:
 parameter_s default_parameter = 
-	{"default_parameter", none_e, 0, 0};
+	{"default_parameter", none_e, 0, 0, 0.0f, 0.0f};
 
 // Detectors:
 const int32_t num_detector_parameters = 19;
 parameter_s detector_parameters[] = 
 {
-	{"name"                             , string_e     , 0, 0},
-	{"position"                         , float_array_e, 0, 0},
-	{"position_sphere"                  , float_array_e, 0, 0},
-	{"latitude"                         , int_array_e  , 1, 1},
-	{"longitude"                        , int_array_e  , 1, 1},
-	{"noise_profile_strain"             , float_array_e, 0, 0},
-    {"noise_profile_frequency"          , float_array_e, 0, 0},
-	{"interpolated_noise_profile"       , float_array_e, 0, 0},
-	{"x_arm_direction"                  , float_array_e, 0, 0},
-	{"y_arm_direction"                  , float_array_e, 0, 0},
-	{"up_direction"                     , float_array_e, 0, 0},
-	{"height_above_sea_level"           , float_e      , 1, 1},
-	{"sensitivity"                      , float_e      , 1, 1},
-	{"noise_amplitude"                  , float_e      , 1, 1},
-	{"noise_profile_length"             , int_e        , 0, 0},
-	{"interpolated_noise_profile_length", int_e        , 0, 0},
-	{"x_arm_bearing"                    , int_e        , 1, 1},
-	{"y_arm_bearing"                    , int_e        , 1, 1},
-	{"active"                           , bool_e       , 1, 1}
+	{"name"                             , string_e     , 0, 0, -FLT_MAX, FLT_MAX},
+	{"position"                         , float_array_e, 0, 0, -FLT_MAX, FLT_MAX},
+	{"position_sphere"                  , float_array_e, 0, 0, -FLT_MAX, FLT_MAX},
+	{"latitude"                         , int_array_e  , 1, 1, -FLT_MAX, FLT_MAX},
+	{"longitude"                        , int_array_e  , 1, 1, -FLT_MAX, FLT_MAX},
+	{"noise_profile_strain"             , float_array_e, 0, 0, -FLT_MAX, FLT_MAX},
+    {"noise_profile_frequency"          , float_array_e, 0, 0, -FLT_MAX, FLT_MAX},
+	{"interpolated_noise_profile"       , float_array_e, 0, 0, -FLT_MAX, FLT_MAX},
+	{"x_arm_direction"                  , float_array_e, 0, 0, -FLT_MAX, FLT_MAX},
+	{"y_arm_direction"                  , float_array_e, 0, 0, -FLT_MAX, FLT_MAX},
+	{"up_direction"                     , float_array_e, 0, 0, -FLT_MAX, FLT_MAX},
+	{"height_above_sea_level"           , float_e      , 1, 1, -FLT_MAX, FLT_MAX},
+	{"sensitivity"                      , float_e      , 1, 1,     0.0f, FLT_MAX},
+	{"noise_amplitude"                  , float_e      , 1, 1,     0.0f, FLT_MAX},
+	{"noise_profile_length"             , int_e        , 0, 0, -FLT_MAX, FLT_MAX},
+	{"interpolated_noise_profile_length", int_e        , 0, 0, -FLT_MAX, FLT_MAX},
+	{"x_arm_bearing"                    , int_e        , 1, 1,     0.0f,  360.0f},
+	{"y_arm_bearing"                    , int_e        , 1, 1,     0.0f,  360.0f},
+	{"active"                           , bool_e       , 1, 1, -FLT_MAX, FLT_MAX}
 };
 
 const int32_t min_num_detector_parameters = 8;
@@ -341,10 +342,10 @@ loader_config_s default_detectors[] = {detector_loader_config};
 const int32_t num_network_parameters = 4;
 parameter_s network_parameters[] = 
 {
-	{"speed_of_light"   , float_e, 1, 1},
-	{"equatorial_radius", float_e, 1, 1},
-	{"polar_radius"     , float_e, 1, 1},
-	{"num_dimensions"   , int_e  , 1, 1}	
+	{"speed_of_light"   , float_e, 1, 1, 0.0f, FLT_MAX},
+	{"equatorial_radius", float_e, 1, 1, 0.0f, FLT_MAX},
+	{"polar_radius"     , float_e, 1, 1, 0.0f, FLT_MAX},
+	{"num_dimensions"   , int_e  , 1, 1, 0.0f, FLT_MAX}	
 };
 
 loader_config_s network_loader_config = 
@@ -386,10 +387,10 @@ loader_config_s network_loader_config =
 const int32_t num_gaussian_parameters = 4;
 parameter_s gaussian_parameters[] = 
 {
-	{"sigma_min", float_e, 1, 1},
-	{"sigma_max", float_e, 1, 1},
-	{"power_min", float_e, 1, 1},
-	{"power_max", float_e, 1, 1}
+	{"sigma_min", float_e, 1, 1, -FLT_MAX, FLT_MAX},
+	{"sigma_max", float_e, 1, 1, -FLT_MAX, FLT_MAX},
+	{"power_min", float_e, 1, 1, -FLT_MAX, FLT_MAX},
+	{"power_max", float_e, 1, 1, -FLT_MAX, FLT_MAX}
 };
 
 // ~~~~ Triangular Window:
@@ -412,105 +413,105 @@ parameter_s *sine_parameters = NULL;
 const int32_t num_power_sine_parameters = 2;
 parameter_s power_sine_parameters[] = 
 {
-	{"power_min", float_e, 1, 1},
-	{"power_max", float_e, 1, 1}
+	{"power_min", float_e, 1, 1, -FLT_MAX, FLT_MAX},
+	{"power_max", float_e, 1, 1, -FLT_MAX, FLT_MAX}
 };
 
 // ~~~~ Cosine sum Window:
 const int32_t num_cosine_sum_parameters = 4;
 parameter_s cosine_sum_parameters[] = 
 {
-	{"a_min", float_e, 1, 1},
-	{"a_max", float_e, 1, 1},
-	{"k_min", int_e  , 1, 1},
-	{"k_max", int_e  , 1, 1}
+	{"a_min", float_e, 1, 1, -FLT_MAX, FLT_MAX},
+	{"a_max", float_e, 1, 1, -FLT_MAX, FLT_MAX},
+	{"k_min", int_e  , 1, 1, -FLT_MAX, FLT_MAX},
+	{"k_max", int_e  , 1, 1, -FLT_MAX, FLT_MAX}
 };
 
 // ~~~~ Tukey Window:
 const int32_t num_tukey_parameters = 2;
 parameter_s tukey_parameters[] = 
 {
-	{"a_min", float_e, 1, 1},
-	{"a_max", float_e, 1, 1}
+	{"a_min", float_e, 1, 1, -FLT_MAX, FLT_MAX},
+	{"a_max", float_e, 1, 1, -FLT_MAX, FLT_MAX}
 };
 
 // ~~~~ Possion Window:
 const int32_t num_possion_parameters = 2;
 parameter_s possion_parameters[] = 
 {
-	{"a_min", float_e, 1, 1},
-	{"a_max", float_e, 1, 1}
+	{"a_min", float_e, 1, 1, -FLT_MAX, FLT_MAX},
+	{"a_max", float_e, 1, 1, -FLT_MAX, FLT_MAX}
 };
 
 // ~~~~ Sine Wave:
 const int32_t num_sine_wave_parameters = 2;
 parameter_s sine_wave_parameters[] = 
 {
-	{"frequency_min", float_e, 1, 1},
-	{"frequency_max", float_e, 1, 1}
+	{"frequency_min", float_e, 1, 1, 0.0f, FLT_MAX},
+	{"frequency_max", float_e, 1, 1, 0.0f, FLT_MAX}
 };
 
 // ~~~~ Triangular Wave:
 const int32_t num_triangular_wave_parameters = 6;
 parameter_s triangular_wave_parameters[] = 
-{
-	{"frequency_min", float_e, 1, 1},
-	{"frequency_max", float_e, 1, 1},
-	{"phase_min"    , float_e, 1, 1},
-	{"phase_max"    , float_e, 1, 1},
-	{"k_min"        , float_e, 1, 1},
-	{"k_max"        , float_e, 1, 1}
+{  
+	{"frequency_min", float_e, 1, 1,     0.0f, FLT_MAX},
+	{"frequency_max", float_e, 1, 1,     0.0f, FLT_MAX},
+	{"phase_min"    , float_e, 1, 1, -FLT_MAX, FLT_MAX},
+	{"phase_max"    , float_e, 1, 1, -FLT_MAX, FLT_MAX},
+	{"k_min"        , float_e, 1, 1, -FLT_MAX, FLT_MAX},
+	{"k_max"        , float_e, 1, 1, -FLT_MAX, FLT_MAX}
 };
 
 // ~~~~ Saw Wave:
 const int32_t num_saw_wave_parameters = 6;
 parameter_s saw_wave_parameters[] = 
 {
-	{"frequency_min", float_e, 1, 1},
-	{"frequency_max", float_e, 1, 1},
-	{"phase_min"    , float_e, 1, 1},
-	{"phase_max"    , float_e, 1, 1},
-	{"k_min"        , float_e, 1, 1},
-	{"k_max"        , float_e, 1, 1}
+	{"frequency_min", float_e, 1, 1,     0.0f, FLT_MAX},
+	{"frequency_max", float_e, 1, 1,     0.0f, FLT_MAX},
+	{"phase_min"    , float_e, 1, 1, -FLT_MAX, FLT_MAX},
+	{"phase_max"    , float_e, 1, 1, -FLT_MAX, FLT_MAX},
+	{"k_min"        , float_e, 1, 1, -FLT_MAX, FLT_MAX},
+	{"k_max"        , float_e, 1, 1, -FLT_MAX, FLT_MAX}
 };
 
 // ~~~~ Inspiral:
 const int32_t num_inspiral_parameters = 10;
 parameter_s inspiral_parameters[] = 
 {
-	{"distribution_type", int_e  , 1, 1},
-	{"max_mass_ratio"   , int_e  , 1, 1},
-	{"mass_1_min"       , float_e, 1, 1},
-	{"mass_1_max"       , float_e, 1, 1},
-	{"mass_2_min"       , float_e, 1, 1},
-	{"mass_2_max"       , float_e, 1, 1},
-	{"iota_min"         , float_e, 1, 1},
-	{"iota_max"         , float_e, 1, 1},
-	{"distance_min"     , float_e, 1, 1},
-	{"distance_max"     , float_e, 1, 1}
+	{"distribution_type", int_e  , 1, 1, -FLT_MAX, FLT_MAX},
+	{"max_mass_ratio"   , int_e  , 1, 1,     0.0f, FLT_MAX},
+	{"mass_1_min"       , float_e, 1, 1,     0.0f, FLT_MAX},
+	{"mass_1_max"       , float_e, 1, 1,     0.0f, FLT_MAX},
+	{"mass_2_min"       , float_e, 1, 1,     0.0f, FLT_MAX},
+	{"mass_2_max"       , float_e, 1, 1,     0.0f, FLT_MAX},
+	{"iota_min"         , float_e, 1, 1, -FLT_MAX, FLT_MAX},
+	{"iota_max"         , float_e, 1, 1, -FLT_MAX, FLT_MAX},
+	{"distance_min"     , float_e, 1, 1,     0.0f, FLT_MAX},
+	{"distance_max"     , float_e, 1, 1,     0.0f, FLT_MAX}
 };
 
 // ~~~~ IMRPhenomD:
 const int32_t num_imrphenomd_parameters = 10;
 parameter_s imrphenomd_parameters[] = 
 {
-	{"distribution_type", int_e  , 1, 1},
-	{"max_mass_ratio"   , int_e  , 1, 1},
-	{"mass_1_min"       , float_e, 1, 1},
-	{"mass_1_max"       , float_e, 1, 1},
-	{"mass_2_min"       , float_e, 1, 1},
-	{"mass_2_max"       , float_e, 1, 1},
-	{"iota_min"         , float_e, 1, 1},
-	{"iota_max"         , float_e, 1, 1},
-	{"distance_min"     , float_e, 1, 1},
-	{"distance_max"     , float_e, 1, 1}
+	{"distribution_type", int_e  , 1, 1, -FLT_MAX, FLT_MAX},
+	{"max_mass_ratio"   , int_e  , 1, 1,     0.0f, FLT_MAX},
+	{"mass_1_min"       , float_e, 1, 1,     0.0f, FLT_MAX},
+	{"mass_1_max"       , float_e, 1, 1,     0.0f, FLT_MAX},
+	{"mass_2_min"       , float_e, 1, 1,     0.0f, FLT_MAX},
+	{"mass_2_max"       , float_e, 1, 1,     0.0f, FLT_MAX},
+	{"iota_min"         , float_e, 1, 1, -FLT_MAX, FLT_MAX},
+	{"iota_max"         , float_e, 1, 1, -FLT_MAX, FLT_MAX},
+	{"distance_min"     , float_e, 1, 1,     0.0f, FLT_MAX},
+	{"distance_max"     , float_e, 1, 1,     0.0f, FLT_MAX}
 };
 
 // ~~~~ Load Waveform:
 const int32_t num_load_parameters = 1;
 parameter_s load_parameters[] = 
 {
-	{"path", int_e  , 1, 1},
+	{"path", int_e, 1, 1, -FLT_MAX, FLT_MAX},
 };
 
 // Subwaveform Priority Parameters:
@@ -617,32 +618,32 @@ for (int32_t index = 0; index < num_subwaveform_types; index++)
 const int32_t num_subwaveform_parameters = 26;
 parameter_s subwaveform_parameters[] = 
 {
-	{"name"             , string_e, 0, 0},
-	{"path"             , string_e, 0, 0},
-	{"mass_1_min"       , float_e , 0, 0},
-	{"mass_1_max"       , float_e , 0, 0},
-	{"mass_2_min"       , float_e , 0, 0},
-	{"mass_2_max"       , float_e , 0, 0},
-	{"iota_min"         , float_e , 0, 0},
-	{"iota_max"         , float_e , 0, 0},
-	{"distance_min"     , float_e , 0, 0},
-	{"distance_max"     , float_e , 0, 0},
-	{"sigma_min"        , float_e , 0, 0},
-	{"sigma_max"        , float_e , 0, 0},
-	{"power_min"        , float_e , 0, 0},
-	{"power_max"        , float_e , 0, 0},
-	{"a_min"            , float_e , 0, 0},
-	{"a_max"            , float_e , 0, 0},
-	{"phaze_min"        , float_e , 0, 0},
-	{"phaze_max"        , float_e , 0, 0},
-	{"frequency_min"    , float_e , 0, 0},
-	{"frequency_max"    , float_e , 0, 0},
-	{"max_mass_ratio"   , float_e , 0, 0},
-	{"distribution_type", int_e   , 0, 0},
-	{"k_max"            , int_e   , 0, 0},
-	{"k_min"            , int_e   , 0, 0},
-	{"layer"            , int_e   , 1, 1},
-	{"active"           , bool_e  , 1, 1}
+	{"name"             , string_e, 0, 0, -FLT_MAX, FLT_MAX},
+	{"path"             , string_e, 0, 0, -FLT_MAX, FLT_MAX},
+	{"mass_1_min"       , float_e , 0, 0,     0.0f, FLT_MAX},
+	{"mass_1_max"       , float_e , 0, 0,     0.0f, FLT_MAX},
+	{"mass_2_min"       , float_e , 0, 0,     0.0f, FLT_MAX},
+	{"mass_2_max"       , float_e , 0, 0,     0.0f, FLT_MAX},
+	{"iota_min"         , float_e , 0, 0, -FLT_MAX, FLT_MAX},
+	{"iota_max"         , float_e , 0, 0, -FLT_MAX, FLT_MAX},
+	{"distance_min"     , float_e , 0, 0,     0.0f, FLT_MAX},
+	{"distance_max"     , float_e , 0, 0,     0.0f, FLT_MAX},
+	{"sigma_min"        , float_e , 0, 0, -FLT_MAX, FLT_MAX},
+	{"sigma_max"        , float_e , 0, 0, -FLT_MAX, FLT_MAX},
+	{"power_min"        , float_e , 0, 0, -FLT_MAX, FLT_MAX},
+	{"power_max"        , float_e , 0, 0, -FLT_MAX, FLT_MAX},
+	{"a_min"            , float_e , 0, 0, -FLT_MAX, FLT_MAX},
+	{"a_max"            , float_e , 0, 0, -FLT_MAX, FLT_MAX},
+	{"phaze_min"        , float_e , 0, 0, -FLT_MAX, FLT_MAX},
+	{"phaze_max"        , float_e , 0, 0, -FLT_MAX, FLT_MAX},
+	{"frequency_min"    , float_e , 0, 0,     0.0f, FLT_MAX},
+	{"frequency_max"    , float_e , 0, 0,     0.0f, FLT_MAX},
+	{"max_mass_ratio"   , float_e , 0, 0,     0.0f, FLT_MAX},
+	{"distribution_type", int_e   , 0, 0, -FLT_MAX, FLT_MAX},
+	{"k_max"            , int_e   , 0, 0, -FLT_MAX, FLT_MAX},
+	{"k_min"            , int_e   , 0, 0, -FLT_MAX, FLT_MAX},
+	{"layer"            , int_e   , 1, 1, -FLT_MAX, FLT_MAX},
+	{"active"           , bool_e  , 1, 1, -FLT_MAX, FLT_MAX}
 };
 
 loader_config_s subwaveform_loader_config = 
@@ -684,18 +685,18 @@ loader_config_s default_subwaveform[] = {subwaveform_loader_config};
 const int32_t num_waveform_parameters = 12;
 parameter_s waveform_parameters[] = 
 {
-	{"name"                         , string_e, 0, 0},
-	{"sample_rate"                  , float_e , 0, 0},
-	{"min_duration"                 , float_e , 1, 1},
-	{"max_duration"                 , float_e , 1, 1},
-	{"subwaveforms_per_stream_mu"   , float_e , 1, 1},
-	{"subwaveforms_per_stream_sigma", float_e , 1, 1},
-	{"subwaveforms_per_stream_min"  , float_e , 1, 1},
-	{"subwaveforms_per_stream_max"  , float_e , 1, 1},
-	{"num_subwaveforms"             , int_e   , 1, 1},
-	{"num_subwaveform_layers"       , int_e   , 1, 1},
-	{"min_num_repeats"              , int_e   , 1, 1},
-	{"max_num_repeats"              , int_e   , 1, 1}	
+	{"name"                         , string_e, 0, 0, -FLT_MAX, FLT_MAX},
+	{"sample_rate"                  , float_e , 0, 0, -FLT_MAX, FLT_MAX},
+	{"min_duration"                 , float_e , 1, 1,     0.0f, FLT_MAX},
+	{"max_duration"                 , float_e , 1, 1,     0.0f, FLT_MAX},
+	{"subwaveforms_per_stream_mu"   , float_e , 1, 1,     0.0f, FLT_MAX},
+	{"subwaveforms_per_stream_sigma", float_e , 1, 1,     0.0f, FLT_MAX},
+	{"subwaveforms_per_stream_min"  , float_e , 1, 1,     0.0f, FLT_MAX},
+	{"subwaveforms_per_stream_max"  , float_e , 1, 1,     0.0f, FLT_MAX},
+	{"num_subwaveforms"             , int_e   , 0, 0, -FLT_MAX, FLT_MAX},
+	{"num_subwaveform_layers"       , int_e   , 1, 1,     0.0f, FLT_MAX},
+	{"min_num_repeats"              , int_e   , 1, 1,     0.0f, FLT_MAX},
+	{"max_num_repeats"              , int_e   , 1, 1,     0.0f, FLT_MAX}	
 };
 
 loader_config_s waveform_subconfig = 
@@ -711,8 +712,8 @@ loader_config_s waveform_subconfig =
     .max                    = INT32_MAX,
     
 	.num_defined_parameters = num_waveform_parameters,
-	.min_inputed_parameters = 10,
-	.max_inputed_parameters = 10,
+	.min_inputed_parameters = 9,
+	.max_inputed_parameters = 9,
 	.defined_parameters     = waveform_parameters,
 	
 	.min_extra_parameters   = 0,
@@ -770,13 +771,13 @@ loader_config_s waveform_loader_config =
 const int32_t num_noise_parameters = 7;
 parameter_s noise_parameters[] = 
 {
-	{"name"           , string_e, 0, 0},
-	{"amplitude_sigma", float_e , 1, 1},
-	{"amplitude_mu"   , float_e , 1, 1},
-	{"amplitude_min"  , float_e , 1, 1},
-	{"amplitude_max"  , float_e , 1, 1},
-	{"type"           , int_e   , 1, 1},
-	{"active"         , bool_e  , 1, 1},
+	{"name"           , string_e, 0, 0, -FLT_MAX, FLT_MAX},
+	{"amplitude_sigma", float_e , 1, 1,     0.0f, FLT_MAX},
+	{"amplitude_mu"   , float_e , 1, 1,     0.0f, FLT_MAX},
+	{"amplitude_min"  , float_e , 1, 1,     0.0f, FLT_MAX},
+	{"amplitude_max"  , float_e , 1, 1,     0.0f, FLT_MAX},
+	{"type"           , int_e   , 1, 1, -FLT_MAX, FLT_MAX},
+	{"active"         , bool_e  , 1, 1, -FLT_MAX, FLT_MAX},
 };
 
 loader_config_s noise_subconfig = 
@@ -845,19 +846,19 @@ loader_config_s noise_loader_config =
 const int32_t num_subinjection_parameters = 13;
 parameter_s subinjection_parameters[] = 
 {
-	{"name"                          , string_e, 0, 0},
-	{"waveform_index"                , int_e   , 1, 1},
-	{"coherence_group"               , int_e   , 1, 1},
-	{"snr_group"                     , int_e   , 1, 1},
-	{"source_type"                   , int_e   , 1, 1},
-	{"active"                        , bool_e  , 1, 1},
-	{"add_time_difference"           , bool_e  , 1, 1},
-	{"simulate_detector_response"    , bool_e  , 1, 1},
-	{"simulate_polarisation_response", bool_e  , 1, 1},
-	{"simulate_orientation_response" , bool_e  , 1, 1},
-	{"snr_adjust"                    , bool_e  , 1, 1},
-	{"used_in_snr"                   , bool_e  , 1, 1},
-	{"use_network_snr"               , bool_e  , 1, 1}
+	{"name"                          , string_e, 0, 0, -FLT_MAX, FLT_MAX},
+	{"waveform_index"                , int_e   , 1, 1, -FLT_MAX, FLT_MAX},
+	{"coherence_group"               , int_e   , 1, 1, -FLT_MAX, FLT_MAX},
+	{"snr_group"                     , int_e   , 1, 1, -FLT_MAX, FLT_MAX},
+	{"source_type"                   , int_e   , 1, 1, -FLT_MAX, FLT_MAX},
+	{"active"                        , bool_e  , 1, 1, -FLT_MAX, FLT_MAX},
+	{"add_time_difference"           , bool_e  , 1, 1, -FLT_MAX, FLT_MAX},
+	{"simulate_detector_response"    , bool_e  , 1, 1, -FLT_MAX, FLT_MAX},
+	{"simulate_polarisation_response", bool_e  , 1, 1, -FLT_MAX, FLT_MAX},
+	{"simulate_orientation_response" , bool_e  , 1, 1, -FLT_MAX, FLT_MAX},
+	{"snr_adjust"                    , bool_e  , 1, 1, -FLT_MAX, FLT_MAX},
+	{"used_in_snr"                   , bool_e  , 1, 1, -FLT_MAX, FLT_MAX},
+	{"use_network_snr"               , bool_e  , 1, 1, -FLT_MAX, FLT_MAX}
 };
 
 loader_config_s subinjection_subconfig = 
@@ -931,11 +932,11 @@ loader_config_s default_subinjection_loader_config[] =
 const int32_t num_snr_group_parameters = 5;
 parameter_s snr_group_parameters[] =
 {
-	{"name"     , string_e, 0, 0},
-	{"snr_mu"   , float_e , 1, 1},
-	{"snr_sigma", float_e , 1, 1},
-	{"snr_min"  , float_e , 1, 1},
-	{"snr_max"  , float_e , 1, 1},
+	{"name"     , string_e, 0, 0, -FLT_MAX, FLT_MAX},
+	{"snr_mu"   , float_e , 1, 1,     0.0f, FLT_MAX},
+	{"snr_sigma", float_e , 1, 1,     0.0f, FLT_MAX},
+	{"snr_min"  , float_e , 1, 1,     0.0f, FLT_MAX},
+	{"snr_max"  , float_e , 1, 1,     0.0f, FLT_MAX},
 };
 
 loader_config_s snr_group_subconfig = 
@@ -1004,9 +1005,9 @@ loader_config_s snr_group_loader_config =
 const int32_t num_coherence_group_parameters = 3;
 parameter_s coherence_group_parameters[] =
 {
-	{"name"        , string_e, 0, 0},
-	{"source_type" , int_e   , 1, 1},
-	{"config_index", int_e   , 1, 1}
+	{"name"        , string_e, 0, 0, -FLT_MAX, FLT_MAX},
+	{"source_type" , int_e   , 1, 1, -FLT_MAX, FLT_MAX},
+	{"config_index", int_e   , 1, 1, -FLT_MAX, FLT_MAX}
 };
 
 loader_config_s coherence_group_subconfig = 
@@ -1075,37 +1076,37 @@ loader_config_s coherence_group_loader_config =
 const int32_t num_injection_parameters = 31;
 parameter_s injection_parameters[] = 
 {
-	{"name"                          , string_e      , 0, 0},
-	{"debug_directory_path"          , string_e      , 0, 0},
-	{"snr_mu"                        , float_array_e , 0, 0},
-	{"snr_sigma"                     , float_array_e , 0, 0},
-	{"snr_min"                       , float_array_e , 0, 0},
-	{"snr_max"                       , float_array_e , 0, 0},
-	{"injections_per_stream_mu"      , float_e       , 1, 1},
-	{"injections_per_stream_sigma"   , float_e       , 1, 1},
-	{"injections_per_stream_min"     , float_e       , 1, 1},
-	{"injections_per_stream_max"     , float_e       , 1, 1},
-	{"subinjections_per_stream_mu"   , float_e       , 1, 1},
-	{"subinjections_per_stream_sigma", float_e       , 1, 1},
-	{"subinjections_per_stream_min"  , float_e       , 1, 1},
-	{"subinjections_per_stream_max"  , float_e       , 1, 1},
-	{"front_padding"                 , float_e       , 1, 1},
-	{"back_padding"                  , float_e       , 1, 1},
-	{"stream_sample_rate"            , float_e       , 0, 0},
-	{"center_time_min"               , float_e       , 0, 0},
-	{"center_time_max"               , float_e       , 0, 0},
-	{"stream_length"                 , int_e         , 0, 0},
-	{"num_streams"                   , int_e         , 0, 0},
-	{"num_detectors"                 , int_e         , 0, 0},
-	{"num_injections"                , int_e         , 0, 0},
-	{"num_injection_types"           , int_e         , 0, 0},
-	{"num_coherence_groups"          , int_e         , 0, 0},
-	{"num_unique_coherence_groups"   , int_e         , 0, 0},
-	{"num_snr_groups"                , int_e         , 0, 0},
-	{"num_unique_snr_groups"         , int_e         , 0, 0},
-	{"num_segments"                  , int_e         , 0, 0},
-	{"segment_length"                , int_e         , 0, 0},
-	{"snr_distribution"              , int_e         , 1, 1}
+	{"name"                          , string_e      , 0, 0, -FLT_MAX, FLT_MAX},
+	{"debug_directory_path"          , string_e      , 0, 0, -FLT_MAX, FLT_MAX},
+	{"snr_mu"                        , float_array_e , 0, 0, -FLT_MAX, FLT_MAX},
+	{"snr_sigma"                     , float_array_e , 0, 0, -FLT_MAX, FLT_MAX},
+	{"snr_min"                       , float_array_e , 0, 0, -FLT_MAX, FLT_MAX},
+	{"snr_max"                       , float_array_e , 0, 0, -FLT_MAX, FLT_MAX},
+	{"injections_per_stream_mu"      , float_e       , 1, 1,     0.0f, FLT_MAX},
+	{"injections_per_stream_sigma"   , float_e       , 1, 1,     0.0f, FLT_MAX},
+	{"injections_per_stream_min"     , float_e       , 1, 1,     0.0f, FLT_MAX},
+	{"injections_per_stream_max"     , float_e       , 1, 1,     0.0f, FLT_MAX},
+	{"subinjections_per_stream_mu"   , float_e       , 1, 1,     0.0f, FLT_MAX},
+	{"subinjections_per_stream_sigma", float_e       , 1, 1,     0.0f, FLT_MAX},
+	{"subinjections_per_stream_min"  , float_e       , 1, 1,     0.0f, FLT_MAX},
+	{"subinjections_per_stream_max"  , float_e       , 1, 1,     0.0f, FLT_MAX},
+	{"front_padding"                 , float_e       , 1, 1, -FLT_MAX, FLT_MAX},
+	{"back_padding"                  , float_e       , 1, 1, -FLT_MAX, FLT_MAX},
+	{"stream_sample_rate"            , float_e       , 0, 0, -FLT_MAX, FLT_MAX},
+	{"center_time_min"               , float_e       , 0, 0, -FLT_MAX, FLT_MAX},
+	{"center_time_max"               , float_e       , 0, 0, -FLT_MAX, FLT_MAX},
+	{"stream_length"                 , int_e         , 0, 0, -FLT_MAX, FLT_MAX},
+	{"num_streams"                   , int_e         , 0, 0, -FLT_MAX, FLT_MAX},
+	{"num_detectors"                 , int_e         , 0, 0, -FLT_MAX, FLT_MAX},
+	{"num_injections"                , int_e         , 0, 0, -FLT_MAX, FLT_MAX},
+	{"num_injection_types"           , int_e         , 0, 0, -FLT_MAX, FLT_MAX},
+	{"num_coherence_groups"          , int_e         , 0, 0, -FLT_MAX, FLT_MAX},
+	{"num_unique_coherence_groups"   , int_e         , 0, 0, -FLT_MAX, FLT_MAX},
+	{"num_snr_groups"                , int_e         , 0, 0, -FLT_MAX, FLT_MAX},
+	{"num_unique_snr_groups"         , int_e         , 0, 0, -FLT_MAX, FLT_MAX},
+	{"num_segments"                  , int_e         , 0, 0, -FLT_MAX, FLT_MAX},
+	{"segment_length"                , int_e         , 0, 0, -FLT_MAX, FLT_MAX},
+	{"snr_distribution"              , int_e         , 1, 1, -FLT_MAX, FLT_MAX}
 };
 
 loader_config_s injection_subconfig = 
@@ -1189,14 +1190,14 @@ loader_config_s default_injection_loader_config[] =
 const int32_t num_example_parameters = 8;
 parameter_s example_parameters[] =
 {
-	{"name"               , string_e, 0, 0},
-	{"label"              , string_e, 1, 1},
-	{"num_injection_types", int_e   , 0, 0},
-	{"num_streams"        , int_e   , 0, 0},
-	{"noise_type"         , int_e   , 1, 1},
-	{"active"             , bool_e  , 1, 1},
-	{"add_injections"     , bool_e  , 1, 1},
-	{"add_noise"          , bool_e  , 1, 1},
+	{"name"               , string_e, 0, 0, -FLT_MAX, FLT_MAX},
+	{"label"              , string_e, 1, 1, -FLT_MAX, FLT_MAX},
+	{"num_injection_types", int_e   , 0, 0, -FLT_MAX, FLT_MAX},
+	{"num_streams"        , int_e   , 0, 0, -FLT_MAX, FLT_MAX},
+	{"noise_type"         , int_e   , 1, 1, -FLT_MAX, FLT_MAX},
+	{"active"             , bool_e  , 1, 1, -FLT_MAX, FLT_MAX},
+	{"add_injections"     , bool_e  , 1, 1, -FLT_MAX, FLT_MAX},
+	{"add_noise"          , bool_e  , 1, 1, -FLT_MAX, FLT_MAX},
 };
 
 const int32_t num_example_subconfigs = 3;
@@ -1273,28 +1274,28 @@ loader_config_s example_loader_config =
 const int32_t num_debug_parameters = 22;
 parameter_s debug_parameters[] = 
 {
-	{"num_plot"           , int_e , 0, 0},
-	{"num_write"          , int_e , 0, 0},
-	{"num_print"          , int_e , 0, 0},
-	{"print_depth"        , int_e , 0, 0},
-	{"active"             , bool_e, 1, 1},
-	{"plot"               , bool_e, 0, 0},
-	{"plot_samples"       , bool_e, 0, 0},
-	{"plot_locations"     , bool_e, 0, 0},
-	{"plot_psd"           , bool_e, 0, 0},
-	{"plot_snr"           , bool_e, 0, 0},
-	{"plot_interpolation" , bool_e, 0, 0},
-	{"plot_predictions"   , bool_e, 0, 0},
-	{"plot_metrics"       , bool_e, 0, 0},
-	{"write"              , bool_e, 0, 0},
-	{"write_samples"      , bool_e, 0, 0},
-	{"write_locations"    , bool_e, 0, 0},
-	{"write_psd"          , bool_e, 0, 0},
-	{"write_snr"          , bool_e, 0, 0},
-	{"write_interpolation", bool_e, 0, 0},
-	{"write_predictions"  , bool_e, 0, 0},
-	{"print"              , bool_e, 0, 0},
-	{"print_memory"       , bool_e, 0, 0}
+	{"num_plot"           , int_e , 0, 0,     0.0f, FLT_MAX},
+	{"num_write"          , int_e , 0, 0,     0.0f, FLT_MAX},
+	{"num_print"          , int_e , 0, 0,     0.0f, FLT_MAX},
+	{"print_depth"        , int_e , 0, 0,     0.0f, FLT_MAX},
+	{"active"             , bool_e, 1, 1, -FLT_MAX, FLT_MAX},
+	{"plot"               , bool_e, 0, 0, -FLT_MAX, FLT_MAX},
+	{"plot_samples"       , bool_e, 0, 0, -FLT_MAX, FLT_MAX},
+	{"plot_locations"     , bool_e, 0, 0, -FLT_MAX, FLT_MAX},
+	{"plot_psd"           , bool_e, 0, 0, -FLT_MAX, FLT_MAX},
+	{"plot_snr"           , bool_e, 0, 0, -FLT_MAX, FLT_MAX},
+	{"plot_interpolation" , bool_e, 0, 0, -FLT_MAX, FLT_MAX},
+	{"plot_predictions"   , bool_e, 0, 0, -FLT_MAX, FLT_MAX},
+	{"plot_metrics"       , bool_e, 0, 0, -FLT_MAX, FLT_MAX},
+	{"write"              , bool_e, 0, 0, -FLT_MAX, FLT_MAX},
+	{"write_samples"      , bool_e, 0, 0, -FLT_MAX, FLT_MAX},
+	{"write_locations"    , bool_e, 0, 0, -FLT_MAX, FLT_MAX},
+	{"write_psd"          , bool_e, 0, 0, -FLT_MAX, FLT_MAX},
+	{"write_snr"          , bool_e, 0, 0, -FLT_MAX, FLT_MAX},
+	{"write_interpolation", bool_e, 0, 0, -FLT_MAX, FLT_MAX},
+	{"write_predictions"  , bool_e, 0, 0, -FLT_MAX, FLT_MAX},
+	{"print"              , bool_e, 0, 0, -FLT_MAX, FLT_MAX},
+	{"print_memory"       , bool_e, 0, 0, -FLT_MAX, FLT_MAX}
 };
 
 loader_config_s debug_subconfig = 
@@ -1329,94 +1330,94 @@ loader_config_s default_debug_subconfig[] =
 const int32_t debug_detector_num_parameters = 7;
 parameter_s debug_detector_parameters[] =
 {
-	{"plot"           , bool_e , 1, 1},
-	{"plot_locations" , bool_e , 1, 1},
-	{"write"          , bool_e , 1, 1},
-	{"write_locations", bool_e , 1, 1},
-	{"print"          , bool_e , 1, 1},
-	{"print_depth"    , int_e  , 1, 1},
-	{"print_memory"   , bool_e , 1, 1}
+	{"print_depth"    , int_e  , 1, 1,     0.0f, FLT_MAX},
+	{"plot"           , bool_e , 1, 1, -FLT_MAX, FLT_MAX},
+	{"plot_locations" , bool_e , 1, 1, -FLT_MAX, FLT_MAX},
+	{"write"          , bool_e , 1, 1, -FLT_MAX, FLT_MAX},
+	{"write_locations", bool_e , 1, 1, -FLT_MAX, FLT_MAX},
+	{"print"          , bool_e , 1, 1, -FLT_MAX, FLT_MAX},
+	{"print_memory"   , bool_e , 1, 1, -FLT_MAX, FLT_MAX}
 };
 
 const int32_t debug_noise_num_parameters = 14;
 parameter_s debug_noise_parameters[] =
 {
-	{"num_plot"           , int_e , 1, 1},
-	{"num_print"          , int_e , 1, 1},
-	{"num_write"          , int_e , 1, 1},
-	{"print_depth"        , int_e , 1, 1},
-	{"plot"               , bool_e, 1, 1},
-	{"plot_psd"           , bool_e, 1, 1},
-	{"plot_interpolation" , bool_e, 1, 1},
-	{"plot_samples"       , bool_e, 1, 1},
-	{"write"              , bool_e, 1, 1},
-	{"write_psd"          , bool_e, 1, 1},
-	{"write_interpolation", bool_e, 1, 1},
-	{"write_samples"      , bool_e, 1, 1},
-	{"print"              , bool_e, 1, 1},
-	{"print_memory"       , bool_e, 1, 1}
+	{"num_plot"           , int_e , 1, 1,     0.0f, FLT_MAX},
+	{"num_print"          , int_e , 1, 1,     0.0f, FLT_MAX},
+	{"num_write"          , int_e , 1, 1,     0.0f, FLT_MAX},
+	{"print_depth"        , int_e , 1, 1,     0.0f, FLT_MAX},
+	{"plot"               , bool_e, 1, 1, -FLT_MAX, FLT_MAX},
+	{"plot_psd"           , bool_e, 1, 1, -FLT_MAX, FLT_MAX},
+	{"plot_interpolation" , bool_e, 1, 1, -FLT_MAX, FLT_MAX},
+	{"plot_samples"       , bool_e, 1, 1, -FLT_MAX, FLT_MAX},
+	{"write"              , bool_e, 1, 1, -FLT_MAX, FLT_MAX},
+	{"write_psd"          , bool_e, 1, 1, -FLT_MAX, FLT_MAX},
+	{"write_interpolation", bool_e, 1, 1, -FLT_MAX, FLT_MAX},
+	{"write_samples"      , bool_e, 1, 1, -FLT_MAX, FLT_MAX},
+	{"print"              , bool_e, 1, 1, -FLT_MAX, FLT_MAX},
+	{"print_memory"       , bool_e, 1, 1, -FLT_MAX, FLT_MAX}
 };
 
 const int32_t debug_waveform_num_parameters = 8;
 parameter_s debug_waveform_parameters[] =
 {
-	{"num_plot"    , int_e , 1, 1},
-	{"num_write"   , int_e , 1, 1},
-	{"num_print"   , int_e , 1, 1},
-	{"print_depth" , int_e , 1, 1},
-	{"plot"        , bool_e, 1, 1},
-	{"write"       , bool_e, 1, 1},
-	{"print"       , bool_e, 1, 1},
-	{"print_memory", bool_e, 1, 1}
+	{"num_plot"    , int_e , 1, 1,     0.0f, FLT_MAX},
+	{"num_write"   , int_e , 1, 1,     0.0f, FLT_MAX},
+	{"num_print"   , int_e , 1, 1,     0.0f, FLT_MAX},
+	{"print_depth" , int_e , 1, 1,     0.0f, FLT_MAX},
+	{"plot"        , bool_e, 1, 1, -FLT_MAX, FLT_MAX},
+	{"write"       , bool_e, 1, 1, -FLT_MAX, FLT_MAX},
+	{"print"       , bool_e, 1, 1, -FLT_MAX, FLT_MAX},
+	{"print_memory", bool_e, 1, 1, -FLT_MAX, FLT_MAX}
 };
 
 const int32_t debug_localisation_num_parameters = 10;
 parameter_s debug_localisation_parameters[] =
 {
-	{"num_plot"       , int_e , 1, 1},
-	{"num_write"      , int_e , 1, 1},
-	{"num_print"      , int_e , 1, 1},
-	{"print_depth"    , int_e , 1, 1},
-	{"plot"           , bool_e, 1, 1},
-	{"plot_locations" , bool_e, 1, 1},
-	{"write"          , bool_e, 1, 1},
-	{"write_locations", bool_e, 1, 1},
-	{"print"          , bool_e, 1, 1},
-	{"print_memory"   , bool_e, 1, 1}
+	{"num_plot"       , int_e , 1, 1,     0.0f, FLT_MAX},
+	{"num_write"      , int_e , 1, 1,     0.0f, FLT_MAX},
+	{"num_print"      , int_e , 1, 1,     0.0f, FLT_MAX},
+	{"print_depth"    , int_e , 1, 1,     0.0f, FLT_MAX},
+	{"plot"           , bool_e, 1, 1, -FLT_MAX, FLT_MAX},
+	{"plot_locations" , bool_e, 1, 1, -FLT_MAX, FLT_MAX},
+	{"write"          , bool_e, 1, 1, -FLT_MAX, FLT_MAX},
+	{"write_locations", bool_e, 1, 1, -FLT_MAX, FLT_MAX},
+	{"print"          , bool_e, 1, 1, -FLT_MAX, FLT_MAX},
+	{"print_memory"   , bool_e, 1, 1, -FLT_MAX, FLT_MAX}
 };
 
 const int32_t debug_snr_num_parameters = 14;
 parameter_s debug_snr_parameters[] =
 {
-	{"num_plot"           , int_e , 1, 1},
-	{"num_write"          , int_e , 1, 1},
-	{"num_print"          , int_e , 1, 1},
-	{"print_depth"        , int_e , 1, 1},
-	{"plot"               , bool_e, 1, 1},	
-	{"plot_psd"           , bool_e, 1, 1},
-	{"plot_interpolation" , bool_e, 1, 1},
-	{"plot_snr"           , bool_e, 1, 1},
-	{"write"              , bool_e, 1, 1},
-	{"write_psd"          , bool_e, 1, 1},
-	{"write_interpolation", bool_e, 1, 1},
-	{"write_snr"          , bool_e, 1, 1},
-	{"print"              , bool_e, 1, 1},
-	{"print_memory"       , bool_e, 1, 1}
+	{"num_plot"           , int_e , 1, 1,     0.0f, FLT_MAX},
+	{"num_write"          , int_e , 1, 1,     0.0f, FLT_MAX},
+	{"num_print"          , int_e , 1, 1,     0.0f, FLT_MAX},
+	{"print_depth"        , int_e , 1, 1,     0.0f, FLT_MAX},
+	{"plot"               , bool_e, 1, 1, -FLT_MAX, FLT_MAX},	
+	{"plot_psd"           , bool_e, 1, 1, -FLT_MAX, FLT_MAX},
+	{"plot_interpolation" , bool_e, 1, 1, -FLT_MAX, FLT_MAX},
+	{"plot_snr"           , bool_e, 1, 1, -FLT_MAX, FLT_MAX},
+	{"write"              , bool_e, 1, 1, -FLT_MAX, FLT_MAX},
+	{"write_psd"          , bool_e, 1, 1, -FLT_MAX, FLT_MAX},
+	{"write_interpolation", bool_e, 1, 1, -FLT_MAX, FLT_MAX},
+	{"write_snr"          , bool_e, 1, 1, -FLT_MAX, FLT_MAX},
+	{"print"              , bool_e, 1, 1, -FLT_MAX, FLT_MAX},
+	{"print_memory"       , bool_e, 1, 1, -FLT_MAX, FLT_MAX}
 };  
 
 const int32_t debug_physicalisation_num_parameters = 10;
 parameter_s debug_physicalisation_parameters[] =
 {
-	{"num_plot"     , int_e , 1, 1},
-	{"num_write"    , int_e , 1, 1},
-	{"num_print"    , int_e , 1, 1},
-	{"print_depth"  , int_e , 1, 1},
-	{"plot"         , bool_e, 1, 1},
-	{"plot_samples" , bool_e, 1, 1},
-	{"write"        , bool_e, 1, 1},
-	{"write_samples", bool_e, 1, 1},
-	{"print"        , bool_e, 1, 1},
-	{"print_memory" , bool_e, 1, 1}
+	{"num_plot"     , int_e , 1, 1,     0.0f, FLT_MAX},
+	{"num_write"    , int_e , 1, 1,     0.0f, FLT_MAX},
+	{"num_print"    , int_e , 1, 1,     0.0f, FLT_MAX},
+	{"print_depth"  , int_e , 1, 1,     0.0f, FLT_MAX},
+	{"plot"         , bool_e, 1, 1, -FLT_MAX, FLT_MAX},
+	{"plot_samples" , bool_e, 1, 1, -FLT_MAX, FLT_MAX},
+	{"write"        , bool_e, 1, 1, -FLT_MAX, FLT_MAX},
+	{"write_samples", bool_e, 1, 1, -FLT_MAX, FLT_MAX},
+	{"print"        , bool_e, 1, 1, -FLT_MAX, FLT_MAX},
+	{"print_memory" , bool_e, 1, 1, -FLT_MAX, FLT_MAX}
 };
 
 char *debug_names[] =

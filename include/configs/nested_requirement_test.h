@@ -17,15 +17,15 @@ typedef struct ConfigTest{
 const int32_t num_defined_parameters = 5;
 parameter_s defined_parameters[] = 
 {
-	{"parameter_string", string_e, 0, 1},
-	{"parameter_float" , float_e , 0, INT32_MAX},
-	{"parameter_int"   , int_e   , 0, INT32_MAX},
-	{"parameter_bool"  , bool_e  , 0, 1},	
-	{"parameter_char"  , char_e  , 0, 0}	
+	{"parameter_string", string_e, 0, 1        , -FLT_MAX, FLT_MAX},
+	{"parameter_float" , float_e , 0, INT32_MAX, -FLT_MAX, FLT_MAX},
+	{"parameter_int"   , int_e   , 0, INT32_MAX, -FLT_MAX, FLT_MAX},
+	{"parameter_bool"  , bool_e  , 0, 1        , -FLT_MAX, FLT_MAX},	
+	{"parameter_char"  , char_e  , 0, 0        , -FLT_MAX, FLT_MAX}	
 };
 
 parameter_s default_parameter = 
-	{"default_parameter", none_e, 0, 0};
+	{"default_parameter", none_e, 0, 0, 0.0f, 0.0f};
 
 // Subconfigs:
 loader_config_s subconfig = 
@@ -54,38 +54,38 @@ loader_config_s subconfig =
 
 parameter_s priority_parameters_0[] = 
 {
-	{"parameter_string", string_e, 1, 1},
-	{"parameter_float" , float_e , 1, 1},
-	{"parameter_int"   , int_e   , 1, 1},
-	{"parameter_bool"  , bool_e  , 0, 1},	
-	{"parameter_char"  , char_e  , 0, 0}	
+	{"parameter_string", string_e, 1, 1, -FLT_MAX, FLT_MAX},
+	{"parameter_float" , float_e , 1, 1, -FLT_MAX, FLT_MAX},
+	{"parameter_int"   , int_e   , 1, 1, -FLT_MAX, FLT_MAX},
+	{"parameter_bool"  , bool_e  , 0, 1, -FLT_MAX, FLT_MAX},	
+	{"parameter_char"  , char_e  , 0, 0, -FLT_MAX, FLT_MAX}	
 };
 
 parameter_s priority_parameters_1[] = 
 {
-	{"parameter_string", string_e, 0, 0},
-	{"parameter_float" , float_e , 0, 0},
-	{"parameter_int"   , int_e   , 0, 0},
+	{"parameter_string", string_e, 0, 0, -FLT_MAX, FLT_MAX},
+	{"parameter_float" , float_e , 0, 0, -FLT_MAX, FLT_MAX},
+	{"parameter_int"   , int_e   , 0, 0, -FLT_MAX, FLT_MAX},
 };
 
 parameter_s priority_parameters_2[] = 
 {
-	{"parameter_string", string_e, 2, 2},	
+	{"parameter_string", string_e, 2, 2, -FLT_MAX, FLT_MAX},	
 };
 
 parameter_s priority_parameters_3[] = 
 {
-	{"parameter_int"   , int_e   , 1, 1},
-	{"parameter_bool"  , bool_e  , 1, 1},	
+	{"parameter_int"   , int_e   , 1, 1, -FLT_MAX, FLT_MAX},
+	{"parameter_bool"  , bool_e  , 1, 1, -FLT_MAX, FLT_MAX},	
 };
 
 parameter_s priority_parameters_4[] = 
 {
-	{"parameter_char"  , char_e  , 1, 1},	
+	{"parameter_char"  , char_e  , 1, 1, -FLT_MAX, FLT_MAX},	
 };
 
 int32_t num_priority_parameters[] = {5,3,1,2,1};
-bool    is_superconfigs[]          = {false,true,false,false,false};
+bool    is_superconfigs[]         = {false,true,false,false,false};
 
 parameter_s *priority_parameters[] =
 {
