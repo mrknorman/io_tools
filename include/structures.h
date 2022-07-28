@@ -42,9 +42,9 @@ typedef struct LoaderConfig{
 	bool                 is_superconfig;    
 	bool                 has_parameters;
     bool                 reorder;
-
 	int32_t              min;
     int32_t              max;
+	int32_t              exit_on_index;
 	
 	int32_t              num_defined_parameters;
 	int32_t              min_inputed_parameters;
@@ -121,7 +121,6 @@ loader_syntax_s syntax =
     .char_separator   = "\'",
     .start_name       = "[",
     .end_name         = "]",
-    .end_section      = "%",
 	.start_array      = "(",
 	.end_array        = ")"
 };

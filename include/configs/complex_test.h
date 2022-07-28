@@ -289,6 +289,7 @@ loader_config_s detector_subconfig =
 	.inherit                = true,
     .min                    = 1,
     .max                    = INT32_MAX,
+	.exit_on_index          = INT32_MAX,
     
 	.num_defined_parameters = num_detector_parameters,
 	.min_inputed_parameters = min_num_detector_parameters,
@@ -314,7 +315,8 @@ loader_config_s detector_loader_config =
 	.inherit                = false,
     .min                    = 1,
     .max                    = INT32_MAX,
-    
+	.exit_on_index          = INT32_MAX,
+   
 	.num_defined_parameters = num_detector_parameters,
 	.min_inputed_parameters = 0,
 	.max_inputed_parameters = 0,
@@ -356,9 +358,9 @@ loader_config_s network_loader_config =
 	.is_superconfig         = true,
 	.has_parameters         = true,
 	.inherit                = false,
-	
     .min                    = 1,
     .max                    = 1,
+	.exit_on_index          = INT32_MAX,
     
 	.num_defined_parameters = num_network_parameters,
 	.min_inputed_parameters = num_network_parameters,
@@ -581,9 +583,9 @@ loader_config_s subwaveform_subconfig =
 	.is_superconfig         = false,
 	.has_parameters         = true,
 	.inherit                = true,
-	
     .min                    = 0,
     .max                    = INT32_MAX,
+	.exit_on_index          = INT32_MAX,
     
 	.num_defined_parameters = 0,
 	.min_inputed_parameters = 2,
@@ -654,9 +656,9 @@ loader_config_s subwaveform_loader_config =
 	.is_superconfig         = true,
 	.has_parameters         = false,
 	.inherit                = false,
-	
     .min                    = 1,
     .max                    = 1,
+	.exit_on_index          = INT32_MAX,
     
 	.num_defined_parameters = num_subwaveform_parameters,
 	.min_inputed_parameters = 2,
@@ -707,9 +709,9 @@ loader_config_s waveform_subconfig =
 	.is_superconfig         = true,
 	.has_parameters         = true,
 	.inherit                = false,
-	
     .min                    = 0,
     .max                    = INT32_MAX,
+	.exit_on_index          = INT32_MAX,
     
 	.num_defined_parameters = num_waveform_parameters,
 	.min_inputed_parameters = 9,
@@ -742,9 +744,9 @@ loader_config_s waveform_loader_config =
 	.is_superconfig         = true,
 	.has_parameters         = false,
 	.inherit                = false,
-	
     .min                    = 1,
     .max                    = 1,
+	.exit_on_index          = INT32_MAX,
     
 	.num_defined_parameters = num_waveform_parameters,
 	.min_inputed_parameters = 10,
@@ -788,10 +790,10 @@ loader_config_s noise_subconfig =
 	.is_superconfig         = false,
 	.has_parameters         = true,
 	.inherit                = false,
-	
     .min                    = 0,
     .max                    = INT32_MAX,
-    
+	.exit_on_index          = INT32_MAX,
+	
 	.num_defined_parameters = num_noise_parameters,
 	.min_inputed_parameters = 6,
 	.max_inputed_parameters = 6,
@@ -817,9 +819,9 @@ loader_config_s noise_loader_config =
 	.is_superconfig         = true,
 	.has_parameters         = false,
 	.inherit                = false,
-	
     .min                    = 0,
     .max                    = 1,
+	.exit_on_index          = INT32_MAX,
     
 	.num_defined_parameters = num_noise_parameters,
 	.min_inputed_parameters = 6,
@@ -869,9 +871,9 @@ loader_config_s subinjection_subconfig =
 	.is_superconfig         = false,
 	.has_parameters         = true,
 	.inherit                = false,
-	
     .min                    = 0,
     .max                    = INT32_MAX,
+	.exit_on_index          = INT32_MAX,
     
 	.num_defined_parameters = num_subinjection_parameters,
 	.min_inputed_parameters = 12,
@@ -898,10 +900,10 @@ loader_config_s subinjection_loader_config =
 	.is_superconfig         = true,
 	.has_parameters         = false,
 	.inherit                = false,
-	
     .min                    = 0,
     .max                    = 1,
-    
+	.exit_on_index          = INT32_MAX,
+	
 	.num_defined_parameters = num_subinjection_parameters,
 	.min_inputed_parameters = 12,
 	.max_inputed_parameters = 12,
@@ -947,9 +949,9 @@ loader_config_s snr_group_subconfig =
 	.is_superconfig         = false,
 	.has_parameters         = true,
 	.inherit                = false,
-	
     .min                    = 0,
     .max                    = INT32_MAX,
+	.exit_on_index          = INT32_MAX,
     
 	.num_defined_parameters = num_snr_group_parameters,
 	.min_inputed_parameters = 4,
@@ -976,9 +978,9 @@ loader_config_s snr_group_loader_config =
 	.is_superconfig         = true,
 	.has_parameters         = false,
 	.inherit                = false,
-	
     .min                    = 0,
     .max                    = 1,
+	.exit_on_index          = INT32_MAX,
     
 	.num_defined_parameters = num_snr_group_parameters,
 	.min_inputed_parameters = 12,
@@ -1018,9 +1020,9 @@ loader_config_s coherence_group_subconfig =
 	.is_superconfig         = false,
 	.has_parameters         = true,
 	.inherit                = false,
-	
     .min                    = 0,
     .max                    = INT32_MAX,
+	.exit_on_index          = INT32_MAX,
     
 	.num_defined_parameters = num_coherence_group_parameters,
 	.min_inputed_parameters = 2,
@@ -1047,9 +1049,9 @@ loader_config_s coherence_group_loader_config =
 	.is_superconfig         = true,
 	.has_parameters         = false,
 	.inherit                = false,
-	
     .min                    = 0,
     .max                    = 1,
+	.exit_on_index          = INT32_MAX,
     
 	.num_defined_parameters = num_coherence_group_parameters,
 	.min_inputed_parameters = 12,
@@ -1117,10 +1119,10 @@ loader_config_s injection_subconfig =
 	.is_superconfig         = true,
 	.has_parameters         = true,
 	.inherit                = false,
-	
     .min                    = 0,
     .max                    = INT32_MAX,
-    
+	.exit_on_index          = INT32_MAX,
+	
 	.num_defined_parameters = num_injection_parameters,
 	.min_inputed_parameters = 11,
 	.max_inputed_parameters = 11,
@@ -1155,10 +1157,10 @@ loader_config_s injection_loader_config =
 	.is_superconfig         = true,
 	.has_parameters         = false,
 	.inherit                = false,
-	
     .min                    = 0,
     .max                    = 1,
-    
+	.exit_on_index          = INT32_MAX,
+	
 	.num_defined_parameters = num_injection_parameters,
 	.min_inputed_parameters = 11,
 	.max_inputed_parameters = 11,
@@ -1216,9 +1218,9 @@ loader_config_s example_subconfig =
 	.is_superconfig         = true,
 	.has_parameters         = true,
 	.inherit                = false,
-	
     .min                    = 1,
     .max                    = 1,
+	.exit_on_index          = INT32_MAX,
     
 	.num_defined_parameters = num_example_parameters,
 	.min_inputed_parameters = 5,
@@ -1254,9 +1256,9 @@ loader_config_s example_loader_config =
 	.is_superconfig         = true,
 	.has_parameters         = false,
 	.inherit                = false,
-	
     .min                    = 0,
     .max                    = 1,
+	.exit_on_index          = INT32_MAX,
 	
 	.num_defined_subconfigs = num_example_subconfigs,
 	.min_num_subconfigs     = 0,
@@ -1306,9 +1308,9 @@ loader_config_s debug_subconfig =
 	.is_superconfig         = false,
 	.has_parameters         = true,
 	.inherit                = true,
-	
     .min                    = 0,
     .max                    = 1,
+	.exit_on_index          = INT32_MAX,
     
 	.num_defined_parameters = num_debug_parameters,
 	.min_inputed_parameters = 1,
@@ -1469,9 +1471,9 @@ loader_config_s debug_loader_config =
 	.is_superconfig         = true,
 	.has_parameters         = false,
 	.inherit                = false,
-	
     .min                    = 0,
     .max                    = 1,
+	.exit_on_index          = INT32_MAX,
     
 	.num_defined_parameters = num_debug_parameters,
 	.min_inputed_parameters = 1,
@@ -1517,9 +1519,9 @@ loader_config_s loader_config =
 	.inherit                = false,
 	.has_parameters         = false,
     .reorder                = true,
-    
     .min                    = 1,
     .max                    = 1,
+	.exit_on_index          = INT32_MAX,
     
 	.num_defined_parameters = 0,
 	.min_inputed_parameters = 0,

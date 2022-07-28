@@ -1841,6 +1841,24 @@ loader_data_s readSubconfig(
                     
                     config = old_config;
 					config_index++; 
+					
+					// Checks for new segment character returns if found:
+					if (config_index >= config.exit_on_index) 
+					{ 
+						printf("Here! \n");
+						config_data.total_num_subconfigs_read = config_index;
+
+						if (!checkAllRequirements(
+							verbosity,
+							config_data,
+							config,
+							superconfig))
+						{
+							config_data.total_num_subconfigs_read = -1;
+						}
+
+						return config_data;
+					}
 					                    
                     break;	
 				}                 
@@ -1929,27 +1947,6 @@ loader_data_s readSubconfig(
                         );
                     }
 					break; 
-				}
-                
-                // Checks for new segment character returns if found:
-				if (strchr(syntax.end_section, line_string[char_index])) 
-				{ 	
-                    //TODO: Add in error checking to check if in config.
-                    //Skip line:
-                    //getline(&line_string, &line_length, file);
-                    
-					config_data.total_num_subconfigs_read = config_index;
-                                                            
-                    if (!checkAllRequirements(
-                        verbosity,
-                        config_data,
-                        config,
-                        superconfig))
-                    {
-                        config_data.total_num_subconfigs_read = -1;
-                    }
-                                        
-                    return config_data;
 				}
     
 				// Checks for comment character and starts a new line if found:

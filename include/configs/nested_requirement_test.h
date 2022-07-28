@@ -36,9 +36,9 @@ loader_config_s subconfig =
 	.is_superconfig         = false,
 	.has_parameters         = true,
 	.inherit                = true,
-	
     .min                    = 1,
     .max                    = 1,
+	.exit_on_index          = INT32_MAX,
     
 	.num_defined_parameters = num_defined_parameters,
 	.min_inputed_parameters = 0,
@@ -122,9 +122,9 @@ loader_config_s loader_config =
 	.is_superconfig         = true,
 	.has_parameters         = false,
     .reorder                = false,
-    
     .min                    = 1,
     .max                    = 1,
+	.exit_on_index          = INT32_MAX,
     
 	.num_defined_parameters = num_defined_parameters,
 	.min_inputed_parameters = 0,

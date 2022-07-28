@@ -919,69 +919,18 @@ bool testMultiTypeConfig(
     int32_t num_configs = 0; 
     
     int64_t file_position[] = {0};
-
+	
+	loader_config.exit_on_index = 3;
 	test_config_s** all_test_results = 
 		(test_config_s**) 
 			 readConfig(
 			     verbosity,
 				 config_file_path, 
-				 subconfig,
+				 loader_config,
 				 &config_data,
                  file_position
 			 );
-             
-    num_configs = config_data.total_num_subconfigs_read;
-    test_config_s *test_results = NULL;
-    if (all_test_results != NULL) 
-    {
-        test_results = all_test_results[0];
-    }
-	
-	if (!num_configs == (expected_num_configs - 1)) {
-		pass = false; 
-		fprintf(
-			stderr, 
-			"Number of configs found (%i) does not match expected (%i). \n",
-			num_configs, expected_num_configs
-		);
-	}
-	
-	if (test_results == NULL) 
-	{
-		printf("Load Config returned NULL! \n");
-		pass = false;
-	} 
-	else
-	{
-		test_config_s known_results = {
-			.parameter_string = "Config Test",
-			.parameter_float  = 1.1f,
-			.parameter_int    = 1,
-			.parameter_bool   = false,
-			.parameter_char   = 'a'
-		};
-        
-		uni_s *cells = malloc(sizeof(uni_s)* (size_t) ( expected_num_configs * expected_num_parameters * 2 ));
-
-		const int32_t cell_index = 0; 
-		setTableCells(
-			known_results, 
-			test_results, 
-			expected_num_parameters, 
-			cell_index, 
-			cells
-		);
-		
-		pass *= 
-			configTestCompare(known_results, test_results);
-		
-		plotConfigTestTable(
-			expected_num_configs, 
-			expected_num_parameters,
-			"Single Config Test",
-			cells
-		);
-	}
+	loader_config.exit_on_index = 100;
     
 	expected_num_parameters = 5;
 	expected_num_configs = 3;
@@ -1210,11 +1159,11 @@ int main() {
             config_directory_name
         ); 
 	
-	  pass *=  
-        testComplexConfig(
-            verbosity,
-            config_directory_name
-        ); 
+	pass *=  
+		testComplexConfig(
+			verbosity,
+			config_directory_name
+		); 
 	
 	printTestResult(pass, "all tests.");
 	
