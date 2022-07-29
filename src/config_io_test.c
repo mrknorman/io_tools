@@ -920,7 +920,7 @@ bool testMultiTypeConfig(
     
     int64_t file_position[] = {0};
 	
-	loader_config.exit_on_index = 3;
+	loader_config.early_exit_index = 3;
 	test_config_s** all_test_results = 
 		(test_config_s**) 
 			 readConfig(
@@ -930,7 +930,7 @@ bool testMultiTypeConfig(
 				 &config_data,
                  file_position
 			 );
-	loader_config.exit_on_index = 100;
+	loader_config.early_exit_index = INT32_MAX;
     
 	expected_num_parameters = 5;
 	expected_num_configs = 3;

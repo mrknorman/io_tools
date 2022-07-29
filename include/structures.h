@@ -44,7 +44,7 @@ typedef struct LoaderConfig{
     bool                 reorder;
 	int32_t              min;
     int32_t              max;
-	int32_t              exit_on_index;
+	int32_t              early_exit_index;
 	
 	int32_t              num_defined_parameters;
 	int32_t              min_inputed_parameters;

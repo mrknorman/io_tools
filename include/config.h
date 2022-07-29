@@ -1843,9 +1843,8 @@ loader_data_s readSubconfig(
 					config_index++; 
 					
 					// Checks for new segment character returns if found:
-					if (config_index >= config.exit_on_index) 
+					if (config_index >= config.early_exit_index) 
 					{ 
-						printf("Here! \n");
 						config_data.total_num_subconfigs_read = config_index;
 
 						if (!checkAllRequirements(

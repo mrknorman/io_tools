@@ -37,7 +37,7 @@ loader_config_s subconfig =
 	.has_parameters         = true,
     .min                    = 1,
     .max                    = 1,
-	.exit_on_index          = INT32_MAX,
+	.early_exit_index       = INT32_MAX,
     
 	.num_defined_parameters = num_defined_parameters,
 	.min_inputed_parameters = 0,
@@ -80,7 +80,7 @@ loader_config_s loader_config =
     .reorder                = false,
     .min                    = 1,
     .max                    = 1,
-	.exit_on_index          = INT32_MAX,
+	.early_exit_index       = INT32_MAX,
 	
 	.num_defined_parameters = num_defined_parameters,
 	.min_inputed_parameters = 0,
