@@ -631,7 +631,8 @@ array_s stringToArrayS(
 		if (index > num_elements)
 		{
 			num_elements *= 2; 
-			elements = realloc(elements, size * (size_t) num_elements);
+			elements = realloc(
+                elements, size * (size_t) num_elements + sizeof(multi_s));
 		}
 		
 		buffer = strtok(NULL, delimiter);
@@ -1199,7 +1200,7 @@ void freeDictionary(
      * @return none
      */
 	
-	dict_entry_s** entries = returnAllEntries(dict);
+	dict_entry_s **entries = returnAllEntries(dict);
 	
 	for (int32_t index = 0; index < dict->num_entries; index++) {
 	
@@ -1217,9 +1218,9 @@ typedef struct Mapping {
      * Structure to hold map to convert string to index.
      */
     
-    dict_s   * dict;
-    char    ** keys;    
-    int32_t    length;
+    dict_s   *dict;
+    char    **keys;    
+    int32_t   length;
 } map_s;
 
 typedef struct Map_Pairing {
@@ -1228,14 +1229,14 @@ typedef struct Map_Pairing {
 	 * Structure to hold index key pair.
 	 */
     
-    char    *  key;
-    int32_t    index;
-    map_s      map;
+    char    *key;
+    int32_t  index;
+    map_s    map;
 } map_pair_s;
 
 map_s createMap(
-          char    ** keys    , 
-    const int32_t    num_keys
+          char    **keys    , 
+    const int32_t   num_keys
     ) {
 	
 	/**

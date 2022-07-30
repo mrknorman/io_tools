@@ -1513,7 +1513,7 @@ loader_data_s setupConfigData(
         
     // Create bins to hold number of each parameter name read:
     config_data.num_subconfigs_read = 
-        calloc((size_t) config.num_defined_parameters, sizeof(int32_t));
+        calloc((size_t) config.num_defined_subconfigs, sizeof(int32_t));
     
     config_data.structure = 
         calloc(1, compiled_struct_size);
@@ -1655,6 +1655,91 @@ bool checkAllRequirements(
     return pass;
 }
 
+loader_config_s allocateNewConfig(
+          loader_data_s   *config_data,
+          loader_config_s *config,
+    const loader_config_s  superconfig,
+          loader_config_s  default_config,
+    const int32_t          config_name_index
+    ) { 
+    
+    const int32_t num_defined_subconfigs = 
+        config->num_defined_subconfigs;
+
+    const int32_t num_defined_parameters = 
+        config->num_defined_parameters;
+
+    *config = 
+        superconfig.defined_subconfigs[config_name_index];
+
+    if (config->inherit)
+    {
+        config->defined_parameters = overwriteParameters(
+            config_data->config.defined_parameters,
+            config_data->parameter_name_map,
+            *config
+        );
+
+        config->num_defined_parameters = 
+            config_data->config.num_defined_parameters;
+    }
+    else
+    {
+        config_data->config = *config;
+        config_data->parameter_name_map = 
+            createParameterMap(
+                config->num_defined_parameters,
+                config->defined_parameters
+            );
+
+        config_data->num_subconfigs_read = 
+            realloc(
+                config_data->num_subconfigs_read, 
+                (size_t) config->num_defined_subconfigs
+                * sizeof(int32_t)
+            );
+            
+        for (
+            int32_t index = num_defined_subconfigs; 
+            index < config->num_defined_subconfigs;
+            index++
+            ) {
+            
+            config_data->num_subconfigs_read[index] = 0;        
+        }
+        
+        config_data->num_parameters_read = 
+            realloc(
+                config_data->num_parameters_read,
+                (size_t) config->num_defined_parameters 
+                * sizeof(int32_t)
+            );
+            
+        for (
+            int32_t index = num_defined_parameters; 
+            index < config->num_defined_parameters;
+            index++
+            ) {
+            
+            config_data->num_parameters_read[index] = 0;        
+        }
+
+        if (config->is_superconfig)
+        {
+            config_data->subconfig_name_map = 
+                createConfigMap(
+                    config->defined_subconfigs,
+                    config->num_defined_subconfigs,
+                    *config
+                ); 
+        }
+        
+        default_config = setupDefaultConfig(*config);
+    }
+    
+    return default_config;
+}
+
 loader_data_s readSubconfig(
     const int32_t            verbosity,
           loader_syntax_s    syntax,
@@ -1793,13 +1878,15 @@ loader_data_s readSubconfig(
 					
 					char_index = 0;
 
-                    if (config_data.subconfigs[config_index].total_num_subconfigs_read < 0)
+                    if (config_data.subconfigs[config_index]
+                        .total_num_subconfigs_read < 0)
                     {
                         config_data.total_num_subconfigs_read = -1;
                         return config_data;
                     }
 
-                    const char *name = config_data.subconfigs[config_index].name;
+                    const char *name = 
+                        config_data.subconfigs[config_index].name;
 					
                     if (name != NULL)
                     {
@@ -1808,7 +1895,8 @@ loader_data_s readSubconfig(
 						
                         if (config_name_index > -1) 
                         {
-                            config_data.num_subconfigs_read[config_name_index]++;
+                            config_data
+                                .num_subconfigs_read[config_name_index]++;
                         }
                         else
                         {
@@ -1895,42 +1983,14 @@ loader_data_s readSubconfig(
 								
                         if (config_name_index > -1) 
                         {
-                            config = 
-								superconfig.defined_subconfigs[config_name_index];
-							
-							if (config.inherit)
-							{
-								config.defined_parameters = overwriteParameters(
-									config_data.config.defined_parameters,
-									config_data.parameter_name_map,
-									config
-								);
-
-								config.num_defined_parameters = 
-									config_data.config.num_defined_parameters;
-							}
-							else
-							{
-								config_data.config = config;
-								config_data.parameter_name_map = 
-									createParameterMap(
-										config.num_defined_parameters,
-										config.defined_parameters
-									);
-								
-								if (config.is_superconfig)
-								{
-									config_data.subconfig_name_map = 
-										createConfigMap(
-											config.defined_subconfigs,
-											config.num_defined_subconfigs,
-											config
-										); 
-								}
-									
-								default_config = 
-									setupDefaultConfig(config);
-							}
+                        
+                            default_config = allocateNewConfig(
+                                &config_data,
+                                &config,
+                                superconfig,
+                                default_config,
+                                config_name_index
+                            );
                         }
 												                        
                         name_read = true;
@@ -2244,5 +2304,3 @@ void pullUInt16ArrayFromStruct(
 }
 
 #endif
-
-

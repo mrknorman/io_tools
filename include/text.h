@@ -22,9 +22,9 @@
 
 typedef struct split_path {
 	
-	const char * full;
-	const char * directory;
-	const char * base;
+	const char *full;
+	const char *directory;
+	const char *base;
 } path_s;
 
 path_s newPath(
@@ -108,7 +108,6 @@ int32_t mkpath(
 	
 	mkpath(new_path.directory, mode);
 	
-	printf("%s \n", new_path.full);
 	return mkdir(new_path.full, mode);
 }
 
@@ -390,7 +389,7 @@ bool checkOpenDirectory(
 }
 
 bool createDirectory(
-	const char* directory_name
+	const char *directory_name
 	) {
 
 	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
@@ -399,17 +398,17 @@ bool createDirectory(
 	//
 	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
 
-	bool success = 0;
+	bool success = false;
 	
 	if ( mkpath(directory_name, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != 0 ) 
 	{
 		fprintf(stderr, "Error creating directory \"%s\". Returning. \n", directory_name);
 
-		success = 0;
+		success = false;
 	}
 	else 
 	{
-		success = 1;
+		success = true;
 	}
 
 	return success;
@@ -426,19 +425,19 @@ bool createOpenDirectory(
 	//
 	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
 
-	bool success = 0;
+	bool success = false;
 
 	if ( mkpath(directory_name, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != 0 ) 
 	{
 		fprintf(stderr, "Error creating directory \"%s\". Returning. \n", directory_name);
 
-		success = 0;
+		success = false;
 	} 
 	else 
 	{
  		checkOpenDirectory(directory_name, ret_directory);
 
-		success = 1;
+		success = true;
 	}
 
 	return success;
@@ -455,7 +454,7 @@ bool checkCreateDirectory(
 	//
 	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
 	
-	bool success = 0;
+	bool success = false;
 	
 	if ( !checkDirectoryExists(1, directory_name) ) 
 	{
@@ -466,15 +465,15 @@ bool checkCreateDirectory(
 				
 		if ( createDirectory(directory_name))
 		{
-			success = 1;
+			success = true;
 		} else 
 		{
-			success = 0;
+			success = false;
 		}
 		
 	} else 
 	{
-		success = 1;
+		success = true;
 	}
 	
 	return success;
@@ -543,16 +542,15 @@ bool readFileDouble(
 	int32_t  curr_num_lines = init_num_lines;
 
 	char    *buffer = NULL; 
-	size_t size = 0;
+	size_t   size = 0;
 
 	int32_t  line_index = 0;
 		
 	FILE* file = NULL;
 	if( checkOpenFile(3, file_name, "r", &file) ) 
 	{
-		int32_t  num_lines = countLinesInTextFile(file);
-		
-		size_t num_elements = (size_t) (num_lines * num_cols);
+		int32_t  num_lines    = countLinesInTextFile(file);
+		size_t   num_elements = (size_t) (num_lines * num_cols);
 		
 		float *data = malloc(sizeof(float) * num_elements);
 
@@ -779,6 +777,8 @@ void filterbyExtension(
 	// Filters a list of filenames, imput, separating the files with extension, ext, into a new list filt_ret. Number of items retained after filtration being given by num_filt. 
 	//
 	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
+	
+	const int32_t init_num_filt = 100;
 
 	if (num_input == 0)
 	{
@@ -788,12 +788,11 @@ void filterbyExtension(
 	}
 
 	int32_t filt_index = 0;
-	const char* dot_pos;
-	int32_t check_ext;
-
-	int32_t init_num_filt = 100;
+	int32_t check_ext  = 0;
 	int32_t curr_num_filt = init_num_filt;
-	char** filt = malloc(sizeof(char*)* (size_t) init_num_filt);
+
+	char  *dot_pos = NULL;
+	char **filt    = malloc(sizeof(char*)*(size_t)curr_num_filt);
 
 	for (int32_t input_index = 0; input_index < num_input; ++input_index)
 	{
