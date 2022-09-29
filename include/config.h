@@ -120,7 +120,7 @@ bool checkStructSize(
 				stderr, 
 				"checkStructSize: \n Warning! Inputted struct size: (%zu) is"
 				"smaller than compiled structure, even acounting for padding:"
-				" (%zu), exiting. Forc config %s.\n", 
+				" (%zu), exiting. For config %s.\n", 
 				size, 
 				compiled_size - largest_memory_alignment,
 				name

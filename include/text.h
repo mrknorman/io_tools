@@ -139,9 +139,13 @@ bool checkFileExists(
 
 		exists = 0;
         
-        if ( verbosity >= 2 ) {
-            
-            fprintf(stderr, "Warning! File \"%s\" does not exist.\n", file_name);
+        if ( verbosity >= 2 ) 
+        {     
+            fprintf(
+                stderr, 
+                "checkFileExists: \nWarning! File \"%s\" does not exist.\n", 
+                file_name
+            );
         }
 	} 
 	else 
@@ -152,7 +156,12 @@ bool checkFileExists(
         
         if ( verbosity >= 1 ) 
 		{
-            fprintf(stderr, "Failed to open file, \"%s\", for unknown reason.\n", file_name);
+            fprintf(
+                stderr, 
+                "checkFileExists: \n Failed to open file, \"%s\", for unknown"
+                " reason.\n", 
+                file_name
+            );
         }
 	}
 
@@ -191,7 +200,11 @@ bool checkOpenFile(
         
         if ( verbosity >= 1 ) 
 		{
-            fprintf(stderr, "Warning! File \"%s\" does not exist.\n", file_name);  
+            fprintf(
+                stderr, 
+                "checkOpenFile: \nWarning! File \"%s\" does not exist.\n", 
+                file_name
+            );  
         }
 	} 
 	else 
@@ -202,7 +215,12 @@ bool checkOpenFile(
         
         if ( verbosity >= 1 ) 
 		{
-            fprintf(stderr, "Failed to open file, \"%s\", for unknown reason.\n", file_name);
+            fprintf(
+                stderr, 
+                "checkOpenFile: \nFailed to open file, \"%s\", for unknown"
+                " reason.\n", 
+                file_name
+            );
         }
 	}
 
@@ -226,7 +244,11 @@ bool createFile(
 	if ( fopen(file_name, mode) == NULL) 
 	{
         if ( verbosity >= 1 ) {
-            fprintf(stderr, "Error creating file \"%s\". Returning.\n", file_name);
+            fprintf(
+                stderr, 
+                "createFile: \nError creating file \"%s\". Returning.\n", 
+                file_name
+            );
         }
 
 		success = true;
@@ -260,7 +282,12 @@ bool createOpenFile(
 	{
         if (verbosity >= 1) 
 		{
-            fprintf(stderr, "Warning! Error creating file \"%s\". Returning.\n", file_name);
+            fprintf(
+                stderr, 
+                "createOpenFile: \nWarning! Error creating file \"%s\"."
+                " Returning.\n",
+                file_name
+            );
         }
  
 		success = true;
@@ -292,7 +319,12 @@ bool checkCreateFile(
 	{
         if (verbosity >= 2) 
 		{
-            printf("File \"%s\" does not exist. Attemping to create.\n", file_name );
+            fprintf(
+                stderr,
+                "checkCreateFile: \n"
+                " File \"%s\" does not exist. Attemping to create.\n", 
+                file_name 
+            );
         }
 
 		if ( createFile(verbosity, file_name, mode) ) 
@@ -341,7 +373,12 @@ bool checkDirectoryExists(
         
         if (verbosity >= 1) 
 		{
-            fprintf(stderr, "Failed to open directory \"%s\", for unknown reason.\n", directory_name);
+            fprintf(
+                stderr, 
+                "checkDirectoryExists: \n Failed to open directory \"%s\", for"
+                "unknown reason.\n", 
+                directory_name
+            );
         }
 	    /* opendir() failed for some other reason. */
 	}
@@ -375,14 +412,22 @@ bool checkOpenDirectory(
 		/* Directory does not exist. */
 		
 		exists = false;
-		fprintf(stderr, "Warning! Cannot find directory \"%s\".\n", directory_name);
+		fprintf(
+            stderr, 
+            "Warning! Cannot find directory \"%s\".\n", 
+            directory_name
+        );
 	} 
 	else 
 	{
 		/* opendir() failed for some other reason. */
 
 		exists = false;
-		fprintf(stderr, "Warning! Failed to open directory \"%s\", for unknown reason.\n", directory_name);
+		fprintf(
+            stderr, 
+            "Warning! Failed to open directory \"%s\", for unknown reason.\n", 
+            directory_name
+        );
 	}
 
 	return exists;
@@ -516,13 +561,13 @@ int32_t countLinesInTextFile(
 }
 
 bool readFileDouble(
-	const char     *file_name , 
-	const int32_t   mode      , 
-	const char     *delimeter , 
-	const int32_t   num_cols  , 
+	const char     *file_name, 
+	const int32_t   mode, 
+	const char     *delimeter, 
+	const int32_t   num_cols, 
 	const int32_t   start_line, 
-	const int32_t   start_col , 
-		  float   **data_ret  , 
+	const int32_t   start_col, 
+		  float   **data_ret, 
 		  int32_t  *lines_read
 	) {
 
