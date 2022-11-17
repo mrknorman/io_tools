@@ -443,7 +443,7 @@ bool checkNumParameters(
 	
 	if (sum > max) 
 	{
-		pass *= false;
+		pass = false;
 		
 		if (verbosity > 0)
 		{
@@ -458,7 +458,7 @@ bool checkNumParameters(
 	}
 	else if (sum < min) 
 	{
-		pass *= false;
+		pass = false;
 		
 		if (verbosity > 0)
 		{
@@ -487,7 +487,7 @@ bool checkNumConfigs(
 	
 	if (total_num_read > max) 
 	{
-		pass *= false;
+		pass = false;
 		
 		if (verbosity > 0)
 		{
@@ -501,7 +501,7 @@ bool checkNumConfigs(
 	}
 	else if (total_num_read < min) 
 	{
-		pass *= false;
+		pass = false;
 		
 		if (verbosity > 0)
 		{
@@ -529,7 +529,7 @@ bool checkNumExtraConfigs(
 	
 	if (total_num_read > max) 
 	{
-		pass *= false;
+		pass = false;
 		
 		if (verbosity > 0)
 		{
@@ -543,7 +543,7 @@ bool checkNumExtraConfigs(
 	}
 	else if (total_num_read < min) 
 	{
-		pass *= false;
+		pass = false;
 		
 		if (verbosity > 0)
 		{
@@ -581,7 +581,7 @@ bool checkNumExtraParameters(
 	
 	if (sum > max) 
 	{
-		pass *= false;
+		pass = false;
 		
 		if (verbosity > 0)
 		{
@@ -595,7 +595,7 @@ bool checkNumExtraParameters(
 	} 
 	else if (sum < min) 
 	{
-		pass *= false;
+		pass = false;
 		
 		if (verbosity > 0)
 		{
@@ -642,7 +642,7 @@ bool checkParameterRequirements(
 				read, name, min, config.name
 			);
 			
-			pass *= false;
+			pass = false;
 		}
 		else if (read > max)
 		{
@@ -653,11 +653,11 @@ bool checkParameterRequirements(
 				read, name, max, config.name
 			);
 			
-			pass *= false;
+			pass = false;
 		}
 	}
 	
-	pass *= 
+	pass = pass &&
 		checkNumParameters(
 			verbosity,
 			num_read,
@@ -704,7 +704,7 @@ bool checkExtraParameterRequirments(
 				read, name, min
 			);
 			
-			pass *= false;
+			pass = false;
 		}
 		else if (read > max)
 		{
@@ -715,11 +715,11 @@ bool checkExtraParameterRequirments(
 				read, name, max
 			);
 			
-			pass *= false;
+			pass = false;
 		}
 	}
 	
-	pass *= 
+	pass = pass &&
 		checkNumExtraParameters(
 			 verbosity,
 			 num_extra_parameters,
@@ -822,7 +822,7 @@ bool checkConfigRequirements(
 				read, name, min
 			);
 			
-			pass *= false;
+			pass = false;
 		}
 		else if (read > max)
 		{
@@ -833,13 +833,13 @@ bool checkConfigRequirements(
 				read, name, max
 			);
 			
-			pass *= false;
+			pass = false;
 		}
 	}
 	
     if (is_superconfig)
     {
-        pass *= 
+        pass = pass && 
             checkNumConfigs(
                 verbosity,
                 total_num_read,
@@ -848,7 +848,7 @@ bool checkConfigRequirements(
 				config.name
             );
 
-        pass *=
+        pass = pass &&
             checkNumExtraConfigs(
                 verbosity,
                 total_num_read - sum,
@@ -1005,7 +1005,7 @@ bool checkDefaultParameter(
 			);
 		}
 
-		pass *= false;
+		pass = false;
 	}
 
 	return pass;
@@ -1040,7 +1040,7 @@ bool checkParameters(
 				);
 			}
 			
-			pass *= false;
+			pass = false;
 		}
 		
 		if (type == none_e)
@@ -1055,7 +1055,7 @@ bool checkParameters(
 				);
 			}
 			
-			pass *= false;
+			pass = false;
 		}
 	}
 	
@@ -1089,7 +1089,7 @@ bool checkDefaultConfig(
                 );
             }
 
-            pass *= false;
+            pass = false;
         }
     }
     
@@ -1127,7 +1127,7 @@ bool checkConfigs(
                     );
                 }
 
-                pass *= false;
+                pass = false;
             }
         }
     }
@@ -1189,43 +1189,49 @@ bool checkLoaderConfig(
     loader_config_s default_config 
 		= setupDefaultConfig( config);
     	
-	pass *=	checkStructSize(
-        verbosity, 
-        struct_size, 
-        compiled_struct_size, 
-        largest_memory_alignment,
-		config.name
-    );
+	pass = pass &&
+        checkStructSize(
+            verbosity, 
+            struct_size, 
+            compiled_struct_size, 
+            largest_memory_alignment,
+            config.name
+        );
 
-	pass *= checkTypeOrder(
-        verbosity, 
-        types, 
-        num_defined_parameters
-    );
+	pass = pass &&
+        checkTypeOrder(
+            verbosity, 
+            types, 
+            num_defined_parameters
+        );
     
-	pass *= checkDefaultParameter(
-        verbosity,
-        default_parameter
-    );
+	pass = pass && 
+        checkDefaultParameter(
+            verbosity,
+            default_parameter
+        );
 
-    pass *= checkParameters(
-        verbosity,
-        defined_parameters, 
-        num_defined_parameters
-    ); 
+    pass = pass &&
+        checkParameters(
+            verbosity,
+            defined_parameters, 
+            num_defined_parameters
+        ); 
         
-    pass *= checkDefaultConfig(
-        verbosity,
-        is_superconfig,
-        default_config
-    );
+    pass = pass &&
+        checkDefaultConfig(
+            verbosity,
+            is_superconfig,
+            default_config
+        );
     
-    pass *= checkConfigs(
-        verbosity,
-        is_superconfig,
-        defined_subconfigs, 
-        num_defined_subconfigs
-    );
+    pass = pass &&
+        checkConfigs(
+            verbosity,
+            is_superconfig,
+            defined_subconfigs, 
+            num_defined_subconfigs
+        );
     
     return pass;
 }

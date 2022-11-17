@@ -437,7 +437,7 @@ void printTitle(
 		printf("*\n");
 }
 
-void printArrayDouble(
+void printArray(
     const char   *title, 
     const float  *array,
     const int32_t num_elements
