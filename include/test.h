@@ -56,7 +56,12 @@ bool checkNULL(
 	} 
 	else
 	{
-		printf("%s %s did not return NULL! Unexpected behaviour.\n", test, name);
+		printf(
+            "%s %s did not return NULL! Unexpected behaviour.\n", 
+            test, 
+            name
+        );
+        
 		pass = false;
 	}
     

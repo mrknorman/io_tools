@@ -391,7 +391,8 @@ bool comapareMultiS(
 		case(char_e        ): pass = (data_a.value.b == data_b.value.b); break;
 		case(char_array_e  ): pass = false; break;		
 
-		case(string_e      ): pass = (bool) !strcmp(data_a.value.s, data_b.value.s); break;		
+		case(string_e      ): pass = 
+            (bool) !strcmp(data_a.value.s, data_b.value.s); break;		
 		case(string_array_e): pass = false; break;
 			
 		default:
@@ -511,7 +512,8 @@ float stringToFloat(
 	if (isdigit(string[0]) || (string[0] == '-')) 
 	{
 		value = (float) atof(string); 
-	} else 
+	} 
+    else 
 	{
 		if (verbosity > 1) 
 		{
@@ -669,23 +671,57 @@ char *MultiStoString(
 	char* string;
 	switch(data.type) 
 	{	
-		case(none_e        ): printf("MultiStoString: \nWarning! Cannot convert None to string!"); break;
-		case(bool_e        ): asprintf(&string, "%i", (int32_t) data.value.b  ); break;
-		case(bool_array_e  ): asprintf(&string, "%p", (void *)  data.value.bb ); break;
-
-		case(int_e         ): asprintf(&string, "%i",           data.value.i  ); break;
-		case(int_array_e   ): asprintf(&string, "%p", (void *)  data.value.ii ); break;
-		case(int_jagged_e  ): asprintf(&string, "%p", (void *)  data.value.iii); break;			
+		case(none_e        ): 
+            printf("MultiStoString: \nWarning! Cannot convert None to string!"); 
+        break;
+        
+		case(bool_e        ): 
+            asprintf(&string, "%i", (int32_t) data.value.b  ); 
+        break;
+        
+		case(bool_array_e  ): 
+            asprintf(&string, "%p", (void *)  data.value.bb ); 
+        break;
+        
+		case(int_e         ): 
+            asprintf(&string, "%i",           data.value.i  ); 
+        break;
+        
+		case(int_array_e   ): 
+            asprintf(&string, "%p", (void *)  data.value.ii ); 
+        break;
+        
+		case(int_jagged_e  ): 
+            asprintf(&string, "%p", (void *)  data.value.iii); 
+        break;			
 			
-		case(float_e       ): asprintf(&string, "%f",           data.value.f  ); break;
-		case(float_array_e ): asprintf(&string, "%p", (void *)  data.value.ff ); break;
-		case(float_jagged_e): asprintf(&string, "%p", (void *)  data.value.fff); break;		
+		case(float_e       ): 
+            asprintf(&string, "%f",           data.value.f  ); 
+        break;
+        
+		case(float_array_e ): 
+            asprintf(&string, "%p", (void *)  data.value.ff ); 
+        break;
+        
+		case(float_jagged_e): 
+            asprintf(&string, "%p", (void *)  data.value.fff); 
+        break;		
 
-		case(char_e        ): asprintf(&string, "%c", data.value.c  ); break;
-		case(char_array_e  ): asprintf(&string, "%p", (void *)  data.value.cc ); break;
+		case(char_e        ): 
+            asprintf(&string, "%c", data.value.c  ); 
+        break;
+        
+		case(char_array_e  ): 
+            asprintf(&string, "%p", (void *)  data.value.cc ); 
+        break;
 
-		case(string_e      ): string = data.value.s; break;		
-		case(string_array_e): asprintf(&string, "%p", (void *)  data.value.ss ); break;
+		case(string_e      ): 
+            string = data.value.s; 
+        break;		
+        
+		case(string_array_e): 
+            asprintf(&string, "%p", (void *)  data.value.ss ); 
+        break;
 			
 		default:
 			fprintf(
@@ -858,7 +894,8 @@ dict_s* makeDictionary(
 	/**
      * Create dictionary data structure.
      * @param 
-     *     const int32_t length: number of elements to allocate for storage of unique hashes.
+     *     const int32_t length: number of elements to allocate for storage of 
+     *                           unique hashes.
      * @see
      * @return dict_s *dictionary: pointer to newly created dictionary.
      */
@@ -900,7 +937,7 @@ int32_t StringToKey(
 }
 
 int32_t getDictHashCode(
-	const dict_s *dict      , 
+	const dict_s *dict, 
 	const char   *string_key
 	) {
 	
@@ -929,8 +966,8 @@ int32_t getDictHashCode(
 }
 
 int32_t insertDictEntry(
-	      dict_s  *dict        , 
-	const multi_s  data        , 
+	      dict_s  *dict, 
+	const multi_s  data, 
     const char    *string_key_o
 	) {
 	
@@ -947,9 +984,14 @@ int32_t insertDictEntry(
 	const char *string_key = strdup(string_key_o);
 	
 	dict->num_entries++;
-	if (dict->num_entries > dict->length) {
-		
-		fprintf(stderr, "Warning dictionary too small! Cannot add entry: %s. \n", string_key);
+	if (dict->num_entries > dict->length) 
+    {
+		fprintf(
+            stderr, 
+            "Warning dictionary too small! Cannot add entry: %s. \n", 
+            string_key
+        );
+        
 		return 1;
 	}
 	
@@ -967,14 +1009,14 @@ int32_t insertDictEntry(
             NULL
         };
 
-        if ( dict->last_entry != NULL) {
-
+        if ( dict->last_entry != NULL) 
+        {
             dict->last_entry->next_entry = entry;
         }
 
         int32_t index = hash;
-        while (dict->entries[index] != NULL){
-
+        while (dict->entries[index] != NULL)
+        {
             index++; index %= dict->length; //Wrap around. 
         }
     
@@ -995,7 +1037,8 @@ int32_t findHashIndex(
 	/**
      * Find dictionary entry index from entered string key.
      * @param 
-	 *     const dict_s  *dict      : Dictionary to find hash for specified string key;.
+	 *     const dict_s  *dict      : Dictionary to find hash for specified 
+     *                                string key.
      *     const char    *string_key: String key to find hash index from.
      * @see getDictHashCode().
      * @return int32_t index: Returns hash index if successful, else return -1.
@@ -1007,7 +1050,8 @@ int32_t findHashIndex(
     {
               int32_t index = hash;
 
-        const int32_t stop_index = ((hash - 1) < 0) ? (dict->length - 1) : (hash - 1);
+        const int32_t stop_index = 
+            ((hash - 1) < 0) ? (dict->length - 1) : (hash - 1);
 
         while (dict->entries[index] != NULL) 
         {
@@ -1028,17 +1072,19 @@ int32_t findHashIndex(
 }
 
 dict_entry_s *findDictEntry_(
-	const dict_s *dict    , 
+	const dict_s *dict, 
 	const char   *string_key
 	) {
 	
 	/**
      * Find dictionary entry from entered string key.
      * @param 
-	 *     const dict_s  *dict      : Dictionary to find entry for specified string key.
+	 *     const dict_s  *dict      : Dictionary to find entry for specified 
+     *                                string key.
      *     const char    *string_key: String key to find dictionary entry of.
      * @see findHashIndex().
-     * @return dict_entry_s entry: Returns dict entry if successful, else return NULL.
+     * @return dict_entry_s entry: Returns dict entry if successful, else return 
+     *                             NULL.
      */
 	
 	const int32_t hash  = findHashIndex(dict, string_key);
@@ -1058,24 +1104,31 @@ dict_entry_s *findDictEntry_(
 }
 
 dict_entry_s *findDictEntry(
-	const dict_s *dict    , 
+	const dict_s *dict, 
 	const char   *string_key
 	) {
 	
 	/**
      * Find dictionary entry from entered string key, with error wrapper.
      * @param 
-	 *     const dict_s  *dict      : Dictionary to find entry for specified string key.
+	 *     const dict_s  *dict      : Dictionary to find entry for specified 
+     *                                string key.
      *     const char    *string_key: String key to find dictionary entry of.
      * @see findHashIndex().
-     * @return dict_entry_s entry: Returns dict entry if successful, else return NULL.
+     * @return dict_entry_s entry: Returns dict entry if successful, else return 
+     *                             NULL.
      */
 		
 	dict_entry_s *entry = findDictEntry_(dict, string_key);
 	
 	if (entry == NULL)
 	{
-		fprintf(stderr, "findDictEntry: \nWarning! Cannot find entry! %s. \n", string_key);
+		fprintf(
+            stderr, 
+            "findDictEntry: \nWarning! Cannot find entry! %s. \n", 
+            string_key
+        );
+        
 		return NULL;
 	}
 	
@@ -1083,14 +1136,15 @@ dict_entry_s *findDictEntry(
 }
 
 void deleteDictEntry(
-	        dict_s * dict      ,
-	const   char   * string_key
+	        dict_s *dict,
+	const   char   *string_key
 	) {
 	
 	/**
      * Delete dictionary entry at entered string key.
      * @param 
-	 *     const dict_s  *dict      : Dictionary to find entry for specified string key.
+	 *     const dict_s  *dict      : Dictionary to find entry for specified 
+     *                                string key.
      *     const char    *string_key: String key to delete dictionary entry at.
      * @see findHashIndex().
      * @return none.
@@ -1104,14 +1158,18 @@ void deleteDictEntry(
 
         if (index >= 0) {
 
-            if (dict->entries[index]->previous_entry != NULL) {
-                if (dict->entries[index]->next_entry != NULL) {
+            if (dict->entries[index]->previous_entry != NULL) 
+            {
+                if (dict->entries[index]->next_entry != NULL) 
+                {
+                    dict->entries[index]->previous_entry->next_entry = 
+                        dict->entries[index]->next_entry;
+                    dict->entries[index]->next_entry->previous_entry = 
+                        dict->entries[index]->previous_entry;
 
-                    dict->entries[index]->previous_entry->next_entry = dict->entries[index]->next_entry;
-                    dict->entries[index]->next_entry->previous_entry = dict->entries[index]->previous_entry;
-
-                } else {
-
+                } 
+                else 
+                {
                     dict->entries[index]->previous_entry->next_entry = NULL;
                     dict->last_entry = dict->entries[index]->previous_entry;
                 }
@@ -1132,19 +1190,23 @@ dict_entry_s** returnAllEntries(
 	/**
      * Returns array of all dictionary entries
      * @param 
-	 *     const dict_s  *dict: Dictionary to find entry for specified string key.
+	 *     const dict_s  *dict: Dictionary to find entry for specified string 
+     *                          key.
      * @see findHashIndex().
      * @return dict_entry_s** entries: array of dict entries.
      */
 	
 	dict_entry_s** entries = malloc(1);
-	if ((dict->num_entries > 0) && (dict->last_entry != NULL)) {
-		
-		entries = realloc(entries, sizeof(dict_entry_s*) * (size_t) dict->num_entries);
+	if ((dict->num_entries > 0) && (dict->last_entry != NULL)) 
+    {
+		entries = 
+            realloc(
+                entries, sizeof(dict_entry_s*) * (size_t) dict->num_entries
+            );
 		
 		entries[dict->num_entries - 1] = dict->last_entry;
-		for (int32_t index = dict->num_entries - 2; index >= 0; index--) {
-			
+		for (int32_t index = dict->num_entries - 2; index >= 0; index--)
+        {
 			entries[index] = entries[index + 1]->previous_entry;
 		}
 	}
@@ -1166,8 +1228,8 @@ void printDictKeys(
 	
 	dict_entry_s** entries = returnAllEntries(dict);
 
-	for (int32_t index = 0; index < dict->num_entries; index++) {
-		
+	for (int32_t index = 0; index < dict->num_entries; index++) 
+    {
 		printf("%s \n", entries[index]->string_key);	
 	}
 }
@@ -1202,8 +1264,8 @@ void freeDictionary(
 	
 	dict_entry_s **entries = returnAllEntries(dict);
 	
-	for (int32_t index = 0; index < dict->num_entries; index++) {
-	
+	for (int32_t index = 0; index < dict->num_entries; index++) 
+    {
 		freeDictEntry(entries[index]);
 	}
 	
@@ -1252,8 +1314,8 @@ map_s createMap(
     map.dict = makeDictionary(10*num_keys);
     
 	map.keys = malloc(sizeof(char*) * (size_t) num_keys);
-    for (int32_t index = 0; index < num_keys; index++) {
-        
+    for (int32_t index = 0; index < num_keys; index++) 
+    {
         const multi_s data = (multi_s) {*((multi_u*)(&index)), int_e, 1, NULL};
         insertDictEntry(map.dict, data, keys[index]);
 		map.keys[index] = strdup(keys[index]);
@@ -1286,7 +1348,8 @@ int32_t getMapIndex(
 	if ( entry!= NULL ) 
 	{
 		index = entry->data.value.i;
-	} else 
+	} 
+    else 
 	{
 		index = -1;
 	}
@@ -1309,10 +1372,12 @@ char *getMapKey(
      */
 	
 	char* key = NULL;
-	if ((index < map.length) && (map.length > 0)) {
-	
+	if ((index < map.length) && (map.length > 0)) 
+    {
 		key = map.keys[index];
-	} else {
+	} 
+    else 
+    {
 		key = NULL;
 	}
     

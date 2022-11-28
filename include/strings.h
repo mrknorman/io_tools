@@ -27,8 +27,8 @@ char *strrev(
     char *rev_string = malloc(sizeof(char*) * (length + (size_t) 1));
 	
 	// Loop through string length:
-    for (size_t index = 0; index < length; index++) {
-        
+    for (size_t index = 0; index < length; index++) 
+    {
 		// Set new string character as reverse of old string:
         rev_string[length - 1 - index] = string[index];
     }
@@ -60,19 +60,23 @@ int32_t compareStrings(
 } 
 
 void splitString(
-    const char      *string          , 
-    const int32_t    num_strings     , 
-    const char      *delimiter       , 
+    const char      *string, 
+    const int32_t    num_strings, 
+    const char      *delimiter, 
           char    ***ret_string_array
     ) {
 	
 	/**
-     * Split larger string into substrings a delimeter for specified number of substrings.
+     * Split larger string into substrings a delimeter for specified number of 
+     * substrings.
      * @param 
-     *     const char      *string          : string to be split into substrings.
+     *     const char      *string          : string to be split into 
+     *                                        substrings.
 	 *     const int32_t    num_strings     : number of substrings to look for.
-	 *     const char      *delimieter      : character by which to split the strings.
-	 *     const char    ***ret_string_array: pointer to array of substrings split from string.
+	 *     const char      *delimieter      : character by which to split the 
+     *                                        strings.
+	 *     const char    ***ret_string_array: pointer to array of substrings 
+     *                                        split from string.
      * @see
      * @return none
      */
@@ -86,30 +90,35 @@ void splitString(
 	// Get first substring:
 	string_array[0] = strtok(string_copy, delimiter);
 
-	//Loop through remaining strings to separate substrings:
-	for (int32_t string_idx = 1; string_idx < num_strings; string_idx++){
-        
-		//Get pointer to start of next substring and replace delimiter with end of string character:
+	// Loop through remaining strings to separate substrings:
+	for (int32_t string_idx = 1; string_idx < num_strings; string_idx++)
+    {
+		// Get pointer to start of next substring and replace delimiter with end 
+        // of string character:
 		string_array[string_idx] = strtok(NULL, delimiter);
 	}
 	
-	//Return separated substring array:
+	// Return separated substring array:
 	*ret_string_array = string_array;
 }
 
 void splitStringDy(
-    const char    *string, 
-    const char    *delimiter, 
-          char  ***ret_string_array, 
-          int32_t *ret_num_strings
+    const char      *string, 
+    const char      *delimiter, 
+          char    ***ret_string_array, 
+          int32_t   *ret_num_strings
     ) {
 	
     /**
-     * Split larger string into substrings a delimeter for dynamic number of substrings.
+     * Split larger string into substrings a delimeter for dynamic number of 
+     * substrings.
      * @param 
-     *     const char      *string          : string to be split into substrings.
-	 *     const char      *delimieter      : character by which to split the strings.
-	 *     const char    ***ret_string_array: pointer to array of substrings split from string.
+     *     const char      *string          : string to be split into 
+     *                                        substrings.
+	 *     const char      *delimieter      : character by which to split the 
+     *                                        strings.
+	 *     const char    ***ret_string_array: pointer to array of substrings 
+     *                                        split from string.
 	 *     const int32_t   *ret_num_strings : number of substrings found.
      * @see
      * @return none
@@ -122,7 +131,8 @@ void splitStringDy(
     char     *string_copy  = strdup(string);
 	
 	// Allocate array to hold pointers to substrings:
-	char    **string_array = malloc(sizeof(char*) * (size_t) initial_num_strings);
+	char    **string_array = 
+        malloc(sizeof(char*) * (size_t) initial_num_strings);
 	
 	//Set number of strings to initial value:
 	int32_t   num_strings  = initial_num_strings;
@@ -134,11 +144,12 @@ void splitStringDy(
 	token = strtok(string_copy, delimiter);
     
 	int32_t  index = 0;
-	while (token != NULL) {
-		
+	while (token != NULL) 
+    {
 		// Expand string pointer array if number of strings found 
 		// exceeds intial number allocated:
-		if (index >= initial_num_strings) {
+		if (index >= initial_num_strings) 
+        {
 			// Increase number of strings in string array:
 			num_strings *= 2;
 			
@@ -149,7 +160,8 @@ void splitStringDy(
 		// Set string array value to new pointer:
 		string_array[index] = token;
 				
-		// Get pointer to start of next substring and replace delimiter with end of string character:
+		// Get pointer to start of next substring and replace delimiter with end 
+        // of string character:
 		token = strtok(NULL, delimiter);
 		
 		// Incrament string index:
@@ -172,11 +184,14 @@ void removeStringChars(
     ) {
 	
 	/**
-     * Remove all isntances of character specified by remove from inputted string.
+     * Remove all isntances of character specified by remove from inputted 
+     * string.
      * @param 
-     *     const char      *string            : old string to remove character from.
+     *     const char      *string            : old string to remove character 
+     *                                          from.
 	 *     const char      *remove            : character to remove from string.
-	 *     const char     **ret_string_removed: new string with character removed. 
+	 *     const char     **ret_string_removed: new string with character 
+     *                                          removed. 
      * @see
      * @return none
      */
@@ -187,15 +202,15 @@ void removeStringChars(
 
 	int32_t remove_char_idx = 0; // Index of new string.
 	int32_t char_idx        = 0; // Index of old string.
-	while (string[char_idx]){
-		
+	while (string[char_idx])
+    {
 		// Strchr returns index of next instance of remove,
 		// if it returns 0, current index is instance of string,
-		// so do not add to new string.
-		if ( !strchr(remove, string[char_idx]) ){
-			
+		// so do not add to new string:
+		if ( !strchr(remove, string[char_idx]))
+        {
 			// Set new string to old string value if not equal
-			// to remove character.
+			// to remove character:
 			string_removed[remove_char_idx] = string[char_idx];
 			remove_char_idx++;
 		}
@@ -252,10 +267,10 @@ char* replaceWord(
 
     // Counting the number of times old word
     // occur in the string:
-    for (index = 0; string[index] != '\0'; index++) {
-        
-        if (strstr(&string[index], old_word) == &string[index]) {
-        
+    for (index = 0; string[index] != '\0'; index++) 
+    {
+        if (strstr(&string[index], old_word) == &string[index]) 
+        {
             count++;
   
             // Jumping to index after the old word.
@@ -272,10 +287,11 @@ char* replaceWord(
 	  
 	// Reset Index:
     index = 0;
-    while (*string) {
-        
+    while (*string) 
+    {
         // Compare the substring with the result
-        if (strstr(string, old_word) == string) {
+        if (strstr(string, old_word) == string) 
+        {
             strcpy(&result[index], new_word);
             index += new_word_length;
             string += old_word_length;
@@ -314,8 +330,8 @@ char* multiplyString(
 		  char   *new_string = malloc(new_length + (size_t) 1);  
     
 	// Loop through string and set multplicants:
-    for (size_t index = 0; index < new_length; index++) {
-        
+    for (size_t index = 0; index < new_length; index++) 
+    {
         new_string[index] = string[index % strlen(string)];
     }
     

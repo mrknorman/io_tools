@@ -80,33 +80,62 @@ void printProgress(
     
 	for (int32_t index = 0; index < max_pips; index++) 
 	{
-		buffer[(int32_t) prefix_length + index] = (index < num_pips) ? pip : ' ';
+		buffer[(int32_t) prefix_length + index] = 
+            (index < num_pips) ? pip : ' ';
 	}
 
 	strcpy(&buffer[(int32_t) prefix_length + max_pips], suffix);
 
-	int32_t days, hours, minutes;
+	int32_t days = 0, hours = 0, minutes = 0;
 	int32_t seconds = (int32_t) loading->time_to_completion;
 
     char * estimated_time;
 	if(seconds > 86400) 
 	{
-        minutes = seconds/60; seconds = seconds%60; hours = minutes/60; minutes = minutes%60; days = hours/24; hours = days%24;
-		asprintf(&estimated_time, "ETA: %d:%d:%d:%d days:hours:minutes:seconds", days, hours, minutes, seconds);
+        minutes = seconds/60; 
+        seconds = seconds%60; 
+        hours = minutes/60; 
+        minutes = minutes%60; 
+        days = hours/24; 
+        hours = days%24;
+        
+		asprintf(
+            &estimated_time, 
+            "ETA: %d:%d:%d:%d days:hours:minutes:seconds", 
+            days, hours, minutes, seconds
+        );
 	} 
 	else if (seconds > 3600) 
 	{   
-        minutes = seconds/60; seconds = seconds%60; hours = minutes/60; minutes = minutes%60;
-		asprintf(&estimated_time, "ETA: %d:%d:%d hours:minutes:seconds", hours, minutes, seconds);
+        minutes = seconds/60; 
+        seconds = seconds%60; 
+        hours = minutes/60; 
+        minutes = minutes%60;
+        
+		asprintf(
+            &estimated_time, 
+            "ETA: %d:%d:%d hours:minutes:seconds", 
+            hours, minutes, seconds
+        );
 	}
 	else if (seconds > 60) 
 	{
-		minutes = seconds/60; seconds = seconds%60;
-		asprintf(&estimated_time, "ETA: %d:%d minutes:seconds", minutes, seconds);
+		minutes = seconds/60; 
+        seconds = seconds%60;
+        
+		asprintf(
+            &estimated_time, 
+            "ETA: %d:%d minutes:seconds", 
+            minutes, seconds
+        );
 	}
 	else
 	{    
-		asprintf(&estimated_time, "ETA: %d seconds", seconds);
+		asprintf(
+            &estimated_time, 
+            "ETA: %d seconds", 
+            seconds
+        );
 	}
     
     //Set max length of eta string to ensure to cover with spaces when printing over.
@@ -116,7 +145,12 @@ void printProgress(
         loading->max_eta_length = eta_length;
     }
     
-	printf("\b%c\r%s %.2f%%. %*s", 5, buffer, percent*100, - (int32_t) loading->max_eta_length, estimated_time);
+	printf(
+        "\b%c\r%s %.2f%%. %*s", 
+        5, buffer, percent*100, 
+        - (int32_t) loading->max_eta_length, 
+        estimated_time
+    );
 
 	fflush(stdout);
 	free(buffer); free(estimated_time);
@@ -142,10 +176,15 @@ void progressCheck(
         if (loading->check_index != 0) { 
 
             loading->end_time            = clock();
-            loading->loop_time           = (float) (loading->end_time - loading->start_time) / CLOCKS_PER_SEC;
+            loading->loop_time           = 
+                (float)(loading->end_time - loading->start_time) 
+                / CLOCKS_PER_SEC;
             loading->total_time         += loading->loop_time;
-            loading->avg_time            = (float) loading->total_time/(float) tick_index;
-            loading->time_to_completion  = loading->avg_time*((float) loading->num_ticks - (float) loading->tick_index);
+            loading->avg_time            = 
+                (float)loading->total_time / (float)tick_index;
+            loading->time_to_completion  = 
+                loading->avg_time
+               *((float)loading->num_ticks - (float)loading->tick_index);
 
             printProgress(loading);
         }
@@ -272,100 +311,105 @@ void printTable(
 	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
 	
 	//Assigning variables for readablity:
-    
-		const int32_t          num_rows     = table.num_rows;
-	    const int32_t          num_columns  = table.num_columns;
-		const table_column_s * columns      = table.columns;
-	
+    const int32_t          num_rows     = table.num_rows;
+    const int32_t          num_columns  = table.num_columns;
+    const table_column_s * columns      = table.columns;
+
 	//Calculate column required widths:
 		
-		int32_t* widths = malloc(sizeof(int) * (size_t) num_columns);
-		for (int32_t column_index = 0; column_index < num_columns; column_index++) 
-		{				
-			widths[column_index] = (int32_t) strlen(columns[column_index].header) + 2;
-		}
-	
-		for (int32_t row_index = 0; row_index < num_rows; row_index++ ) 
-		{
-			for (int32_t column_index = 0; column_index < num_columns; column_index++) 
-			{
-				int32_t cell_index = row_index*num_columns + column_index;
+    int32_t* widths = malloc(sizeof(int) * (size_t) num_columns);
+    for (
+        int32_t column_index = 0; 
+        column_index < num_columns; 
+        column_index++
+    ) {				
+        widths[column_index] = 
+            (int32_t) strlen(columns[column_index].header) + 2;
+    }
 
-				table_column_s column = columns[column_index]; uni_s cell = table.cells[cell_index];
-				widths[column_index] = 
-					(int32_t) strlen(convertCellToString(cell, widths[column_index] - 2, column.decimal_places));
-			}
-		}
+    for (int32_t row_index = 0; row_index < num_rows; row_index++ ) 
+    {
+        for (
+            int32_t column_index = 0; 
+            column_index < num_columns; 
+            column_index++
+        ) {
+            int32_t cell_index = row_index*num_columns + column_index;
+
+            table_column_s column = columns[column_index]; 
+            uni_s cell = table.cells[cell_index];
+            widths[column_index] = 
+                (int32_t) strlen(
+                    convertCellToString(cell, widths[column_index] - 2, 
+                    column.decimal_places)
+                );
+        }
+    }
 		
 	//Calculate total table width:
     
-		int32_t table_width = 1; //<-- Add width for last colum separator.
-	
-		for (int32_t column_index = 0; column_index < num_columns; column_index++) 
-		{
-			//Add extra width for separators/.
-			table_width += widths[column_index] + 1;
-		}
+    int32_t table_width = 1; //<-- Add width for last colum separator.
+
+    for (int32_t column_index = 0; column_index < num_columns; column_index++) 
+    {
+        //Add extra width for separators/.
+        table_width += widths[column_index] + 1;
+    }
 	
 	//Print Spacing Before table:
-		printf("\n");
+	printf("\n");
 	
 	//Print table top:
-
-		printTableSeparator(top_e, num_columns, columns, widths);
+	printTableSeparator(top_e, num_columns, columns, widths);
 
  	//Calculate centre of table for title start position:
+    int32_t title_length = (int32_t) strlen(table.title); 
+    int32_t title_start  = table_width - title_length - 2; 
 
-	 	int32_t title_length = (int32_t) strlen(table.title); 
-	 	int32_t title_start  = table_width - title_length - 2; 
-
-	 	if (title_start < 0) 
-		{
-	 		title_start = 0;
-	 	} 
-		else 
-		{
-	 		title_start /= 2;
-	 	}
+    if (title_start < 0) 
+    {
+        title_start = 0;
+    } 
+    else 
+    {
+        title_start /= 2;
+    }
 
 	//Calculate remaining space needed to reach end of table: 
-		
-		int32_t title_end = table_width - title_start - title_length - 2;
+	int32_t title_end = table_width - title_start - title_length - 2;
 
 	//Print title column: 
+    printf("║");
 
-	 	printf("║");
+    for (int32_t index = 0; index < (int32_t) title_start; index++ ) 
+    {    
+        printf(" ");
+    }
 
-	 	for (int32_t index = 0; index < (int32_t) title_start; index++ ) 
-		{    
-			printf(" ");
-		}
+    printf("%s", table.title);
 
-		printf("%s", table.title);
+    for (int32_t index = 0; index < (int32_t) title_end; index++ ) 
+    {
+        printf(" ");
+    }
 
-		for (int32_t index = 0; index < (int32_t) title_end; index++ ) 
-		{
-			printf(" ");
-		}
-
-		printf("║\n");
+    printf("║\n");
 
  	//Print Title Separator:
 	
-		printTableSeparator(mid_top_e, num_columns, columns, widths);
+	printTableSeparator(mid_top_e, num_columns, columns, widths);
 
 	//Print headers:
+    for (int32_t column_index = 0; column_index < num_columns; column_index++ ) 
+    {
 
-		for (int32_t column_index = 0; column_index < num_columns; column_index++ ) 
-		{
-			
-			table_column_s column = columns[column_index];
+        table_column_s column = columns[column_index];
 
-			bool bold = (( column.bold ) || ( column_index == 0 ));
-			printf(bold?"║":"│");
+        bool bold = (( column.bold ) || ( column_index == 0 ));
+        printf(bold?"║":"│");
 
-			printf(" %*s ", widths[column_index] - 2, columns[column_index].header);
-		}
+        printf(" %*s ", widths[column_index] - 2, columns[column_index].header);
+    }
 
 		printf("║\n");
 
@@ -375,25 +419,28 @@ void printTable(
 
 	//Print data:
 
-		for (int32_t row_index = 0; row_index < num_rows; row_index++) 
-		{
-			for (int32_t column_index = 0; column_index < num_columns; column_index++ ) 
-			{
-				table_column_s column = columns[column_index];
-				int32_t cell_index = row_index*num_columns + column_index;
-				
-				bool bold = (( column.bold ) || ( column_index == 0 ));
-				printf(bold?"║":"│");
-				
-				int32_t   width          = widths[column_index] - 2;
-				int32_t   decimal_places = column.decimal_places;
-				uni_s cell           = table.cells[cell_index];
-				
-				printf(convertCellToString(cell, width, decimal_places));					
-			}
+    for (int32_t row_index = 0; row_index < num_rows; row_index++) 
+    {
+        for (
+            int32_t column_index = 0; 
+            column_index < num_columns; 
+            column_index++     
+        ) {
+            table_column_s column = columns[column_index];
+            int32_t cell_index = row_index*num_columns + column_index;
 
-			printf("║\n");
-		}
+            bool bold = (( column.bold ) || ( column_index == 0 ));
+            printf(bold?"║":"│");
+
+            int32_t   width          = widths[column_index] - 2;
+            int32_t   decimal_places = column.decimal_places;
+            uni_s cell           = table.cells[cell_index];
+
+            printf(convertCellToString(cell, width, decimal_places));					
+        }
+
+        printf("║\n");
+    }
 
 	//Print table bottom:
 
@@ -410,31 +457,29 @@ void printTitle(
     ) {
 
 	//Calculate centre of table for title start position:
-
-		const int32_t title_length = (int32_t) strlen(title) + 4; 
-	 	const int32_t title_start  = (title_length >= 0) ? (width - (int32_t) title_length) / 2 : 0;
+    const int32_t title_length = (int32_t) strlen(title) + 4; 
+    const int32_t title_start  = 
+        (title_length >= 0) ? (width - (int32_t) title_length) / 2 : 0;
 
 	//Calculate remaining space needed to reach end of table: 
-		
-		const int32_t title_end = width - title_start - title_length;
+	const int32_t title_end = width - title_start - title_length;
 
 	//Print title column: 
+    printf("*");
 
-	 	printf("*");
+    for (int32_t index = 0; index < title_start; index++ ) {
 
-	 	for (int32_t index = 0; index < title_start; index++ ) {
-            
-			printf("~");
-		}
+        printf("~");
+    }
 
-		printf("* %s *", title);
+    printf("* %s *", title);
 
-		for (int32_t index = 0; index < title_end; index++ ) {
-            
-			printf("~");
-		}
+    for (int32_t index = 0; index < title_end; index++ ) {
 
-		printf("*\n");
+        printf("~");
+    }
+
+    printf("*\n");
 }
 
 void printArray(

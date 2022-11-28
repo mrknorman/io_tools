@@ -71,7 +71,8 @@ path_s newPath(
         dir_name [dir_index ] = '\0';
     }
     
-    const path_s path = (const path_s) {full_path_copy, strrev(dir_name), strrev(base_name)};
+    const path_s path = 
+        (const path_s) {full_path_copy, strrev(dir_name), strrev(base_name)};
     
     free(dir_name); free(base_name);
     
@@ -447,7 +448,11 @@ bool createDirectory(
 	
 	if ( mkpath(directory_name, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != 0 ) 
 	{
-		fprintf(stderr, "Error creating directory \"%s\". Returning. \n", directory_name);
+		fprintf(
+            stderr, 
+            "Error creating directory \"%s\". Returning. \n", 
+            directory_name
+        );
 
 		success = false;
 	}
@@ -474,7 +479,11 @@ bool createOpenDirectory(
 
 	if ( mkpath(directory_name, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != 0 ) 
 	{
-		fprintf(stderr, "Error creating directory \"%s\". Returning. \n", directory_name);
+		fprintf(
+            stderr, 
+            "Error creating directory \"%s\". Returning. \n", 
+            directory_name
+        );
 
 		success = false;
 	} 
@@ -505,7 +514,10 @@ bool checkCreateDirectory(
 	{
 		if (verbosity >= 2) 
 		{
-			printf("Directory \"%s\" does not exist. Attemping to create.\n", directory_name );
+			printf(
+                "Directory \"%s\" does not exist. Attemping to create.\n", 
+                directory_name
+            );
 		}
 				
 		if ( createDirectory(directory_name))
@@ -613,7 +625,9 @@ bool readFileDouble(
 				{	
 					if(line_index >= curr_num_lines)
 					{
-						size_t num_elements = (size_t) ((curr_num_lines + init_num_lines) * num_cols);
+						size_t num_elements = 
+                            (size_t) ((curr_num_lines + init_num_lines) 
+                                    * num_cols);
 						data = realloc(data, sizeof(float) * num_elements);
 						curr_num_lines += init_num_lines;
 					}
@@ -624,13 +638,41 @@ bool readFileDouble(
 
 					//Skips to start column
 					float empty = 0;
-					for (int32_t col_index = 1; col_index < start_col; ++col_index) { get_argf(&empty, delimeter); }
+					for (
+                        int32_t col_index = 1; 
+                        col_index < start_col; 
+                        ++col_index
+                    ) { 
+                        get_argf(&empty, delimeter); 
+                    }
 
-					if (start_col == 0) { for (int32_t col_index = 1; col_index < num_cols; ++col_index) { get_argf(&data[line_index*num_cols + col_index], delimeter); } }
-					else                { for (int32_t col_index = 0; col_index < num_cols; ++col_index) { get_argf(&data[line_index*num_cols + col_index], delimeter); } } 
+					if (start_col == 0) 
+                    { 
+                        for (
+                            int32_t col_index = 1; 
+                            col_index < num_cols; 
+                            ++col_index
+                        ) { 
+                            get_argf(
+                                &data[line_index*num_cols + col_index], 
+                                delimeter
+                            ); 
+                        }
+                    }
+					else
+                    { 
+                        for (
+                            int32_t col_index = 0; 
+                            col_index < num_cols; 
+                            ++col_index
+                        ) { 
+                            get_argf(
+                                &data[line_index*num_cols + col_index], 
+                                delimeter); 
+                        } 
+                    } 
 
 					line_index++;
-					
 				}
 
 			break;
@@ -645,10 +687,40 @@ bool readFileDouble(
 
 					//Skips to start column
 					float empty = 0;
-					for (int32_t col_index = 1; col_index < start_col; ++col_index) { get_argf(&empty, delimeter); }
+					for (
+                        int32_t col_index = 1; 
+                        col_index < start_col; 
+                        ++col_index
+                    ) { 
+                        get_argf(&empty, delimeter); 
+                    }
 
-					if (start_col == 0) { for (int32_t col_index = 1; col_index < num_cols; ++col_index) { get_argf(&data[col_index*num_lines + line_index], delimeter); } }
-					else                { for (int32_t col_index = 0; col_index < num_cols; ++col_index) { get_argf(&data[col_index*num_lines + line_index], delimeter); } } 
+					if (start_col == 0) 
+                    { 
+                        for (
+                            int32_t col_index = 1; 
+                            col_index < num_cols; 
+                            ++col_index
+                        ) { 
+                            get_argf(
+                                &data[col_index*num_lines + line_index], 
+                                delimeter
+                            ); 
+                        } 
+                    }
+					else                
+                    { 
+                        for (
+                            int32_t col_index = 0; 
+                            col_index < num_cols; 
+                            ++col_index
+                        ) { 
+                            get_argf(
+                                &data[col_index*num_lines + line_index], 
+                                delimeter
+                            );
+                        } 
+                    } 
 
 					line_index++;
 				}
@@ -698,18 +770,42 @@ bool writeFileDouble(
 	if( createOpenFile(1, file_name, "w+", &file) )
 	{
 		//Skips to start line:
-		for (int32_t line_index = 0; line_index < start_line; ++line_index) { fprintf(file, "\n"); }
+		for (int32_t line_index = 0; line_index < start_line; ++line_index) 
+        { 
+            fprintf(file, "\n"); 
+        }
 
 		switch(mode) 
 		{
 			case 0: //Column index first:
 
-				for (int32_t line_index = 0; line_index < num_lines; line_index++) 
-				{
+				for (
+                    int32_t line_index = 0; 
+                    line_index < num_lines; 
+                    line_index++
+                ) {
 					//Skips to start column
-					for (int32_t col_index = 1; col_index < start_col; ++col_index) { fprintf(file, "%s", delimeter); }
+					for (
+                        int32_t col_index = 1; 
+                        col_index < start_col; 
+                        ++col_index
+                    ) { 
+                        fprintf(file, "%s", delimeter); 
+                    }
 
-					for (int32_t col_index = 0; col_index < num_cols ; ++col_index) { fprintf(file, "%*e%s", decimal_places, data[line_index*num_cols + col_index], delimeter); }
+					for (
+                        int32_t col_index = 0; 
+                        col_index < num_cols ; 
+                        ++col_index
+                    ) { 
+                        fprintf(
+                            file, 
+                            "%*e%s", 
+                            decimal_places, 
+                            data[line_index*num_cols + col_index], 
+                            delimeter
+                        ); 
+                    }
 
 					fprintf(file, "\n");
 				}
@@ -718,12 +814,32 @@ bool writeFileDouble(
 
 			case 1: //Row index first:
 
-				for (int32_t line_index = 0; line_index < num_lines; line_index++) 
-				{
+				for (
+                    int32_t line_index = 0; 
+                    line_index < num_lines; 
+                    line_index++
+                ) {
 					//Skips to start column
-					for (int32_t col_index = 1; col_index < start_col; ++col_index) { fprintf(file, "%s", delimeter); }
+					for (
+                        int32_t col_index = 1; 
+                        col_index < start_col; 
+                        ++col_index
+                    ) { 
+                        fprintf(file, "%s", delimeter); 
+                    }
 
-					for (int32_t col_index = 0; col_index < num_cols ; ++col_index) { fprintf(file, "%f%s", data[col_index*num_lines + line_index], delimeter); }
+					for (
+                        int32_t col_index = 0; 
+                        col_index < num_cols ; 
+                        ++col_index
+                    ) { 
+                        fprintf(
+                            file, 
+                            "%f%s", 
+                            data[col_index*num_lines + line_index], 
+                            delimeter
+                        ); 
+                    }
 
 					fprintf(file, "\n");
 				}
@@ -755,7 +871,8 @@ bool readDirectoryContents(
 
 	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
 	//
-	// Gets the names of all files within dir_name, and stores them in stings_ret. Number of files found is stored in num_strings.
+	// Gets the names of all files within dir_name, and stores them in 
+    // stings_ret. Number of files found is stored in num_strings.
 	//
 	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
 	
@@ -776,7 +893,11 @@ bool readDirectoryContents(
 
 			if(name_index >= curr_num_strings)
 			{
-				strings = realloc(strings, sizeof(char*)* (size_t) curr_num_strings*2);
+				strings = 
+                    realloc(
+                        strings, 
+                        sizeof(char*)* (size_t) curr_num_strings*2
+                    );
 				curr_num_strings *= 2;
 			}
 
@@ -794,7 +915,11 @@ bool readDirectoryContents(
 	} 
 	else 
 	{
-		fprintf(stderr, "Warning! Failed to open directory \"%s\"!\n", directory_name);
+		fprintf(
+            stderr, 
+            "Warning! Failed to open directory \"%s\"!\n", 
+            directory_name
+        );
 		success = false;
 	}
 
@@ -819,7 +944,9 @@ void filterbyExtension(
 
 	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
 	//
-	// Filters a list of filenames, imput, separating the files with extension, ext, into a new list filt_ret. Number of items retained after filtration being given by num_filt. 
+	// Filters a list of filenames, imput, separating the files with extension, 
+    // ext, into a new list filt_ret. Number of items retained after filtration 
+    // being given by num_filt. 
 	//
 	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
 	
@@ -850,7 +977,8 @@ void filterbyExtension(
 			{	
 				if(filt_index >= curr_num_filt)
 				{
-					filt = realloc(filt, sizeof(char*)*(size_t) curr_num_filt*2);
+					filt = 
+                        realloc(filt, sizeof(char*)*(size_t) curr_num_filt*2);
 					curr_num_filt *= 2;
 				}
 
@@ -886,7 +1014,9 @@ void filterbyPrefix(
 	
 	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
 	//
-	// Filters a list of filenames, imput, separating the files with a prefix, prefix, into a new list filt_ret. Number of items retained after filtration being given by num_filt. 
+	// Filters a list of filenames, imput, separating the files with a prefix, 
+    // prefix, into a new list filt_ret. Number of items retained after 
+    // filtration being given by num_filt. 
 	//
 	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
 
@@ -913,7 +1043,8 @@ void filterbyPrefix(
 		{
 			if(filt_index >= curr_num_filt)
 			{
-				filt = realloc(filt, sizeof(char*) * (size_t) curr_num_filt * 2);
+				filt = 
+                    realloc(filt, sizeof(char*) * (size_t) curr_num_filt * 2);
 				curr_num_filt *= 2;
 			}
 

@@ -1847,7 +1847,8 @@ loader_data_s readSubconfig(
                     // allocate more memory:
                     if ((config_index >= num_configs))
                     {
-                        num_configs = (int32_t) ceil((float) num_configs * 1.5f);
+                        num_configs = 
+                            (int32_t) ceil((float) num_configs * 1.5f);
                         config_data.subconfigs = 
                             realloc(
 								config_data.subconfigs, 
@@ -1897,7 +1898,7 @@ loader_data_s readSubconfig(
                     if (name != NULL)
                     {
                         const int32_t config_name_index = 
-                                getMapIndex(config_data.subconfig_name_map, name);
+                            getMapIndex(config_data.subconfig_name_map, name);
 						
                         if (config_name_index > -1) 
                         {
@@ -1974,7 +1975,9 @@ loader_data_s readSubconfig(
                     if (name_read == false) 
                     {
                         config_name = 
-							strtok(&line_string[char_index + 1], syntax.end_name);
+							strtok(
+                                &line_string[char_index + 1], syntax.end_name
+                            );
                         config_data.name = strdup(config_name);
 						
                         const map_s subconfig_name_map =
@@ -2042,12 +2045,15 @@ loader_data_s readSubconfig(
                     parameter_end = true;
                     
 					parameter_index = 
-						getMapIndex(config_data.parameter_name_map, parameter_name);
+						getMapIndex(
+                            config_data.parameter_name_map, parameter_name
+                        );
                         										
 					if (parameter_index > -1) 
 					{
 						parameter_type = 
-							config_data.config.defined_parameters[parameter_index].type;
+							config_data.config
+                                .defined_parameters[parameter_index].type;
 						config_data.num_parameters_read[parameter_index]++;
                         
 						parameter_recognised = true;
@@ -2156,7 +2162,8 @@ loader_data_s readSubconfig(
 								parameter_type,
 								parameter_index, 
 								extra_parameter_start_index, 
-								config_data.num_parameters_read[parameter_index],
+								config_data
+                                    .num_parameters_read[parameter_index],
 								value_string
 							);
 						}
