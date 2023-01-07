@@ -1840,9 +1840,6 @@ loader_data_s readSubconfig(
 					   (strchr(syntax.start_config, line_string[char_index])) 
 					&& is_superconfig
 				) {                      
-                    name_read   = false;
-                    config_name = NULL;
-
                     // If number of configs greater than allocated in memory,
                     // allocate more memory:
                     if ((config_index >= num_configs))
@@ -1961,7 +1958,7 @@ loader_data_s readSubconfig(
                     fprintf(
 						stderr, 
 						"readSubconfig: \nWarning! Unexpected config opening:"
-						" '{' in config %s.\n", 
+						" '{' in config \"%s\". Exiting read attempt! \n", 
 						config_data.name
 					); 
 
@@ -2008,11 +2005,14 @@ loader_data_s readSubconfig(
                     {
                         fprintf(
                             stderr, 
-                            "readSubconfig: \nWarning! More than one name"
-							" detected inside config %s, ignoring all but"
-							" first. \n", 
-                            config_name
+                            "readSubconfig: \nWarning! More than one name "
+							"detected inside config \"%s\". Exiting read "
+							"attempt! \n",
+                            config_data.name
                         );
+						
+						config_data.total_num_subconfigs_read = -1;
+						return config_data;
                     }
 					break; 
 				}
