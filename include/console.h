@@ -10,6 +10,50 @@
 
 #include "custom_types.h"
 
+typedef struct timer 
+{
+    char  *name;
+
+    struct timespec start;
+    struct timespec stop;
+} timer_s;
+
+timer_s start_timer(
+    char    *name,
+    timer_s *timer
+    ) {
+    
+    timer->name = name;
+    clock_gettime(CLOCK_REALTIME, &timer->start);
+}
+
+float stop_timer(
+    timer_s *timer
+    ) {
+    
+    clock_gettime(CLOCK_REALTIME, &timer->stop);
+    float time_elapsed = (float)(timer->stop.tv_sec - timer->start.tv_sec)
+        + (float)(timer->stop.tv_nsec - timer->start.tv_nsec) 
+        / (float)1E9;
+    clock_gettime(CLOCK_REALTIME, &timer->start);
+    
+    return time_elapsed;
+}
+
+void print_timer(
+    const char *lap_name,
+    timer_s    *timer
+    ) {
+
+    printf(
+        "Timer: %s, Lap: %s. Reading: %f Seconds.\n", 
+        timer->name, 
+        lap_name, 
+        stop_timer(timer)
+    );
+}
+
+
 typedef struct loading_s {
 
 	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
@@ -496,7 +540,7 @@ void printArray(
 	printf("] \n");
 }
 
-void printArrayFloatE(
+void printArrayE(
     const  char   *title , 
     const  float  *array , 
     const  int32_t num_elements
