@@ -18,7 +18,7 @@ typedef struct timer
     struct timespec stop;
 } timer_s;
 
-timer_s start_timer(
+void start_timer(
     char    *name,
     timer_s *timer
     ) {
