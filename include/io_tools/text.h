@@ -18,7 +18,7 @@
 #include <errno.h>
 #include <sys/stat.h>
 
-#include "strings.h"
+#include "io_tools/strings.h"
 
 typedef struct split_path {
 	
