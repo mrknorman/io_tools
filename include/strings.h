@@ -28,13 +28,13 @@ char *strrev(
     const size_t length = strlen(string);
     
 	// Allocate memory for reversed string:
-    char *rev_string = malloc(sizeof(char*) * (length + (size_t) 1));
+    char *rev_string = (char*)malloc(sizeof(char*) * (length + 1u));
 	
 	// Loop through string length:
     for (size_t index = 0; index < length; index++) 
     {
 		// Set new string character as reverse of old string:
-        rev_string[length - 1 - index] = string[index];
+        rev_string[length - 1u - index] = string[index];
     }
 	
 	//Add null terminating string:
@@ -89,7 +89,7 @@ void splitString(
 	char  *string_copy  = strdup(string);
 	
 	// Allocate array to hold pointers to substrings:
-	char **string_array = (char**) malloc(sizeof(char*) * (size_t) num_strings);
+	char **string_array = (char**)malloc(sizeof(char*) * (size_t) num_strings);
 	
 	// Get first substring:
 	string_array[0] = strtok(string_copy, delimiter);
@@ -132,11 +132,11 @@ void splitStringDy(
 	const int32_t initial_num_strings = 2;
 	
 	// Make a copy of old string as strtok is an inplace operation:
-    char     *string_copy  = strdup(string);
+    char *string_copy  = strdup(string);
 	
 	// Allocate array to hold pointers to substrings:
-	char    **string_array = 
-        malloc(sizeof(char*) * (size_t) initial_num_strings);
+	char **string_array = 
+        (char**)malloc(sizeof(char*) * (size_t) initial_num_strings);
 	
 	//Set number of strings to initial value:
 	int32_t   num_strings  = initial_num_strings;
@@ -157,8 +157,8 @@ void splitStringDy(
 			// Increase number of strings in string array:
 			num_strings *= 2;
 			
-			string_array = 
-				realloc(string_array, sizeof(char*) * (size_t) (num_strings));
+			string_array = (char**)
+				realloc(string_array, sizeof(char*) * (size_t)num_strings);
 		}
 		
 		// Set string array value to new pointer:
@@ -173,7 +173,7 @@ void splitStringDy(
 	}
 	
 	//Reallocate memory to final number of strings found:
-	string_array = 
+	string_array = (char**)
 		realloc(string_array, sizeof(char*) * (size_t) (index));
 	
 	// Set return string length and num returned substrings:
@@ -201,8 +201,7 @@ void removeStringChars(
      */
 	
 	// Allocate memory for new string with removed character.
-	char *string_removed = 
-		calloc(strlen(string) + 1, sizeof(char));
+	char *string_removed = (char*)calloc(strlen(string) + 1, sizeof(char));
 
 	int32_t remove_char_idx = 0; // Index of new string.
 	int32_t char_idx        = 0; // Index of old string.
@@ -237,7 +236,7 @@ char *intToString(
      * @return char *: string: converted string.
      */
 		
-	char * string; // Initilise pointer to hold new string.
+	char *string; // Initilise pointer to hold new string.
 	asprintf(&string, "%i", value); //Convert integer to string.
 	
 	return string;
@@ -284,7 +283,7 @@ char* replaceWord(
   
     // Making new string of enough length:
     result = 
-		(char*) malloc(
+		(char*)malloc(
 			sizeof(char) * 
 			(index + count * (new_word_length - old_word_length) + (size_t) 1)
 		);
@@ -325,13 +324,13 @@ char* multiplyString(
      */
     
 	// Get length of old string:
-    const size_t  old_length = sizeof(char) * strlen(string);
+    const size_t old_length = sizeof(char) * strlen(string);
 	
 	// Calculate length of new string:
-	const size_t  new_length = old_length * (size_t) value;
+	const size_t new_length = old_length * (size_t) value;
 	
 	// Allocate value for new string:
-		  char   *new_string = malloc(new_length + (size_t) 1);  
+	char *new_string = (char*)malloc(new_length + (size_t) 1);  
     
 	// Loop through string and set multplicants:
     for (size_t index = 0; index < new_length; index++) 
