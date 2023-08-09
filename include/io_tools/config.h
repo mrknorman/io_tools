@@ -9,10 +9,10 @@
 #include <string.h>
 #include "float.h"
 
-#include "text.h"
-#include "strings.h"
-#include "custom_types.h"
-#include "structures.h"
+#include "io_tools/text.h"
+#include "io_tools/strings.h"
+#include "io_tools/custom_types.h"
+#include "io_tools/structures.h"
 
 typedef struct construct_s {
 	

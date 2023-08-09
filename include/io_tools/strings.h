@@ -29,10 +29,10 @@ char *strrev(
     const size_t length = strlen(string);
     
 	// Allocate memory for reversed string:
-    char *rev_string = (char*)malloc(sizeof(char) * (length + (size_t) 1));
+    char *rev_string = (char*)malloc(sizeof(char) * (length + (size_t)1u));
 	
 	// Loop through string length:
-    for (size_t index = 0; index < length; index++) 
+    for (int32_t index = 0; index < length; index++) 
     {
 		// Set new string character as reverse of old string:
         rev_string[length - 1 - index] = string[index];
@@ -137,14 +137,14 @@ void splitStringDy(
 	const int32_t initial_num_strings = 2;
 	
 	// Make a copy of old string as strtok is an inplace operation:
-    char     *string_copy  = strdup(string);
+    char *string_copy  = strdup(string);
 	
 	// Allocate array to hold pointers to substrings:
 	char    **string_array = 
         (char**)malloc(sizeof(char*) * (size_t)initial_num_strings);
 	
 	//Set number of strings to initial value:
-	int32_t   num_strings  = initial_num_strings;
+	int32_t   num_strings = initial_num_strings;
 		
 	//Intilize token to hold substring pointer:
 	char    *token;
@@ -181,7 +181,7 @@ void splitStringDy(
 	
 	//Reallocate memory to final number of strings found:
 	string_array = 
-		(char**)realloc(string_array, sizeof(char*) * (size_t) (index));
+		(char**)realloc(string_array, sizeof(char*) * (size_t)index);
 	
 	// Set return string length and num returned substrings:
 	*ret_string_array = string_array;
@@ -208,7 +208,7 @@ void removeStringChars(
 	
 	// Allocate memory for new string with removed character:
 	char *string_removed = 
-		(char*)calloc(strlen(string) + 1, sizeof(char));
+		(char*)calloc(strlen(string) + (size_t)1u, sizeof(char));
 
 	int32_t remove_char_idx = 0; // Index of new string.
 	int32_t char_idx        = 0; // Index of old string.
@@ -243,7 +243,7 @@ char *intToString(
      * @return char *: string: converted string.
      */
 		
-	char * string; // Initilise pointer to hold new string.
+	char *string; // Initilise pointer to hold new string.
 	asprintf(&string, "%i", value); //Convert integer to string.
 	
 	return string;
@@ -274,7 +274,7 @@ char* replaceWord(
     const size_t  old_word_length = strlen(old_word);
 	
 	// Intilise count and index:
-	      size_t  index, count  = 0;
+	      size_t  index, count  = 0u;
 
     // Counting the number of times old word
     // occur in the string:
@@ -285,7 +285,7 @@ char* replaceWord(
             count++;
   
             // Jumping to index after the old word.
-            index += old_word_length - 1;
+            index += old_word_length - 1u;
         }
     }
   
@@ -293,7 +293,7 @@ char* replaceWord(
     result = 
 		(char*)malloc(
 			sizeof(char) * 
-			(index + count * (new_word_length - old_word_length) + (size_t) 1)
+			(index + count * (new_word_length - old_word_length) + (size_t)1u)
 		);
 	  
 	// Reset Index:
@@ -333,13 +333,13 @@ char* multiplyString(
      */
     
 	// Get length of old string:
-    const size_t  old_length = sizeof(char) * strlen(string);
+    const size_t old_length = sizeof(char) * strlen(string);
 	
 	// Calculate length of new string:
-	const size_t  new_length = old_length * (size_t) value;
+	const size_t new_length = old_length * (size_t) value;
 	
 	// Allocate value for new string:
-		  char   *new_string = (char*)malloc(new_length + (size_t)1);  
+	char *new_string = (char*)malloc(new_length + (size_t)1u);  
     
 	// Loop through string and set multplicants:
     for (size_t index = 0; index < new_length; index++) 

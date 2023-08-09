@@ -1,7 +1,7 @@
 #ifndef IO_STRUCTURES_H
 #define IO_STRUCTURES_H
 
-#include "custom_types.h"
+#include "io_tools/custom_types.h"
 
 typedef enum Necessity{ 
 	
