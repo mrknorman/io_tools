@@ -21,14 +21,15 @@ char *strrev(
      * @param 
      *     const char *string: string to be reversed.
      * @see
-     * @return char *rev_string: reversed string.
+     * @return char *rev_string: reversed string. Caller must free this memory 
+     * when no longer needed.
      */
     
 	// Get length of string to be reversed:
     const size_t length = strlen(string);
     
 	// Allocate memory for reversed string:
-    char *rev_string = malloc(sizeof(char*) * (length + (size_t) 1));
+    char *rev_string = (char*)malloc(sizeof(char) * (length + (size_t) 1));
 	
 	// Loop through string length:
     for (size_t index = 0; index < length; index++) 
@@ -80,7 +81,9 @@ void splitString(
 	 *     const char      *delimieter      : character by which to split the 
      *                                        strings.
 	 *     const char    ***ret_string_array: pointer to array of substrings 
-     *                                        split from string.
+     *                                        split from string. Caller must 
+     *                                        free this memory when no longer 
+     *                                        needed.
      * @see
      * @return none
      */
@@ -89,7 +92,7 @@ void splitString(
 	char  *string_copy  = strdup(string);
 	
 	// Allocate array to hold pointers to substrings:
-	char **string_array = (char**) malloc(sizeof(char*) * (size_t) num_strings);
+	char **string_array = (char**)malloc(sizeof(char*) * (size_t) num_strings);
 	
 	// Get first substring:
 	string_array[0] = strtok(string_copy, delimiter);
@@ -122,7 +125,9 @@ void splitStringDy(
 	 *     const char      *delimieter      : character by which to split the 
      *                                        strings.
 	 *     const char    ***ret_string_array: pointer to array of substrings 
-     *                                        split from string.
+     *                                        split from string. Caller must 
+     *                                        free this memory when no longer 
+     *                                        needed.
 	 *     const int32_t   *ret_num_strings : number of substrings found.
      * @see
      * @return none
@@ -136,7 +141,7 @@ void splitStringDy(
 	
 	// Allocate array to hold pointers to substrings:
 	char    **string_array = 
-        malloc(sizeof(char*) * (size_t) initial_num_strings);
+        (char**)malloc(sizeof(char*) * (size_t)initial_num_strings);
 	
 	//Set number of strings to initial value:
 	int32_t   num_strings  = initial_num_strings;
@@ -158,7 +163,9 @@ void splitStringDy(
 			num_strings *= 2;
 			
 			string_array = 
-				realloc(string_array, sizeof(char*) * (size_t) (num_strings));
+				(char**)realloc(
+                    string_array, sizeof(char*) * (size_t) (num_strings)
+                );
 		}
 		
 		// Set string array value to new pointer:
@@ -174,7 +181,7 @@ void splitStringDy(
 	
 	//Reallocate memory to final number of strings found:
 	string_array = 
-		realloc(string_array, sizeof(char*) * (size_t) (index));
+		(char**)realloc(string_array, sizeof(char*) * (size_t) (index));
 	
 	// Set return string length and num returned substrings:
 	*ret_string_array = string_array;
@@ -191,18 +198,17 @@ void removeStringChars(
      * Remove all isntances of character specified by remove from inputted 
      * string.
      * @param 
-     *     const char      *string            : old string to remove character 
-     *                                          from.
-	 *     const char      *remove            : character to remove from string.
-	 *     const char     **ret_string_removed: new string with character 
-     *                                          removed. 
+     *     const char  *string            : old string to remove character 
+     *                                      from.
+	 *     const char  *remove            : character to remove from string.
+	 *     const char **ret_string_removed: new string with character removed. 
      * @see
      * @return none
      */
 	
-	// Allocate memory for new string with removed character.
+	// Allocate memory for new string with removed character:
 	char *string_removed = 
-		calloc(strlen(string) + 1, sizeof(char));
+		(char*)calloc(strlen(string) + 1, sizeof(char));
 
 	int32_t remove_char_idx = 0; // Index of new string.
 	int32_t char_idx        = 0; // Index of old string.
@@ -221,7 +227,7 @@ void removeStringChars(
 		char_idx++;
 	}
 	
-	// Set return pointer to new string with string removed.
+	// Set return pointer to new string with string removed:
 	*ret_string_removed = string_removed;
 }
 
@@ -256,7 +262,8 @@ char* replaceWord(
 	 *     const char *old_word: word to replace with new_word.
 	 *     const char *new_word: word to replace old_word.
      * @see
-     * @return char *: string: string with replaced words.
+     * @return char *: string: string with replaced words. Caller must free this 
+     * memory when no longer needed.
      */
 	
 	// Intilise pointer to hold resulting pointer:
@@ -284,7 +291,7 @@ char* replaceWord(
   
     // Making new string of enough length:
     result = 
-		(char*) malloc(
+		(char*)malloc(
 			sizeof(char) * 
 			(index + count * (new_word_length - old_word_length) + (size_t) 1)
 		);
@@ -321,7 +328,8 @@ char* multiplyString(
      *     const char    *string: string to multiply.
 	 *     const int32_t *value : integer value to copy string by.
      * @see
-     * @return char *: string: string multiplied by value.
+     * @return char *string: string multiplied by value. Caller must free this 
+     * memory when no longer needed.
      */
     
 	// Get length of old string:
@@ -331,7 +339,7 @@ char* multiplyString(
 	const size_t  new_length = old_length * (size_t) value;
 	
 	// Allocate value for new string:
-		  char   *new_string = malloc(new_length + (size_t) 1);  
+		  char   *new_string = (char*)malloc(new_length + (size_t)1);  
     
 	// Loop through string and set multplicants:
     for (size_t index = 0; index < new_length; index++) 
